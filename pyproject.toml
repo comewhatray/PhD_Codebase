@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "phd-code"
+version = "0.1.0"
+description = ""
+authors = ["MasterRain <rayconlin@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+music21 = "^9.1.0"
+numpy = "^2.1.0"
+matplotlib = "^3.9.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
