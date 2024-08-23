@@ -1,15 +1,14 @@
 from Utilities import ComeWhatRayUtil as CWR
 
-# It is assumed that all input is a set of points derived from MIDI_Extraction.py
+# MUST USE A GEOMETRIC REPRESENTATION
 
 options = {
     "": ""
 }
 
-def generateRepresentation(inputOptions):
+def generatePatterns(work, inputOptions=None):
     # Update Options with user input
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)
-
 
 
 
