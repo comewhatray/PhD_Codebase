@@ -1,4 +1,4 @@
-from MIDI_Interface import MIDI_Extraction as ME
+from Code_Stages.MIDI_Representations import MIDI_Extraction as ME
 from Utilities import ComeWhatRayUtil as CWR
 
 from music21 import *
@@ -16,7 +16,7 @@ def main():
 def durationSanityTest():
     print("Sanity test for duration calculations")
     print(CWR.largeSpacer)
-    DurationTestMidi = "../Sanity_Checks/Sanity_MIDIS/Testing_Duration_Calculations.mid"
+    DurationTestMidi = "Sanity_Checks/Sanity_MIDIS/Testing_Duration_Calculations.mid"
 
     notes = ME.convertMidiToPoints(DurationTestMidi)
     print("Interesting note here is how musescore changes semibreaves to tripple dotted minums")
@@ -29,7 +29,7 @@ def mozartSanityTest():
     print("Sanity test for Mozart extract")
     print(CWR.largeSpacer)
 
-    sanityMozart = "../Sanity_Checks/Sanity_MIDIS/Mini Motzart.mid"
+    sanityMozart = "Sanity_Checks/Sanity_MIDIS/Mini Motzart.mid"
 
     notes = ME.convertMidiToPoints(sanityMozart)
 

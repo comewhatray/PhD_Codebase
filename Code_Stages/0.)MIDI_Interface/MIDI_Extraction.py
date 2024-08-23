@@ -38,8 +38,10 @@ def convertMidiToPoints(work):
                 returnedNote['position'] = round(float(n.offset), Options["decimalPrecision"])
                 returnedNote['duration'] = round(float(n.quarterLength), Options["decimalPrecision"])
                 # Do not include notes with a negative pitch as these are likely percussion
-                if returnedNote['pitch'] >= 0:
-                    coordinates.append(returnedNote)
+                # (Hopefully this has been fixed with the later code increasing the octave of the notes)
+                # if returnedNote['pitch'] >= 0:
+                #     coordinates.append(returnedNote)
+                coordinates.append(returnedNote)
 
     pointSet = sortPoints(coordinates)
 
@@ -73,10 +75,10 @@ def getNotePosition(midiInput):
         # if midiInput.pitch.octave >= 0:
         octave = midiInput.pitch.octave
 
-        # Calculating the pitch number based on what pitch it is plus what octive its at
-        position = position + 12 * octave
+        # Calculating the pitch number based on what pitch it is plus what octave its at
+        position = position + 12 * (octave + 1)
 
-        # If we somehow end up with a negative pitch I dont' know what happens but it scares me
+        # If we somehow end up with a negative pitch I don't know what happens, but it scares me
         # if position < 0:
         #     print("Da fuq")
 
