@@ -1,21 +1,25 @@
 from music21 import *
 
-options = {
+Options = {
     "decimalPrecision": 3
 }
 
+noteToNumber = {
+    'A': 9,
+    'B': 11,
+    'C': 0,
+    'D': 2,
+    'E': 4,
+    'F': 5,
+    'G': 7,
+}
 
-
-
+# Intakes a midifile and returns a set of coordinates and details
 def convertMidiToPoints(work):
+
     work = converter.parse(work)
-
-    # work = work.flatten()
     work = work.flatten()
-
     coordinates = []
-
-    # notes = work.notes
 
     # Go through all notes in the midi file
     for n in work.notes:
@@ -31,8 +35,8 @@ def convertMidiToPoints(work):
         elif "Chord" in n.classSet:
             for midiNote in n:
                 returnedNote = getNotePosition(midiNote)
-                returnedNote['position'] = round(float(n.offset), Options.decimalPrecision)
-                returnedNote['duration'] = round(float(n.quarterLength), Options.decimalPrecision)
+                returnedNote['position'] = round(float(n.offset), Options["decimalPrecision"])
+                returnedNote['duration'] = round(float(n.quarterLength), Options["decimalPrecision"])
                 # Do not include notes with a negative pitch as these are likely percussion
                 if returnedNote['pitch'] >= 0:
                     coordinates.append(returnedNote)
@@ -41,6 +45,7 @@ def convertMidiToPoints(work):
 
     return pointSet
 
+# Determines the coordinates of each note and relevant details
 def getNotePosition(midiInput):
     # Confirming that the object being looked at is a note
     if "Note" in midiInput.classSet:
@@ -58,7 +63,7 @@ def getNotePosition(midiInput):
         note = midiInput.pitch.name
 
         # Get Note value in scale
-        position = Options.noteToNumber[note[0]]
+        position = noteToNumber[note[0]]
 
         # Add sharps and flats
         position = position + augment
@@ -77,8 +82,8 @@ def getNotePosition(midiInput):
 
         # combine output
         output = {'pitch': float(position),
-                  'position': round(float(midiInput.offset), Options.decimalPrecision),
-                  'duration': round(float(midiInput.quarterLength), Options.decimalPrecision)}
+                  'position': round(float(midiInput.offset), Options["decimalPrecision"]),
+                  'duration': round(float(midiInput.quarterLength), Options["decimalPrecision"])}
 
         return output
 
