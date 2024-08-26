@@ -1,0 +1,18 @@
+{
+  "Title": "Similarity (4x4)",
+  "Directory": "Papers/Paper 1/Dataset/Midis/",
+  "Labels": {
+    "Hes a Pirate": [
+      "Hes a Pirate (Clarinet Choir).mscz.mid",
+      "Hes a Pirate (Orchestra).mid",
+      "Hes a Pirate (Piano).mid",
+      "Hes a Pirate (String Trio + Piano).mid"
+    ],
+    "Trepak": [
+      "Trepak (Mixed Ensemble).mid",
+      "Trepak (Orchestra).mid",
+      "Trepak (Piano).mid",
+      "Trepak (String Quartet).mid"
+    ]
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "Title": "All Test",
+  "Labels": true,
+  "Directory": "Papers/Paper 1/Dataset/Midis",
+  "Files": [
+    {
+      "Name": "Blue Bird (Concert Band).mid",
+      "Label": "Blue Bird"
+    },
+    {
+      "Location": "Blue Bird (Flute).mid",
+      "Label": "Blue Bird"
+    },
+    {
+      "Location": "Blue Bird (Mixed Quintet).mid",
+      "Label": "Blue Bird"
+    },
+    {
+      "Location": "Blue Bird (Piano).mid",
+      "Label": "Blue Bird"
+    },
+
+
+    {
+      "Location": "Danny Boy (Concert Band).mid",
+      "Label": "Danny Boy"
+    },
+    {
+      "Location": "Danny Boy (Piano).mid",
+      "Label": "Danny Boy"
+    },
+    {
+      "Location": "Danny Boy (String Trio).mid",
+      "Label": "Danny Boy"
+    },
+    {
+      "Location": "Danny Boy (Violin Piano Duet).mid",
+      "Label": "Danny Boy"
+    },
+
+
+    {
+      "Location": "Fly Me To The Moon (Jazz Band).mid",
+      "Label": "Fly Me to The Moon"
+    },
+    {
+      "Location": "Fly Me to The Moon (Sax Quartet).mid",
+      "Label": "Fly Me to The Moon"
+    },
+    {
+      "Location": "Fly Me to The Moon (Solo Piano).mid",
+      "Label": "Fly Me to The Moon"
+    },
+    {
+      "Location": "Fly Me to The Moon (Trumpet).mid",
+      "Label": "Fly Me to The Moon"
+    },
+
+
+    {
+      "Location": "Hes a Pirate (Clarinet Choir).mscz.mid",
+      "Label": "Hes a Pirate"
+    },
+    {
+      "Location": "Hes a Pirate (Orchestra).mid",
+      "Label": "Hes a Pirate"
+    },
+    {
+      "Location": "Hes a Pirate (Piano).mid",
+      "Label": "Hes a Pirate"
+    },
+    {
+      "Location": "Hes a Pirate (String Trio + Piano).mid",
+      "Label": "Hes a Pirate"
+    },
+
+
+    {
+      "Location": "High Hopes (Concert Band).mid",
+      "Label": "High Hopes"
+    },
+    {
+      "Location": "High Hopes (Piano).mid",
+      "Label": "High Hopes"
+    },
+    {
+      "Location": "High Hopes (Sax Quartet).mid",
+      "Label": "High Hopes"
+    },
+    {
+      "Location": "High Hopes (Violin Piano Duet).mid",
+      "Label": "High Hopes"
+    },
+
+
+    {
+      "Location": "Take Me Home Country Roads (Acordian).mid",
+      "Label": "Take Me Home Country Roads"
+    },
+    {
+      "Location": "Take Me Home Country Roads (Brass Quintet).mid",
+      "Label": "Take Me Home Country Roads"
+    },
+    {
+      "Location": "Take Me Home Country Roads (Concert Band).mid",
+      "Label": "Take Me Home Country Roads"
+    },
+    {
+      "Location": "Take Me Home Country Roads (Voice Piano Duet).mid",
+      "Label": "Take Me Home Country Roads"
+    },
+
+
+    {
+      "Location": "Tico Tico no Fuba (Clarinet Quartet).mid",
+      "Label": "Tico Tico no Fuba"
+    },
+    {
+      "Location": "Tico Tico no Fuba (Guitar).mid",
+      "Label": "Tico Tico no Fuba"
+    },
+    {
+      "Location": "Tico Tico no Fuba (Orchestra).mid",
+      "Label": "Tico Tico no Fuba"
+    },
+    {
+      "Location": "Tico Tico no Fuba (Piano).mid",
+      "Label": "Tico Tico no Fuba"
+    },
+
+
+    {
+      "Location": "Trepak (Mixed Ensemble).mid",
+      "Label": "Trepak"
+    },
+    {
+      "Location": "Trepak (Orchestra).mid",
+      "Label": "Trepak"
+    },
+    {
+      "Location": "Trepak (Piano).mid",
+      "Label": "Trepak"
+    },
+    {
+      "Location": "Trepak (String Quartet).mid",
+      "Label": "Trepak"
+    }
+  ]
+}

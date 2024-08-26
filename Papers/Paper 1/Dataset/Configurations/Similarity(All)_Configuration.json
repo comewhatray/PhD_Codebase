@@ -1,0 +1,54 @@
+{
+  "Title": "Similarity (All)",
+  "Directory": "Papers/Paper 1/Dataset/Midis",
+  "Labels": {
+    "Blue Bird": [
+      "Blue Bird (Concert Band).mid",
+      "Blue Bird (Flute).mid",
+      "Blue Bird (Mixed Quintet).mid",
+      "Blue Bird (Piano).mid"
+    ],
+    "Danny Boy": [
+      "Danny Boy (Concert Band).mid",
+      "Danny Boy (Piano).mid",
+      "Danny Boy (String Trio).mid",
+      "Danny Boy (Violin Piano Duet).mid"
+    ],
+    "Fly Me To The Moon": [
+      "Fly Me To The Moon (Jazz Band).mid",
+      "Fly Me To The Moon (Sax Quartet).mid",
+      "Fly Me To The Moon (Solo Piano).mid",
+      "Fly Me To The Moon (Trumpet).mid"
+    ],
+    "Hes a Pirate": [
+      "Hes a Pirate (Clarinet Choir).mid",
+      "Hes a Pirate (Orchestra).mid",
+      "Hes a Pirate (Piano).mid",
+      "Hes a Pirate (String Trio + Piano).mid"
+    ],
+    "High Hopes": [
+      "High Hopes (Concert Band).mid",
+      "High Hopes (Piano).mid",
+      "High Hopes (Sax Quartet).mid",
+      "High Hopes (Violin Piano Duet).mid"
+    ],
+    "Take Me Home Country Roads": [
+      "Take Me Home Country Roads (Accordian).mid",
+      "Take Me Home Country Roads (Brass Quintet).mid",
+      "Take Me Home Country Roads (Concert Band).mid",
+      "Take Me Home Country Roads (Voice Piano Duet).mid"
+    ],
+    "Tico Tico no Fuba": [
+      "Tico Tico no Fuba (Clarinet Quartet).mid",
+      "Tico Tico no Fuba (Guitar).mid",
+      "Tico Tico no Fuba (Orchestra).mid",
+      "Tico Tico no Fuba (Piano).mid"
+    ],
+    "Trepak": [
+      "Trepak (Mixed Ensemble).mid",
+      "Trepak (Orchestra).mid",
+      "Trepak (Piano).mid",
+      "Trepak (String Quartet).mid"
+    ]
+  }
+}

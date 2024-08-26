@@ -14,7 +14,8 @@ options = {
             "height": 4,
             "width": 4
         }
-    }
+    },
+    "pruningMethod": ""
 }
 
 # The Coordinates returned by MIDI_Extraction.py is the geometric representation
@@ -31,6 +32,8 @@ def generateRepresentation(work, inputOptions=None):
 
     return proximityGraphRepresentation
 
+# Graph Representations
+# ----------------------------------------------------------------------------------------------------------------------
 
 def GraphPointRepresentation(work):
     work = CWR.openFile(work)
@@ -147,3 +150,7 @@ def GraphLineRepresentation(work):
     # prunedGraph = pruningThree(tuneGraph)
 
     return prunedGraph
+
+
+# Pruning Methods #TODO Implement
+# ----------------------------------------------------------------------------------------------------------------------
