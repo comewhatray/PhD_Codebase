@@ -8,14 +8,13 @@ import warnings
 options = {
     "method": "SlidingWindowMelodyExtraction",
     "patternSize": 3,
-    # Gaps refers to the amount of non-consecutive notes allowed in a pattern
-    "gaps": 0,
+    "gaps": 0, # Gaps refers to the amount of non-consecutive notes allowed in a pattern
     "precision": 3
 }
 
 
 def generatePatterns(work, inputOptions=None):
-    warnings.warn("Please recheck some methods in sliding window approach and remove this warning")
+    warnings.warn("Please recheck some methods in sliding window approach and remove this warning and the import")
 
     # Update Options with user input
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)

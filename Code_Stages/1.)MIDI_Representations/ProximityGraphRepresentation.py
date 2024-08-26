@@ -1,13 +1,20 @@
 from Utilities import ComeWhatRayUtil as CWR
+from Utilities import BoundingGenerator as BG
 import sys
 import networkx as nx
-from shapely.geometry import Polygon, box, Point, LineString
+from shapely.geometry import Point, LineString
 
 # It is assumed that all input is a set of points derived from MIDI_Extraction.py
 
 options = {
-    "polygon": "Rectangle",
-    "dimensions": [4, 4],
+    "method": "GraphLineRepresentation",
+    "polygon": {
+        "type": "Rectangle",
+        "dimensions": {
+            "height": 4,
+            "width": 4
+        }
+    }
 }
 
 # The Coordinates returned by MIDI_Extraction.py is the geometric representation
@@ -31,7 +38,7 @@ def GraphPointRepresentation(work):
     updateCounter = 0
 
     # Selects the appropriate shape generator
-    shapeGenerator = getattr(SG, options["polygon"])
+    shapeGenerator = getattr(BG, options["polygon"]["type"]+"PointGenerator")
 
     # Creates a graph containing a node for each note
     tuneGraph = nx.empty_graph(len(work))
@@ -51,7 +58,7 @@ def GraphPointRepresentation(work):
         tuneGraph.nodes[counter]['pos'] = (note['position'], note['pitch'])
 
         # Generates the coordinates for the shape
-        shape = shapeGenerator(note, details)
+        shape = shapeGenerator(note, options["polygon"]["dimensions"])
 
         # Tells the index of where the current note is
         beginScan = work.index(note)
@@ -59,7 +66,7 @@ def GraphPointRepresentation(work):
         # Checks which notes are within the shape of the note
         for x in work[beginScan:]:
             # Ends if the points is too far away
-            if x['position'] > note['position'] + details["RepresentationDetails"]["ShapeWidth"]:
+            if x['position'] > note['position'] + options["polygon"]["dimensions"]["width"]:
                 break
 
             noteRep = Point(x['position'], x['pitch'])
@@ -70,7 +77,7 @@ def GraphPointRepresentation(work):
 
         counter += 1
 
-    # TODO improve this so that it doesn't happen to begin with
+        # TODO improve this so that it doesn't happen to begin with
     tuneGraph.remove_edges_from(nx.selfloop_edges(tuneGraph))
     return tuneGraph
 
@@ -82,7 +89,7 @@ def GraphLineRepresentation(work):
     work = CWR.openFile(work)
 
     # Selects the appropriate shape generator
-    shapeGenerator = getattr(SG, options["polygon"])
+    shapeGenerator = getattr(BG, options["polygon"]["type"]+"LineGenerator")
 
     tuneGraph = nx.empty_graph(len(work))
 
@@ -103,7 +110,7 @@ def GraphLineRepresentation(work):
         tuneGraph.nodes[counter]['pos'] = (note['position'], note['pitch'])
 
         # Generates the coordinates for the shape
-        shape = shapeGenerator(note, details)
+        shape = shapeGenerator(note, options["polygon"]["dimensions"])
 
         # Tells the index of where the current note is
         beginScan = work.index(note)
@@ -111,7 +118,7 @@ def GraphLineRepresentation(work):
         # Checks which notes are within the shape of the note
         for x in work[beginScan:]:
             # Ends if the points is too far away
-            if x['position'] > note['position'] + details["RepresentationDetails"]["ShapeWidth"]:
+            if x['position'] > note['position'] + options["polygon"]["dimensions"]["width"]:
                 break
 
             # Makes line or point depending on parameters
