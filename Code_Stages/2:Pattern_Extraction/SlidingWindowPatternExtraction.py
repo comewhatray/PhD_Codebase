@@ -361,19 +361,19 @@ def inputPatternListToHash(patternsHash, patternList, hashingMethod):
 
 
 # Given a graph, a node and a path length get all pathes of that length begining with the node
-def generatePatternsContainingNode(tuneGraph, node, length, excludeSet=None):
-    if excludeSet is None:
-        excludeSet = set([node])
-    else:
-        excludeSet.add(node)
-    if length == 0:
-        return [[node]]
-    paths = [[node] + path for neighbor in tuneGraph.neighbors(node) if neighbor not in excludeSet for path in
-             generatePatternsContainingNode(tuneGraph, neighbor, length - 1, excludeSet)]
-
-    excludeSet.remove(node)
-
-    return paths
+# def generatePatternsContainingNode(tuneGraph, node, length, excludeSet=None):
+#     if excludeSet is None:
+#         excludeSet = set([node])
+#     else:
+#         excludeSet.add(node)
+#     if length == 0:
+#         return [[node]]
+#     paths = [[node] + path for neighbor in tuneGraph.neighbors(node) if neighbor not in excludeSet for path in
+#              generatePatternsContainingNode(tuneGraph, neighbor, length - 1, excludeSet)]
+#
+#     excludeSet.remove(node)
+#
+#     return paths
 
 
 

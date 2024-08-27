@@ -1,5 +1,8 @@
 from music21 import *
 
+e = environment.Environment()
+e['directoryScratch'] = ""
+
 Options = {
     "decimalPrecision": 3
 }
