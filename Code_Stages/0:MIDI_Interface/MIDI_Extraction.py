@@ -1,4 +1,5 @@
 from music21 import *
+from Utilities import ComeWhatRayUtil as CWR
 
 e = environment.Environment()
 e['directoryScratch'] = ""
@@ -18,7 +19,8 @@ noteToNumber = {
 }
 
 # Intakes a midifile and returns a set of coordinates and details
-def convertMidiToPoints(work):
+def convertMidiToPoints(work, inputOptions = None):
+    CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(Options, inputOptions)
 
     work = converter.parse(work)
     work = work.flatten()

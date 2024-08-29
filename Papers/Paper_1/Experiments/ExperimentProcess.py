@@ -3,22 +3,29 @@ import importlib
 
 options = {
     "ExperimentName": "default",
+    "WorkspaceLocation": "Papers/Paper_1/Experiments/ExperimentsWorkspace",
     "Dataset_Configuration": "Papers/Paper_1/Dataset/Configurations/Similarity(4x4)_Configuration.json",
-    "Midi_Interface": "Code_Stages.0:MIDI_Interface.MIDI_Extraction",
-    "MIDI_Representation": "Code_Stages.1:MIDI_Representations.GeometricRepresentation",
-    "Pattern_Extraction": {
-        "Location": "Code_Stages.2:Pattern_Extraction.SlidingWindowPatternExtraction",
-        "Method": ""
-    },
-    "Pattern_Encoding": {
-        "Location": "Code_Stages.3:Pattern_Encoding.StandardEncoding",
-        "Method": "NoEncoding"
-    },
-    "Similarity_Measure": ""
+    "Stages": [
+        {"Midi_Interface": "Code_Stages.0:MIDI_Interface.MIDI_Extraction"},
+        {"MIDI_Representation": "Code_Stages.1:MIDI_Representations.GeometricRepresentation"},
+        {"Pattern_Extraction": {
+            "Location": "Code_Stages.2:Pattern_Extraction.SlidingWindowPatternExtraction",
+            "Method": ""
+            }
+        },
+        {"Pattern_Encoding": {
+            "Location": "Code_Stages.3:Pattern_Encoding.StandardEncoding",
+            "Method": "NoEncoding"
+            }
+        },
+        {"Task": ""}
+    ]
 }
 
 def begin(details=None):
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, details)
+
+    options["WorkspaceLocation"] = options["WorkspaceLocation"] + "/" + options[")ExperimentName"]
 
     # Get Dataset Details
     datasetConfig = CWR.openFile(options["Dataset_Configuration"])

@@ -15,7 +15,7 @@ options = {
             "width": 4
         }
     },
-    "pruningMethod": ""
+    "pruningMethod": "NoPruning",
 }
 
 # The Coordinates returned by MIDI_Extraction.py is the geometric representation
@@ -26,11 +26,13 @@ def generateRepresentation(work, inputOptions=None):
     # Setting up python voodoo magic to let me use a sting to call a function
     this_module = sys.modules[__name__]
     methodInstanciated = getattr(this_module, options['method'])
+    pruningMethod = getattr(this_module, options['pruningMethod'])
 
     print(f"Pattern Extraction Approach: {options['method']}")
     proximityGraphRepresentation = methodInstanciated(work)
+    prunedGraphRepresentation = pruningMethod(proximityGraphRepresentation)
 
-    return proximityGraphRepresentation
+    return prunedGraphRepresentation
 
 # Graph Representations
 # ----------------------------------------------------------------------------------------------------------------------
@@ -82,6 +84,7 @@ def GraphPointRepresentation(work):
 
         # TODO improve this so that it doesn't happen to begin with
     tuneGraph.remove_edges_from(nx.selfloop_edges(tuneGraph))
+
     return tuneGraph
 
 
@@ -143,14 +146,11 @@ def GraphLineRepresentation(work):
     # TODO improve this so that it doesn't happen to begin with
     tuneGraph.remove_edges_from(nx.selfloop_edges(tuneGraph))
 
-    prunedGraph = tuneGraph
-
-    # graphTransitivityPruning(tuneGraph)
-    # prunedGraph = pruningtwo(tuneGraph)
-    # prunedGraph = pruningThree(tuneGraph)
-
-    return prunedGraph
+    return tuneGraph
 
 
 # Pruning Methods #TODO Implement
 # ----------------------------------------------------------------------------------------------------------------------
+
+def NoPruning(work):
+    return work

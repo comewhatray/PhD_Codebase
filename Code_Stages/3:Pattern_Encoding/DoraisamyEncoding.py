@@ -4,6 +4,7 @@ import os
 import ast
 import math
 import sys
+import warnings
 
 options = {
     "method": "NoEncoding",
@@ -24,6 +25,8 @@ pitchEncodingDict = {
 
 def encode(patternList, inputOptions = None):
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)
+
+    warnings.warn("Please recheck some methods in doraisamy encoding file and remove this warning and the import")
 
     this_module = sys.modules[__name__]
     methodInstanciated = getattr(this_module, options['method'])
