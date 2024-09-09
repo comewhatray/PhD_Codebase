@@ -23,8 +23,9 @@ pitchEncodingDict = {
     'G': 7,
 }
 
-def encode(patternList, inputOptions = None):
+def startProcess(work, inputOptions = None):
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)
+    work = CWR.openFile(work)
 
     warnings.warn("Please recheck some methods in doraisamy encoding file and remove this warning and the import")
 
@@ -32,7 +33,7 @@ def encode(patternList, inputOptions = None):
     methodInstanciated = getattr(this_module, options['method'])
 
     print(f"Pattern Encoding Approach: {options['method']}")
-    extractedPatterns = methodInstanciated(patternList)
+    extractedPatterns = methodInstanciated(work)
 
     return extractedPatterns
 

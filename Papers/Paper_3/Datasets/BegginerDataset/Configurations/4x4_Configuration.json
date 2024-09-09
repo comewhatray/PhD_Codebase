@@ -1,39 +1,18 @@
 {
-  "Title": "4x4 Test",
-  "Labels": true,
-  "Directory": "Papers/Paper 1/Dataset/Midis/",
-  "Files": [
-    {
-      "Location": "Hes a Pirate (Clarinet Choir).mscz.mid",
-      "Label": "Hes a Pirate"
-    },
-    {
-      "Location": "Hes a Pirate (Orchestra).mid",
-      "Label": "Hes a Pirate"
-    },
-    {
-      "Location": "Hes a Pirate (Piano).mid",
-      "Label": "Hes a Pirate"
-    },
-    {
-      "Location": "Hes a Pirate (String Trio + Piano).mid",
-      "Label": "Hes a Pirate"
-    },
-    {
-      "Location": "Trepak (Mixed Ensemble).mid",
-      "Label": "Trepak"
-    },
-    {
-      "Location": "Trepak (Orchestra).mid",
-      "Label": "Trepak"
-    },
-    {
-      "Location": "Trepak (Piano).mid",
-      "Label": "Trepak"
-    },
-    {
-      "Location": "Trepak (String Quartet).mid",
-      "Label": "Trepak"
-    }
-  ]
+  "Title": "Similarity (4x4)",
+  "Directory": "Papers/Paper_1/Dataset/Midis",
+  "Labels": {
+    "Hes a Pirate": [
+      "Hes a Pirate (Clarinet Choir).mid",
+      "Hes a Pirate (Orchestra).mid",
+      "Hes a Pirate (Piano).mid",
+      "Hes a Pirate (String Trio + Piano).mid"
+    ],
+    "Trepak": [
+      "Trepak (Mixed Ensemble).mid",
+      "Trepak (Orchestra).mid",
+      "Trepak (Piano).mid",
+      "Trepak (String Quartet).mid"
+    ]
+  }
 }

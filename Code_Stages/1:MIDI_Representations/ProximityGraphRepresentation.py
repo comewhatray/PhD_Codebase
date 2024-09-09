@@ -3,11 +3,13 @@ from Utilities import BoundingGenerator as BG
 import sys
 import networkx as nx
 from shapely.geometry import Point, LineString
+from scipy.spatial.distance import euclidean
+import numpy as np
 
 # It is assumed that all input is a set of points derived from MIDI_Extraction.py
 
 options = {
-    "method": "GraphLineRepresentation",
+    "function": "GraphLineRepresentation",
     "polygon": {
         "type": "Rectangle",
         "dimensions": {
@@ -15,24 +17,35 @@ options = {
             "width": 4
         }
     },
-    "pruningMethod": "NoPruning",
+    "distanceAttempts": 100,
+    "pruningMethod": None,
+    "pitchWeighting" : 0.5
 }
 
 # The Coordinates returned by MIDI_Extraction.py is the geometric representation
-def generateRepresentation(work, inputOptions=None):
+def startProcess(work, inputOptions=None):
     # Updating Options
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)
 
+    print(options['pitchWeighting'])
+    # work = CWR.openFile(work)
+
     # Setting up python voodoo magic to let me use a sting to call a function
     this_module = sys.modules[__name__]
-    methodInstanciated = getattr(this_module, options['method'])
-    pruningMethod = getattr(this_module, options['pruningMethod'])
+    methodInstanciated = getattr(this_module, options['function'])
 
-    print(f"Pattern Extraction Approach: {options['method']}")
+    print(f"Pattern Extraction Approach: {options['function']}")
     proximityGraphRepresentation = methodInstanciated(work)
-    prunedGraphRepresentation = pruningMethod(proximityGraphRepresentation)
 
-    return prunedGraphRepresentation
+    if options['pruningMethod'] is not None:
+        pruningMethod = getattr(this_module, options['pruningMethod'])
+        proximityGraphRepresentation = pruningMethod(proximityGraphRepresentation)
+
+    return proximityGraphRepresentation
+
+# The Coordinates returned by MIDI_Extraction.py is the geometric representation
+
+
 
 # Graph Representations
 # ----------------------------------------------------------------------------------------------------------------------
@@ -124,6 +137,7 @@ def GraphLineRepresentation(work):
         # Checks which notes are within the shape of the note
         for x in work[beginScan:]:
             # Ends if the points is too far away
+
             if x['position'] > note['position'] + options["polygon"]["dimensions"]["width"]:
                 break
 
@@ -149,8 +163,139 @@ def GraphLineRepresentation(work):
     return tuneGraph
 
 
+def SzetoGraphRepresentation(work):
+
+    counter = 0
+    updateCounter = 0
+
+    work = CWR.openFile(work)
+
+    tuneGraph = nx.empty_graph(len(work))
+
+    # Going through each point in the piece
+    for note in work:
+
+        # Encoding each node with the notes relevant information
+        tuneGraph.nodes[counter]['pitch'] = note['pitch']
+        tuneGraph.nodes[counter]['position'] = note['position']
+        tuneGraph.nodes[counter]['duration'] = note['duration']
+        tuneGraph.nodes[counter]['pos'] = (note['position'], note['pitch'])
+
+        # Update Counter
+        if counter > ((len(work) / 10) * updateCounter):
+            # print(str(counter) + '/' + str(len(points)))
+            print('Number of Points: ' + str(len(work)))
+            updateCounter += 1
+            print(str(counter) + '/' + str(len(work)))
+
+        # Setup for comparison code goes here
+
+        beginScan = work.index(note)
+        currentSequentialIndex = -1
+        failureCount = 0
+
+        # compare current note to notes that occur after it
+        for x in work[beginScan:]:
+
+            # Ends if the points is too far away
+            #todo edit calculation to end loop
+            # if x['position'] > note['position'] + options["polygon"]["dimensions"]["width"]:
+            #     break
+
+            # Comparison code goes here
+            # if the notes are simultaneous add an edge
+            if simultaneousEventCheck(note, work[work.index(x)]):
+                tuneGraph.add_edge(counter, work.index(x))
+
+            else:
+                # if there is no point of comparison yet set the proposed sequential event equal to the first non-simultaneous event
+                if currentSequentialIndex == -1:
+                    currentSequentialIndex = work.index(x)
+                else:
+                    # Check if the current note is closer to the original note
+                    if interEventDistance(note, work[currentSequentialIndex]) > interEventDistance(note, work[work.index(x)]):
+                        currentSequentialIndex = work.index(x)
+
+                    # This is just some optimisation such that it doesn't go through the whole piece
+                    # As the further the process goes on, the less likely it will be closer
+                    else:
+                        failureCount += 1
+                        if failureCount > options["distanceAttempts"]:
+                            break
+
+
+
+        # Each note can only have one sequential event, so it finds the closest one that is simultaneous
+        if not currentSequentialIndex == -1:
+            tuneGraph.add_edge(counter, currentSequentialIndex)
+
+        counter += 1
+
+
+    # Removes all self loops if any are created
+    tuneGraph.remove_edges_from(nx.selfloop_edges(tuneGraph))
+
+
+    return tuneGraph
+
+
+# Helper Methods
+# ----------------------------------------------------------------------------------------------------------------------
+
+# Checks if two notes would be connected by a sequential edge (Melody) or simultaneous edge (Harmony).
+def eventType(note1, note2):
+
+    if simultaneousEventCheck(note1, note2):
+        return "SimultaneousEvent"
+    else:
+        return "SequentialEvent"
+
+# Checks if notes are sequential events (ie they do not share any overlapping time
+def sequentialEventCheck(note1, note2):
+    return not simultaneousEventCheck(note1, note2)
+
+# Checks if two notes are simultaneous
+def simultaneousEventCheck(note1, note2):
+
+    # if the start of note 1 is between
+
+    note1RelevantTime = [note1['position'], note1['position'] + note1['duration']]
+    note2RelevantTime = [note2['position'], note2['position'] + note2['duration']]
+
+    return timeOverlapCheck(note1RelevantTime, note2RelevantTime)
+
+# Time Overlap Check.
+def timeOverlapCheck(relevantTime1, relevantTime2):
+
+    if (
+            (relevantTime2[0] <= relevantTime1[0] < relevantTime2[1])
+            or
+            (relevantTime2[0] < relevantTime1[1] <= relevantTime2[1])
+    ):
+        return True
+
+    elif (
+            (relevantTime1[0] <= relevantTime2[0] < relevantTime1[1])
+            or
+            (relevantTime1[0] < relevantTime2[1] <= relevantTime1[1])
+    ):
+
+        return True
+
+    return False
+
+# Gets the distance between two notes (the distance is infinite if they are simultaneous)
+def interEventDistance(note1, note2):
+                # End of the first note (x)         , pitch of first note (y)
+    point1 = [note1['position'] + note1['duration'], note1['pitch']]
+
+             # start of the second note (x)   , pitch of first note (y)
+    point2 = [note2['position'], note2['pitch']]
+
+    distance = euclidean(point1, point2, w=[1, options['pitchWeighting']])
+
+    return distance
+
 # Pruning Methods #TODO Implement
 # ----------------------------------------------------------------------------------------------------------------------
 
-def NoPruning(work):
-    return work

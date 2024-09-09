@@ -13,7 +13,7 @@ options = {
 
 this_module = sys.modules[__name__]
 
-def similarityCalculation(dataset, inputOptions):
+def startProcess(dataset, inputOptions):
     print("Calculating Cosine Similarity")
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)
 

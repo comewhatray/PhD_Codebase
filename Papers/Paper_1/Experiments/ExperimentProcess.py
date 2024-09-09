@@ -25,7 +25,7 @@ options = {
 def begin(details=None):
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, details)
 
-    options["WorkspaceLocation"] = options["WorkspaceLocation"] + "/" + options[")ExperimentName"]
+    options["WorkspaceLocation"] = CWR.appendDirectory(options["WorkspaceLocation"], options["ExperimentName"])
 
     # Get Dataset Details
     datasetConfig = CWR.openFile(options["Dataset_Configuration"])

@@ -2,22 +2,22 @@ from Utilities import ComeWhatRayUtil as CWR
 import sys
 
 options = {
-    "method": "NoEncoding"
+    "method": None
 }
 
-def encodePatterns(patternList, inputOptions=None):
+def startProcess(work, inputOptions=None):
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options,inputOptions)
+    work = CWR.openFile(work)
     this_module = sys.modules[__name__]
-    methodInstanciated = getattr(this_module, options['method'])
+    if options["method"] is not None:
+        methodInstanciated = getattr(this_module, options['method'])
+        print(f"Pattern Encoding Approach: {options['method']}")
+        extractedPatterns = methodInstanciated(work)
 
-    print(f"Pattern Encoding Approach: {options['method']}")
-    extractedPatterns = methodInstanciated(patternList)
+    else:
+        extractedPatterns = work
 
     return extractedPatterns
 
 # Encoding Methods
 #-----------------------------------------------------------------------------------------------------------------------
-
-# Does what it says on the tin
-def NoEncoding(work):
-    return work

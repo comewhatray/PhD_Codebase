@@ -18,9 +18,13 @@ noteToNumber = {
     'G': 7,
 }
 
-# Intakes a midifile and returns a set of coordinates and details
-def convertMidiToPoints(work, inputOptions = None):
+def startProcess(work, inputOptions = None):
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(Options, inputOptions)
+    return convertMidiToPoints(work)
+
+# Intakes a midifile and returns a set of coordinates and details
+def convertMidiToPoints(work):
+
 
     work = converter.parse(work)
     work = work.flatten()

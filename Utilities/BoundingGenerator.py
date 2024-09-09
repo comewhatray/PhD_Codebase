@@ -2,7 +2,7 @@ from shapely.geometry import Polygon, box, LineString
 from matplotlib.patches import Ellipse
 
 
-def RectangleDurationGenerator(note, dimensions):
+def RectangleLineGenerator(note, dimensions):
     width = dimensions['width']
     height = dimensions["height"]
     shape = box(

@@ -13,11 +13,12 @@ options = {
 }
 
 
-def generatePatterns(work, inputOptions=None):
+def startProcess(work, inputOptions=None):
     warnings.warn("Please recheck some methods in sliding window approach and remove this warning and the import")
 
     # Update Options with user input
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)
+    work = CWR.openFile(work)
 
     # Setting up python voodoo magic to let me use a sting to call a function
     this_module = sys.modules[__name__]
