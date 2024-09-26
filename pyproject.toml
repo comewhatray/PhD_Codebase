@@ -4,17 +4,25 @@ version = "0.1.0"
 description = ""
 authors = ["MasterRain <rayconlin@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.10"
 music21 = "^9.1.0"
-numpy = "^2.1.0"
+numpy = "^2.1.1"
 matplotlib = "^3.9.2"
 networkx = "^3.3"
 shapely = "^2.0.6"
 scikit-learn = "^1.5.1"
 
+# PYTORCH SHIT
+# ----------------------------------------------------------------------------------------------------------------------
+
+#https://download.pytorch.org/whl/cpu/torch-2.2.1-cp310-none-macosx_10_9_x86_64.whl
+# ----------------------------------------------------------------------------------------------------------------------
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+#cp311-cp311-macosx

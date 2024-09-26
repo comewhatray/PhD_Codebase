@@ -21,6 +21,7 @@ ExperimentDetails = {
             "options": {
                 "function": "GraphLineRepresentation",
                 "saveType": ".gpickle",
+                "edgeAttributes": True,
                 # "pitchWeighting": 0.1
                 "polygon": {
                         "type": "Rectangle",

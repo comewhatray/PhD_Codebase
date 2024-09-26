@@ -87,14 +87,16 @@ def getNotePosition(midiInput):
         # Calculating the pitch number based on what pitch it is plus what octave its at
         position = position + 12 * (octave + 1)
 
-        # If we somehow end up with a negative pitch I don't know what happens, but it scares me
-        # if position < 0:
-        #     print("Da fuq")
+        # Getting where the note occurs within a bar
+        # 1 is subtracted to make it more computer friendly rather than musicoligist friendly
+        barBeat = midiInput.beat - 1
 
         # combine output
         output = {'pitch': float(position),
                   'position': round(float(midiInput.offset), Options["decimalPrecision"]),
-                  'duration': round(float(midiInput.quarterLength), Options["decimalPrecision"])}
+                  'duration': round(float(midiInput.quarterLength), Options["decimalPrecision"]),
+                  'barBeat': round(float(barBeat), Options["decimalPrecision"])
+                  }
 
         return output
 
@@ -178,3 +180,4 @@ def sortPoints(pointSet):
         print('Notes are not in order')
 
     return temp
+

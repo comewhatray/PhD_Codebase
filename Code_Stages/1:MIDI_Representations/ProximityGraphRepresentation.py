@@ -19,7 +19,11 @@ options = {
     },
     "distanceAttempts": 100,
     "pruningMethod": None,
-    "pitchWeighting" : 0.5
+    "pitchWeighting" : 0.5,
+    "edgeAttributes": False,
+    "selfLoop": False,
+    "testing": False,
+
 }
 
 # The Coordinates returned by MIDI_Extraction.py is the geometric representation
@@ -96,7 +100,7 @@ def GraphPointRepresentation(work):
         counter += 1
 
         # TODO improve this so that it doesn't happen to begin with
-    tuneGraph.remove_edges_from(nx.selfloop_edges(tuneGraph))
+    tuneGraph = graphModifications(tuneGraph)
 
     return tuneGraph
 
@@ -126,6 +130,7 @@ def GraphLineRepresentation(work):
         tuneGraph.nodes[counter]['pitch'] = note['pitch']
         tuneGraph.nodes[counter]['position'] = note['position']
         tuneGraph.nodes[counter]['duration'] = note['duration']
+        tuneGraph.nodes[counter]['barBeat'] = note['barBeat']
         tuneGraph.nodes[counter]['pos'] = (note['position'], note['pitch'])
 
         # Generates the coordinates for the shape
@@ -158,7 +163,7 @@ def GraphLineRepresentation(work):
         counter += 1
 
     # TODO improve this so that it doesn't happen to begin with
-    tuneGraph.remove_edges_from(nx.selfloop_edges(tuneGraph))
+    tuneGraph = graphModifications(tuneGraph)
 
     return tuneGraph
 
@@ -233,7 +238,7 @@ def SzetoGraphRepresentation(work):
 
 
     # Removes all self loops if any are created
-    tuneGraph.remove_edges_from(nx.selfloop_edges(tuneGraph))
+    tuneGraph = graphModifications(tuneGraph)
 
 
     return tuneGraph
@@ -296,6 +301,43 @@ def interEventDistance(note1, note2):
 
     return distance
 
+
+def graphModifications(graph):
+
+    if not options["selfLoop"]:
+        graph.remove_edges_from(nx.selfloop_edges(graph))
+
+    if options["edgeAttributes"]:
+        attributes = {
+            "pitchChange": 0,
+            "distanceChange": 0
+        }
+
+        for edge in graph.edges():
+
+            if options["testing"]:
+                print(f"{edge[0]} -> {edge[1]}")
+
+            attributes = {
+                "pitchChange": graph.nodes[edge[1]]['pitch'] - graph.nodes[edge[0]]['pitch'],
+                "onsetGap": graph.nodes[edge[1]]['position'] - graph.nodes[edge[0]]['position'],
+                "endOnsetGap": graph.nodes[edge[1]]['position'] - (
+                            graph.nodes[edge[0]]['position'] + graph.nodes[edge[0]]['duration']),
+            }
+
+            if options["testing"]:
+                print(attributes)
+
+            graph.edges[edge[0], edge[1]].update(attributes)
+            if options["testing"]:
+                print(f"Pitch Change: {graph.edges[edge[0], edge[1]]['pitchChange']}")
+                print(f"Onset Gap: {graph.edges[edge[0], edge[1]]['onsetGap']}")
+                print(f"End Onset Gap: {graph.edges[edge[0], edge[1]]['endOnsetGap']}")
+
+
+
+
+    return graph
+
 # Pruning Methods #TODO Implement
 # ----------------------------------------------------------------------------------------------------------------------
-
