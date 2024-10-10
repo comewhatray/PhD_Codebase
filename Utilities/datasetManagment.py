@@ -66,4 +66,23 @@ def exampleTagging(datasetOrigin, datasetTarget, configurationLocation):
     print(datasetConfiguration)
     CWR.saveFile(configurationLocation, datasetConfiguration)
 
+
+def convertDatasetToOldFormat(dataset):
+    oldFormat = []
+    for label in dataset:
+
+        for piece in dataset[label]:
+
+            Name = CWR.getFileNameFromPath(piece)
+            Label = label
+            Location = piece
+
+            oldFormat.append({
+                "Name": Name,
+                "Label": Label,
+                "Location": Location
+            })
+
+    return oldFormat
+
 # exampleTagging(dsetOrigin, dsetTarget, confLocation)

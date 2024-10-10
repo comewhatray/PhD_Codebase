@@ -1,5 +1,6 @@
 from Utilities import ComeWhatRayUtil as CWR
 from Utilities import BoundingGenerator as BG
+from Utilities import datasetManagment as DM
 import numpy as np
 
 # MAKE SURE TO SAVE THE LOOKUPTABLE IF IT IS USED
@@ -8,7 +9,7 @@ import sys
 this_module = sys.modules[__name__]
 
 options = {
-    "task": "totalPatternOverlapSimilarity",
+    "function": "totalPatternOverlapSimilarity",
     "threshold": 0,
     # The distance from the line that the polygon is generated
     "shapeBuffer": 3,
@@ -19,6 +20,7 @@ options = {
                 "width": 4
             }
         },
+    # Provide the location of a look up table
     "LookUpTable": None
 }
 
@@ -27,8 +29,7 @@ options = {
 
 def startProcess(dataset, inputOptions):
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)
-
-    methodInstanciated = getattr(this_module, options['method'])
+    methodInstanciated = getattr(this_module, options['function'])
 
     methodInstanciated(dataset)
 
@@ -40,7 +41,8 @@ def startProcess(dataset, inputOptions):
 
 def MaxOverlapSimilarity(dataset):
 
-    correlationMatrix = np.zeros((len(dataset), len(dataset)))
+    correlationMatrix = generateEmptyMatrix(dataset)
+    dataset = DM.convertDatasetToOldFormat(dataset)
 
     for piece in dataset:
         openedPiece = CWR.openFile(piece['Location'])
@@ -76,27 +78,10 @@ def MaxOverlapSimilarity(dataset):
 
                     for pattern2 in comparisonPiece:
 
-                        sim = 0
-
-                        if options["LookUpTable"] is not None:
-
-                            if pattern1 in options["LookUpTable"]:
-                                if pattern2 in options["LookUpTable"][pattern1]:
-                                    sim = options["LookUpTable"][pattern1][pattern2]
-
-                            if pattern2 in options["LookUpTable"]:
-                                if pattern1 in options["LookUpTable"][pattern2]:
-                                    sim = options["LookUpTable"][pattern2][pattern1]
-
+                        sim = lookUpTable(pattern1, pattern2)
                         if sim == 0:
                             sim = modifiedJaccardSimilarityPatternMatching(eval(pattern1), eval(pattern2))
-
-                            if options["LookUpTable"] is not None:
-
-                                if pattern1 not in options["LookUpTable"]:
-                                    options["LookUpTable"][pattern1] = {}
-
-                                options["LookUpTable"][pattern1][pattern2] = sim
+                            updateLookUpTable(pattern1, pattern2, sim)
 
                         if sim > maxSim:
                             maxSim = sim
@@ -119,7 +104,8 @@ def MaxOverlapSimilarity(dataset):
     return correlationMatrix
 
 def totalPatternOverlapSimilarity(dataset):
-    correlationMatrix = np.zeros((len(dataset), len(dataset)))
+    correlationMatrix = generateEmptyMatrix(dataset)
+    dataset = DM.convertDatasetToOldFormat(dataset)
 
     for piece in dataset:
         openedPiece = CWR.openFile(piece['Location'])
@@ -144,30 +130,14 @@ def totalPatternOverlapSimilarity(dataset):
 
                 for pattern2 in comparisonPiece:
 
-                    sim = 0
-
-                    if options["LookUpTable"] is not None:
-
-                        if pattern1 in options["LookUpTable"]:
-                            if pattern2 in options["LookUpTable"][pattern1]:
-                                sim = options["LookUpTable"][pattern1][pattern2]
-
-                        if pattern2 in options["LookUpTable"]:
-                            if pattern1 in options["LookUpTable"][pattern2]:
-                                sim = options["LookUpTable"][pattern2][pattern1]
-
+                    sim = lookUpTable(pattern1, pattern2)
                     if sim == 0:
                         sim = modifiedJaccardSimilarityPatternMatching(eval(pattern1), eval(pattern2))
+                        updateLookUpTable(pattern1, pattern2, sim)
+                        newPatterns += 1
 
-                        if options["LookUpTable"] is not None:
-                            if pattern1 not in options["LookUpTable"]:
-                                options["LookUpTable"][pattern1] = {}
-
-                            options["LookUpTable"][pattern1][pattern2] = sim
-                            newPatterns += 1
-
-                    else:
-                        sim = modifiedJaccardSimilarityPatternMatching(eval(pattern1), eval(pattern2))
+                    # else:
+                    #     sim = modifiedJaccardSimilarityPatternMatching(eval(pattern1), eval(pattern2))
 
                     totalPatternSim += sim * openedPiece[pattern1] * comparisonPiece[pattern2]
 
@@ -185,6 +155,9 @@ def totalPatternOverlapSimilarity(dataset):
 
             correlationMatrix[dataset.index(piece), dataset.index(comparedPiece)] = normalSim
 
+            if options["LookUpTable"] is not None:
+                CWR.saveFile("Papers/Paper_2/LookUpTables/SzetoClassicalTestEnd.json", options["LookUpTable"])
+
     return correlationMatrix
     # workspace = details["ExperimentDirectories"]["SimilarityWorkspace"]
     # CWR.saveFile(workspace + "/correlationMatrix.npy", correlationMatrix)
@@ -196,7 +169,8 @@ def thresholdPatternOverlapSimilarity(dataset):
 
     threshold = options["threshold"]
 
-    correlationMatrix = np.zeros((len(dataset), len(dataset)))
+    correlationMatrix = generateEmptyMatrix(dataset)
+    dataset = DM.convertDatasetToOldFormat(dataset)
     averageThreshold = 0
     rawThreshold = 0
     numberofComparisons = 0
@@ -228,27 +202,13 @@ def thresholdPatternOverlapSimilarity(dataset):
 
                 for pattern2 in comparisonPiece:
 
-                    sim = 0
-
-                    if options['LookUpTable'] is not None:
-
-                        if pattern1 in options['LookUpTable']:
-                            if pattern2 in options['LookUpTable'][pattern1]:
-                                sim = options['LookUpTable'][pattern1][pattern2]
-
-                        if pattern2 in options['LookUpTable']:
-                            if pattern1 in options['LookUpTable'][pattern2]:
-                                sim = options['LookUpTable'][pattern2][pattern1]
+                    sim = lookUpTable(pattern1, pattern2)
 
                     if sim == 0:
                         sim = modifiedJaccardSimilarityPatternMatching(eval(pattern1), eval(pattern2))
 
-                        if options['LookUpTable'] is not None:
-                            if pattern1 not in options['LookUpTable']:
-                                options['LookUpTable'][pattern1] = {}
-
-                            options['LookUpTable'][pattern1][pattern2] = sim
-                            newPatterns += 1
+                        updateLookUpTable(pattern1, pattern2, sim)
+                        newPatterns += 1
 
                     numberofComparisons +=1
                     if sim >= threshold:
@@ -303,8 +263,8 @@ def modifiedJaccardSimilarityPatternMatching(pattern1, pattern2):
         pattern2 = eval(pattern2)
     pattern1Line = extractLineStringFromPattern(extractLinesFromPattern(pattern1))
     pattern2Line = extractLineStringFromPattern(extractLinesFromPattern(pattern2))
-    patter1Bounding = BG.boundingPolygon(pattern1Line, options["ShapeBuffer"])
-    patter2Bounding = BG.boundingPolygon(pattern2Line, options["ShapeBuffer"])
+    patter1Bounding = BG.boundingPolygon(pattern1Line, options["shapeBuffer"])
+    patter2Bounding = BG.boundingPolygon(pattern2Line, options["shapeBuffer"])
     totalArea = patter1Bounding.area + patter2Bounding.area
     overlapShape = patternAreaComparison(pattern1, pattern2)
     overlapArea = overlapShape.area
@@ -324,7 +284,6 @@ def extractLineStringFromPattern(pattern):
             lineStringList.append(point)
 
     return lineStringList
-
 
 def extractLinesFromPattern(pattern):
     patternSize = (len(pattern) + 1) % 3
@@ -355,7 +314,6 @@ def extractLinesFromPattern(pattern):
     # print(points)
     return points
 
-
 # Finds the best overlap of the polygons
 def patternAreaComparison(pattern1, pattern2, visualisation=False):
     pattern1Lines = extractLinesFromPattern(pattern1)
@@ -363,7 +321,7 @@ def patternAreaComparison(pattern1, pattern2, visualisation=False):
 
     initialLineStringSequence = extractLineStringFromPattern(pattern1Lines)
 
-    initialPolygon = BG.boundingPolygon(initialLineStringSequence, options["ShapeBuffer"])
+    initialPolygon = BG.boundingPolygon(initialLineStringSequence, options["shapeBuffer"])
 
     maxOverlap = 0
 
@@ -382,7 +340,7 @@ def patternAreaComparison(pattern1, pattern2, visualisation=False):
 
             newLineStringSequence = extractLineStringFromPattern(newPattern)
 
-            newPolygon = BG.boundingPolygon(newLineStringSequence, options["ShapeBuffer"])
+            newPolygon = BG.boundingPolygon(newLineStringSequence, options["shapeBuffer"])
             overlapPolygon = BG.overlappingPolygon(initialPolygon, newPolygon)
 
             if overlapPolygon.area > maxOverlap:
@@ -394,3 +352,68 @@ def patternAreaComparison(pattern1, pattern2, visualisation=False):
     # VIS.visualisePolygon(bestOverlapPolygon)
 
     return bestOverlapPolygon
+
+# Generates the correct size matrix for the dataset
+def generateEmptyMatrix(dataset):
+    print("Generating empty matrix")
+
+    totalLength = 0
+
+    for label in dataset:
+        totalLength += len(dataset[label])
+
+
+    return np.zeros((totalLength, totalLength))
+
+# Gets the division of the dataset
+def getDatasetDivisions(dataset):
+
+    divisions = []
+    for label in dataset:
+        divisions.append(len(dataset[label]))
+
+    return divisions
+
+# Searches Lookup Table
+def lookUpTable(pattern1, pattern2):
+
+    sim = 0
+
+    if options["LookUpTable"] is not None:
+        if pattern1 in options["LookUpTable"]:
+            if pattern2 in options["LookUpTable"][pattern1]:
+                sim = options["LookUpTable"][pattern1][pattern2]
+
+        if pattern2 in options["LookUpTable"]:
+            if pattern1 in options["LookUpTable"][pattern2]:
+                sim = options["LookUpTable"][pattern2][pattern1]
+
+    return sim
+
+# Updates Lookup Table
+def updateLookUpTable(pattern1, pattern2, sim):
+
+    if options["LookUpTable"] is not None:
+        if pattern1 not in options["LookUpTable"]:
+            options["LookUpTable"][pattern1] = {}
+
+        options["LookUpTable"][pattern1][pattern2] = sim
+
+# Transforms new dataset format into old one
+# def convertDataset(dataset):
+#     oldFormat = []
+#     for label in dataset:
+#
+#         for piece in dataset[label]:
+#
+#             Name = CWR.getFileNameFromPath(piece)
+#             Label = label
+#             Location = piece
+#
+#             oldFormat.append({
+#                 "Name": Name,
+#                 "Label": Label,
+#                 "Location": Location
+#             })
+#
+#     return oldFormat

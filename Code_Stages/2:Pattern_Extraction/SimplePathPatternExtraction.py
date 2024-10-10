@@ -5,7 +5,7 @@ import json
 # MUST USE A GRAPH REPRESENTATION
 
 options = {
-    "method": "SimplePathGraphDurationExtraction",
+    "function": "SimplePathGraphDurationExtraction",
     "patternSize": 3,
     "precision": 3
 }
@@ -17,9 +17,9 @@ def startProcess(work, inputOptions=None):
 
     # Setting up python voodoo magic to let me use a sting to call a function
     this_module = sys.modules[__name__]
-    methodInstanciated = getattr(this_module, options['method'])
+    methodInstanciated = getattr(this_module, options['function'])
 
-    print(f"Pattern Extraction Approach: {options['method']}")
+    print(f"Pattern Extraction Approach: {options['function']}")
     extractedPatterns = methodInstanciated(work)
 
     return extractedPatterns

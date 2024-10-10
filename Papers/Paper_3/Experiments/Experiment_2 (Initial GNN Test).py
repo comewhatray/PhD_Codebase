@@ -1,13 +1,16 @@
+import os.path
+
 from Code_Stages import ExperimentProcess as EP
 from Utilities import ComeWhatRayUtil as CWR
 
 
 ExperimentDetails = {
     # Experiment Name left blank is just for experiments we don't want to store the results of
-    # "ExperimentName": "Proof of Concept",
+    "ExperimentName": "Transformation of Classical Dataset into Tensors to be used with a gnn",
     "Description": "Initial exploration of GNN learning for paper 3",
     "WorkspaceLocation": "Papers/Paper_3/Experiments/ExperimentsWorkspace",
-    "Dataset_Configuration": "Papers/Paper_3/Datasets/ClassicalComposersDataset/Configurations/3x3_Sample.json",
+    # "Dataset_Configuration": "Papers/Paper_3/Datasets/ClassicalComposersDataset/Configurations/3x3_Sample.json",
+    "Dataset_Configuration": "Papers/Paper_3/Datasets/ClassicalComposersDataset/Configurations/All.json",
     "Stages": [
         # First Extract the midi file into points
         {
@@ -19,30 +22,13 @@ ExperimentDetails = {
         },
         # Then transform it into a more usable representation
         {
-            "file": "Code_Stages/1:MIDI_Representations/GeometricRepresentation.py",
+            "file": "Code_Stages/1:MIDI_Representations/ProximityGraphRepresentation.py",
             "options": {
-                "function": "GraphLineRepresentation",
+                "function": "SzetoGraphRepresentation",
                 "saveType": ".gpickle",
-                # "pruningMethod": ""
+                "edgeAttributes": True
             }
         },
-        # {
-        #     "file": "Code_Stages/2:Pattern_Extraction/SlidingWindowPatternExtraction.py",
-        #     "options": {
-        #         "function": "SlidingWindowMelodyExtraction",
-        #         "saveType": ".json",
-        #     }
-        # },
-        # {
-        #     "file": "Code_Stages/3:Pattern_Encoding/StandardEncoding.py",
-        #     "function": None,
-        #          "options": {
-        # }},
-        # {
-        #     "file": "",
-        #     "function": "",
-        #          "options": {
-        # }},
         # {
         #     "file": "",
         #     "function": "",
@@ -51,8 +37,28 @@ ExperimentDetails = {
     ]
 }
 
+aggregationDetails = {
+    "Stages": [
+        {
+            "file": "Code_Stages/4:Tasks/Classification/GNN.py",
+            "options": {
+                "function": "graphClassificationUsingEdgeInformation",
+                # "saveType": "",
+            }
+        }
+    ]
+}
+
 
 if __name__ == '__main__':
+
+    # saveLoc = CWR.appendDirectory(ExperimentDetails["WorkspaceLocation"], "LocationData.json")
+    # if not os.path.exists(saveLoc):
+    #     details = EP.batchExperiment(ExperimentDetails)
+    #     CWR.saveFile(saveLoc, details)
+    # else:
+    #     details = CWR.openFile(saveLoc)
+
     details = EP.batchExperiment(ExperimentDetails)
-    saveLoc = CWR.appendDirectory(ExperimentDetails["WorkspaceLocation"], "LocationData.json")
-    CWR.saveFile(saveLoc, details)
+    EP.aggregationExperiment(details, aggregationDetails)
+

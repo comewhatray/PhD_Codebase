@@ -120,14 +120,33 @@ def batchExperiment(details=None):
     return LocationsDict
 
 # For Experiments that wish to compile data into knew knowledge
-def aggregationExperiment(details=None):
-    CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, details)
+def aggregationExperiment(locationsDict, details=None):
     print("Aggregation Experiment")
+    lastLocation = locationsDict[options["Stages"][-1]['options']['function']]
+
+    CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, details)
+
+    for process in options["Stages"]:
+
+        processFunction = process['options']['function']
+
+        if processFunction not in locationsDict:
+            locationsDict[processFunction] = {}
+
+        # locationsDict[processFunction] = {}
+
+        results = processTask(lastLocation, process)
+
+        lastLocation = processFunction
+
+
+    return
 
 
 # Helper Methods
 # ----------------------------------------------------------------------------------------------------------------------
 
+# Iteratively goes through the dataset
 def iterationStep(locationsDict, previousLocation, label, process):
     print("Iterative step")
     processName = process['options']['function']
@@ -162,18 +181,17 @@ def iterationStep(locationsDict, previousLocation, label, process):
         else:
             "Results for current file already exist"
 
-def processTask(work, process):
+# Sends data to the relevant file
+def processTask(location, process):
 
     # Import the relevant python file
     # This allows to name the directory of the file and automatically transform it into a way python understands
     processName = CWR.removeExtension(process["file"])
     processName = processName.replace('/', '.')
+
     stage = importlib.import_module(processName)
 
     # Calls the startProcess function of the relevant file
-    results = stage.startProcess(work, process['options'])
-
+    results = stage.startProcess(location, process['options'])
 
     return results
-
-# batchExperiment()

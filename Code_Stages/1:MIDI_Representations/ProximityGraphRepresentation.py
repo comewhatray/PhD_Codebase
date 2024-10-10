@@ -20,6 +20,7 @@ options = {
     "distanceAttempts": 100,
     "pruningMethod": None,
     "pitchWeighting" : 0.5,
+    "rounding": 2,
     "edgeAttributes": False,
     "selfLoop": False,
     "testing": False,
@@ -31,7 +32,7 @@ def startProcess(work, inputOptions=None):
     # Updating Options
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)
 
-    print(options['pitchWeighting'])
+    # print(options['pitchWeighting'])
     # work = CWR.openFile(work)
 
     # Setting up python voodoo magic to let me use a sting to call a function
@@ -319,10 +320,10 @@ def graphModifications(graph):
                 print(f"{edge[0]} -> {edge[1]}")
 
             attributes = {
-                "pitchChange": graph.nodes[edge[1]]['pitch'] - graph.nodes[edge[0]]['pitch'],
-                "onsetGap": graph.nodes[edge[1]]['position'] - graph.nodes[edge[0]]['position'],
-                "endOnsetGap": graph.nodes[edge[1]]['position'] - (
-                            graph.nodes[edge[0]]['position'] + graph.nodes[edge[0]]['duration']),
+                "pitchChange": round(graph.nodes[edge[1]]['pitch'] - graph.nodes[edge[0]]['pitch'], options['rounding']),
+                "onsetGap": round(graph.nodes[edge[1]]['position'] - graph.nodes[edge[0]]['position'], options['rounding']),
+                "endOnsetGap": round(graph.nodes[edge[1]]['position'] - (
+                            graph.nodes[edge[0]]['position'] + graph.nodes[edge[0]]['duration']), options['rounding']),
             }
 
             if options["testing"]:

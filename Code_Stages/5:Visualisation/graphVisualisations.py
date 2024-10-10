@@ -1,4 +1,5 @@
 from matplotlib.pyplot import savefig
+import numpy as np
 
 from Utilities import ComeWhatRayUtil as CWR
 import sys
@@ -37,3 +38,12 @@ def visualiseSpatialGraph(work):
 
     if options["toSave"]:
         savefig()
+
+
+def visualiseBoundingPattern(pattern):
+    return
+
+
+# Helper methods for visualising data
+# ----------------------------------------------------------------------------------------------------------------------
+

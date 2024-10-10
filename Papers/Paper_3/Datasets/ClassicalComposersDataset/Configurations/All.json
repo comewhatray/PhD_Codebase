@@ -15,7 +15,7 @@
     "mendelssohn": ["mendelssohn_1.mid", "mendelssohn_2.mid", "mendelssohn_3.mid", "mendelssohn_4.mid", "mendelssohn_5.mid", "mendelssohn_6.mid", "mendelssohn_7.mid", "mendelssohn_8.mid", "mendelssohn_9.mid"],
     "debussy": ["debussy_1.mid", "debussy_2.mid", "debussy_3.mid"],
     "grieg": ["grieg_1.mid", "grieg_2.mid", "grieg_3.mid", "grieg_4.mid", "grieg_5.mid", "grieg_6.mid", "grieg_7.mid", "grieg_8.mid", "grieg_9.mid"],
-    "bach": ["bach_1.mid", "bach_2.mid", "bach_3.mid", "bach_4.mid", "bach_5.mid"],
+    "bach": ["bach_1.mid", "bach_2.mid", "bach_3.mid", "bach_4.mid"],
     "borodin": ["borodin_1.mid", "borodin_2.mid", "borodin_3.mid", "borodin_4.mid", "borodin_5.mid"],
     "brahms": ["brahms_1.mid", "brahms_2.mid", "brahms_3.mid", "brahms_4.mid", "brahms_5.mid", "brahms_6.mid"],
     "mussorgsky": ["mussorgsky_1.mid", "mussorgsky_2.mid", "mussorgsky_3.mid", "mussorgsky_4.mid", "mussorgsky_5.mid"]

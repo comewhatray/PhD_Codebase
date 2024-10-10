@@ -47,11 +47,11 @@ def EllipsePointGenerator(note, dimensions):
 def boundingPolygon(lineString, bufferSize):
 
     line = LineString(lineString)
-
-    line = line.buffer(bufferSize)
+                                # Round flat Square     # round, mitre, bevel
+    line = line.buffer(bufferSize, cap_style='square', join_style='mitre')
 
     return line
 
-
+2
 def overlappingPolygon(shape1, shape2):
     return shape1.intersection(shape2)

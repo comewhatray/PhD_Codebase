@@ -1,0 +1,9 @@
+{
+  "Title": "",
+  "Directory": "Papers/Paper_3/Datasets/ClassicalComposersDataset/Midis",
+  "Labels": {
+    "tchaikovsky": ["tchaikovsky_1.mid", "tchaikovsky_2.mid", "tchaikovsky_3.mid"],
+    "burgm": ["burgm_1.mid", "burgm_2.mid", "burgm_3.mid"],
+    "debussy": ["debussy_1.mid", "debussy_2.mid", "debussy_3.mid"]
+  }
+}

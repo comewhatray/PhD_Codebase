@@ -1,0 +1,23 @@
+{
+  "Title": "",
+  "Directory": "Papers/Paper_3/Datasets/ClassicalComposersDataset/Midis",
+  "Labels": {
+    "mozart": ["mozart_1.mid", "mozart_2.mid", "mozart_3.mid", "mozart_4.mid", "mozart_5.mid", "mozart_6.mid", "mozart_7.mid"],
+    "chopin": ["chopin_1.mid", "chopin_2.mid", "chopin_3.mid", "chopin_4.mid", "chopin_5.mid", "chopin_6.mid", "chopin_7.mid", "chopin_8.mid", "chopin_9.mid", "chopin_10.mid", "chopin_11.mid", "chopin_12.mid", "chopin_13.mid", "chopin_14.mid", "chopin_15.mid", "chopin_16.mid", "chopin_17.mid", "chopin_18.mid", "chopin_19.mid", "chopin_20.mid", "chopin_21.mid", "chopin_22.mid", "chopin_23.mid", "chopin_24.mid"],
+    "tchaikovsky": ["tchaikovsky_1.mid", "tchaikovsky_2.mid", "tchaikovsky_3.mid"],
+    "liszt": ["liszt_1.mid", "liszt_2.mid", "liszt_3.mid", "liszt_4.mid", "liszt_5.mid", "liszt_6.mid", "liszt_7.mid"],
+    "beethoven": ["beethoven_1.mid", "beethoven_2.mid", "beethoven_3.mid", "beethoven_4.mid", "beethoven_5.mid", "beethoven_6.mid", "beethoven_7.mid", "beethoven_8.mid", "beethoven_9.mid", "beethoven_10.mid", "beethoven_11.mid", "beethoven_12.mid", "beethoven_13.mid", "beethoven_14.mid", "beethoven_15.mid", "beethoven_16.mid", "beethoven_17.mid", "beethoven_18.mid"],
+    "burgm": ["burgm_1.mid", "burgm_2.mid", "burgm_3.mid"],
+    "haydn": ["haydn_1.mid", "haydn_2.mid", "haydn_3.mid", "haydn_4.mid", "haydn_5.mid", "haydn_6.mid", "haydn_7.mid", "haydn_8.mid", "haydn_9.mid", "haydn_10.mid", "haydn_11.mid"],
+    "schumann": ["schumann_1.mid", "schumann_2.mid", "schumann_3.mid", "schumann_4.mid", "schumann_5.mid", "schumann_6.mid", "schumann_7.mid", "schumann_8.mid", "schumann_9.mid", "schumann_10.mid", "schumann_11.mid", "schumann_12.mid", "schumann_13.mid"],
+    "schubert": ["schubert_1.mid", "schubert_2.mid", "schubert_3.mid", "schubert_4.mid", "schubert_5.mid", "schubert_6.mid", "schubert_7.mid", "schubert_8.mid", "schubert_9.mid", "schubert_10.mid", "schubert_11.mid", "schubert_12.mid"],
+    "albeniz": ["albeniz_1.mid", "albeniz_2.mid", "albeniz_3.mid", "albeniz_4.mid", "albeniz_5.mid", "albeniz_6.mid"],
+    "mendelssohn": ["mendelssohn_1.mid", "mendelssohn_2.mid", "mendelssohn_3.mid", "mendelssohn_4.mid", "mendelssohn_5.mid", "mendelssohn_6.mid", "mendelssohn_7.mid", "mendelssohn_8.mid", "mendelssohn_9.mid"],
+    "debussy": ["debussy_1.mid", "debussy_2.mid", "debussy_3.mid"],
+    "grieg": ["grieg_1.mid", "grieg_2.mid", "grieg_3.mid", "grieg_4.mid", "grieg_5.mid", "grieg_6.mid", "grieg_7.mid", "grieg_8.mid", "grieg_9.mid"],
+    "bach": ["bach_1.mid", "bach_2.mid", "bach_3.mid", "bach_4.mid"],
+    "borodin": ["borodin_1.mid", "borodin_2.mid", "borodin_3.mid", "borodin_4.mid", "borodin_5.mid"],
+    "brahms": ["brahms_1.mid", "brahms_2.mid", "brahms_3.mid", "brahms_4.mid", "brahms_5.mid", "brahms_6.mid"],
+    "mussorgsky": ["mussorgsky_1.mid", "mussorgsky_2.mid", "mussorgsky_3.mid", "mussorgsky_4.mid", "mussorgsky_5.mid"]
+  }
+}
