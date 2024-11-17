@@ -1,0 +1,13 @@
+{
+  "Title": "",
+  "Directory": "Papers/Paper_3/Datasets/ClassicalComposersDataset/Midis",
+  "Labels": {
+    "chopin": ["chopin_1.mid", "chopin_2.mid", "chopin_3.mid", "chopin_4.mid", "chopin_5.mid", "chopin_6.mid", "chopin_7.mid", "chopin_8.mid", "chopin_9.mid"],
+    "beethoven": ["beethoven_1.mid", "beethoven_2.mid", "beethoven_3.mid", "beethoven_4.mid", "beethoven_5.mid", "beethoven_6.mid", "beethoven_7.mid", "beethoven_8.mid", "beethoven_9.mid"],
+    "haydn": ["haydn_1.mid", "haydn_2.mid", "haydn_3.mid", "haydn_4.mid", "haydn_5.mid", "haydn_6.mid", "haydn_7.mid", "haydn_8.mid", "haydn_9.mid"],
+    "schumann": ["schumann_1.mid", "schumann_2.mid", "schumann_3.mid", "schumann_4.mid", "schumann_5.mid", "schumann_6.mid", "schumann_7.mid", "schumann_8.mid", "schumann_9.mid"],
+    "schubert": ["schubert_1.mid", "schubert_2.mid", "schubert_3.mid", "schubert_4.mid", "schubert_5.mid", "schubert_6.mid", "schubert_7.mid", "schubert_8.mid", "schubert_9.mid"],
+    "mendelssohn": ["mendelssohn_1.mid", "mendelssohn_2.mid", "mendelssohn_3.mid", "mendelssohn_4.mid", "mendelssohn_5.mid", "mendelssohn_6.mid", "mendelssohn_7.mid", "mendelssohn_8.mid", "mendelssohn_9.mid"],
+    "grieg": ["grieg_1.mid", "grieg_2.mid", "grieg_3.mid", "grieg_4.mid", "grieg_5.mid", "grieg_6.mid", "grieg_7.mid", "grieg_8.mid", "grieg_9.mid"]
+  }
+}

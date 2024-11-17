@@ -2,6 +2,7 @@ import os
 from Utilities import ComeWhatRayUtil as CWR
 import shutil
 
+
 dsetOrigin = "/Users/rayconlin/Downloads/Classical Music MIDI"
 dsetTarget = "Papers/Paper_3/Datasets/ClassicalComposersDataset/Midis"
 confLocation = "Papers/Paper_3/Datasets/ClassicalComposersDataset/Configurations/All.json"
@@ -16,6 +17,8 @@ datasetConfiguration = {
 
 }
 
+# Given a folder of data such that each sub folder is a label and contains all examples of that label.
+# Create a dataset configuration json file and move the data to a specified location
 def exampleTagging(datasetOrigin, datasetTarget, configurationLocation):
     print("Naming files in Directory")
 
@@ -57,7 +60,7 @@ def exampleTagging(datasetOrigin, datasetTarget, configurationLocation):
 
             # os.rename(toUpdate, update)
 
-            shutil.copyfile(toUpdate, CWR.appendDirectory(datasetTarget, updateName))
+            CWR.moveFile(toUpdate, CWR.appendDirectory(datasetTarget, updateName))
 
             fileCount += 1
             totalCount += 1
@@ -66,7 +69,7 @@ def exampleTagging(datasetOrigin, datasetTarget, configurationLocation):
     print(datasetConfiguration)
     CWR.saveFile(configurationLocation, datasetConfiguration)
 
-
+# An inelegent method for getting my new way of structuring data to work with older methods I don't want to update
 def convertDatasetToOldFormat(dataset):
     oldFormat = []
     for label in dataset:
@@ -84,5 +87,21 @@ def convertDatasetToOldFormat(dataset):
             })
 
     return oldFormat
+
+
+def GNNStructureCreation(ExperimentDetails):
+
+    rawConfiguration = CWR.getFileNameFromPath(ExperimentDetails["Dataset_Configuration"], includeExtension=True)
+
+    fileRoot = CWR.appendDirectory(ExperimentDetails["WorkspaceLocation"],
+                                   ["MidiTensors", ExperimentDetails["ExperimentSignifier"], CWR.removeExtension(rawConfiguration)])
+    CWR.ensureDirectory(fileRoot)
+    rawLocation = CWR.appendDirectory(fileRoot, "raw")
+    CWR.ensureDirectory(rawLocation)
+
+    configuration = CWR.openFile(ExperimentDetails["Dataset_Configuration"])
+    CWR.saveFile(CWR.appendDirectory(rawLocation, rawConfiguration), configuration)
+
+    return fileRoot, rawConfiguration
 
 # exampleTagging(dsetOrigin, dsetTarget, confLocation)

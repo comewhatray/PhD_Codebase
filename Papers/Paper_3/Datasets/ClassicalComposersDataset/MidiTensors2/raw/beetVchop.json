@@ -1,0 +1,8 @@
+{
+  "Title": "",
+  "Directory": "Papers/Paper_3/Datasets/ClassicalComposersDataset/Midis",
+  "Labels": {
+    "chopin": ["chopin_1.mid", "chopin_2.mid", "chopin_3.mid", "chopin_4.mid", "chopin_5.mid", "chopin_6.mid", "chopin_7.mid", "chopin_8.mid", "chopin_9.mid", "chopin_10.mid", "chopin_11.mid", "chopin_12.mid", "chopin_13.mid", "chopin_14.mid", "chopin_15.mid", "chopin_16.mid", "chopin_17.mid", "chopin_18.mid"],
+    "beethoven": ["beethoven_1.mid", "beethoven_2.mid", "beethoven_3.mid", "beethoven_4.mid", "beethoven_5.mid", "beethoven_6.mid", "beethoven_7.mid", "beethoven_8.mid", "beethoven_9.mid", "beethoven_10.mid", "beethoven_11.mid", "beethoven_12.mid", "beethoven_13.mid", "beethoven_14.mid", "beethoven_15.mid", "beethoven_16.mid", "beethoven_17.mid", "beethoven_18.mid"]
+  }
+  }
