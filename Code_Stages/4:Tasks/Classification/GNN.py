@@ -32,7 +32,7 @@ hotEncodeDictionary = {
 this_module = sys.modules[__name__]
 
 def startProcess(dataset, inputOptions):
-    print("Calculating Cosine Similarity")
+    print("Generating Graphs for GNN")
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)
 
     methodInstanciated = getattr(this_module, options['function'])
@@ -44,6 +44,46 @@ def startProcess(dataset, inputOptions):
 # Default GNN
 def GNN(dataset):
     print("Beginning GNN")
+
+
+def graphClassificationUsingNodeInformation(dataset):
+    classificationFormat = DM.convertDatasetToOldFormat(dataset)
+
+    dataset = []
+    idx = 0
+    for nodeGraph in classificationFormat:
+
+        pyg_graph = from_networkx(CWR.openFile(nodeGraph['Location']))
+
+        x = []
+
+        for i in range(pyg_graph.num_nodes):
+            x.append([pyg_graph['pitch'][i], pyg_graph['position'][i], pyg_graph['duration'][i]])
+
+        pyg_graph.x = torch.tensor(x)
+        pyg_graph.y = torch.tensor([hotEncoder(nodeGraph['Label'])])
+
+        cleanedTorchData = Data(
+            # X is a tensor of the features
+            x=pyg_graph.x,
+            # Edge index is edge index
+            edge_index=pyg_graph.edge_index,
+            # This is the class it belongs to that has been hot encoded to a number
+            y=pyg_graph.y,
+            MidiName=nodeGraph['Name']
+        )
+
+        # save
+
+        saveTo = CWR.appendDirectory(options["saveLocation"], f"data_{idx}.pt")
+        CWR.saveFile(saveTo, cleanedTorchData)
+        idx += 1
+
+
+
+    # return
+
+
 
 
 # Uses the edge features to classify the graph
@@ -76,16 +116,6 @@ def graphClassificationUsingEdgeInformation(dataset):
             MidiName=nodeGraph['Name']
         )
 
-        print(cleanedTorchData)
-
-        # filePath = CWR.appendDirectory(midiTensorsLocation, nodeGraph['Label'])
-        # CWR.ensureDirectory(filePath)
-        # filePath = CWR.appendDirectory(midiTensorsLocation, nodeGraph['Name'] + ".pt")
-        if options["saveLocation"] is not None:
-            CWR.saveFile(CWR.appendDirectory(options["saveLocation"],f"data_{idx}.pt"), cleanedTorchData)
-
-        idx += 1
-
         # dataset.append(pyg_graph)
 
 
@@ -103,7 +133,7 @@ def graphClassificationUsingEdgeInformation(dataset):
     # testLoader = DataLoader(testData, batch_size=32, shuffle=True)
 
     # datasetPlanet = Planetoid(root='/tmp/Cora', name='Cora')
-    print('test')
+    # print('test')
     # print(loader[0])
 
         # nx.draw(edgeGraph, with_labels=True)

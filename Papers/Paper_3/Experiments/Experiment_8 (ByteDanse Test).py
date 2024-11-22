@@ -167,7 +167,7 @@ class GraphSAGE(torch.nn.Module):
         return x
 
 
-def train(train_loader):
+def train(train_loader, logging):
     model.train()
 
     totalLoss = 0
@@ -182,6 +182,11 @@ def train(train_loader):
         # out = model(data)
         out = model(data, data.batch)
 
+        logging.append({
+            "Probabilities": out.tolist(),
+            "Answer": data.y.tolist()
+        })
+
         # desiredOutput = torch.zeros(train_loader.num_classes)
         # desiredOutput[data.y] = 1
         # loss = F.cross_entropy(out, desiredOutput)
@@ -194,7 +199,7 @@ def train(train_loader):
     # return float(totalLoss / len(train_loader))
 
 @torch.no_grad()
-def test(loader):
+def test(loader, logging):
     model.eval()
     # total_correct = 0
     #
@@ -211,6 +216,10 @@ def test(loader):
     correct = 0
     for data in loader:  # Iterate in batches over the training/test dataset.
         out = model(data, data.batch)
+        logging.append({
+            "Probabilities": out.tolist(),
+            "Answer": data.y.tolist()
+        })
         pred = out.argmax(dim=1)  # Use the class with highest probability.
         correct += int((pred == data.y).sum())  # Check against ground-truth labels.
     return round(correct / len(loader.dataset), 4)
@@ -261,17 +270,31 @@ if __name__ == '__main__':
 
 
     times = []
+
+    analysis = {
+        "TrainingStage": [],
+        "TrainingTest": [],
+        "TestStage": []
+    }
+
     if learn:
         print(CWR.largeSpacer)
         for epoch in range(epochs + 1):
 
             print(f"Epoch: {epoch}")
+            trainStageLog = []
+            trainTestStageLog = []
+            testStageLog = []
 
 
-            train(trainSplit)
+            train(trainSplit, trainStageLog)
 
-            train_acc = test(trainSplit)
-            test_acc = test(testSplit)
+            train_acc = test(trainSplit, trainTestStageLog)
+            test_acc = test(testSplit, testStageLog)
+
+            analysis["TrainingStage"].append(trainStageLog)
+            analysis["TrainingTest"].append(trainTestStageLog)
+            analysis["TestStage"].append(testStageLog)
 
             print(f"{epoch=} | {train_acc=} | {test_acc=}")
 
@@ -282,6 +305,8 @@ if __name__ == '__main__':
 
     for stamp in times:
         print(f"Epoch: {stamp[0]} | Train Accuracy: {stamp[1]} | Test Accuracy: {stamp[2]}")
+
+    CWR.saveFile("ExperimentResults.json", analysis)
 
     torch.save(model.state_dict(), "newModel.pt")
 

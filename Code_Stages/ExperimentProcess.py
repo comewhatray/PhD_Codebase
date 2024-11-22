@@ -140,7 +140,7 @@ def aggregationExperiment(locationsDict, details=None):
         lastLocation = processFunction
 
 
-    return
+    # return
 
 
 # Helper Methods
@@ -179,7 +179,9 @@ def iterationStep(locationsDict, previousLocation, label, process):
                 locationsDict[processName][label].append(fileLocation)
 
         else:
-            "Results for current file already exist"
+            print("Results for current file already exist")
+            if process['options']['saveType'] is not None:
+                locationsDict[processName][label].append(fileLocation)
 
 # Sends data to the relevant file
 def processTask(location, process):
