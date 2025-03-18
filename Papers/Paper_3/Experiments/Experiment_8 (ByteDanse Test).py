@@ -6,7 +6,7 @@ from torch_geometric.nn import GCNConv, Linear, global_add_pool, SAGEConv, SumAg
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 from tabulate import tabulate
-import os.path as osp
+import os
 
 import torch
 from torch_geometric.data import Dataset, download_url
@@ -57,7 +57,8 @@ aggregationDetails = {
             "options": {
                 "function": "graphClassificationUsingEdgeInformation",
                 # "saveType": "",
-                "saveLocation": None
+                "saveLocation": None,
+                "saveIntermediate": None,
             }
         }
     ]
@@ -108,7 +109,7 @@ class MidiDataset(Dataset):
     # get a specific piece of data
     def get(self, idx):
         # data = torch.load(osp.join(self.processed_dir, processedFileName))
-        data = torch.load(osp.join(self.processed_dir, f'data_{idx}.pt'))
+        data = torch.load(os.path.join(self.processed_dir, f'data_{idx}.pt'))
         return data
 
     # Method to stop constantly opening the configuration file
@@ -306,7 +307,16 @@ if __name__ == '__main__':
     for stamp in times:
         print(f"Epoch: {stamp[0]} | Train Accuracy: {stamp[1]} | Test Accuracy: {stamp[2]}")
 
-    CWR.saveFile("ExperimentResults.json", analysis)
+    experimentLocation = "ExperimentResults/Experiment10/Custom/"
+    resultsLocation = experimentLocation + "results/"
+    modelLocation = experimentLocation + "model/"
 
-    torch.save(model.state_dict(), "newModel.pt")
+    resultsCount = len(os.listdir(resultsLocation))
+    modelCount = len(os.listdir(modelLocation))
+
+    resultsLocation += f"ExperimentResults{resultsCount}.json"
+    modelLocation += f"newModel{modelCount}.pt"
+
+    CWR.saveFile(resultsLocation, analysis)
+    torch.save(model.state_dict(), modelLocation)
 

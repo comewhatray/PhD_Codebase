@@ -55,7 +55,10 @@ def batchExperiment(details=None):
     CWR.ensureDirectory(options["WorkspaceLocation"])
 
     # Get Dataset Details
-    datasetConfig = CWR.openFile(options["Dataset_Configuration"])
+    if ".json" in options["Dataset_Configuration"]:
+        datasetConfig = CWR.openFile(options["Dataset_Configuration"])
+    else:
+        datasetConfig = options["Dataset_Configuration"]
 
     LocationsDict = {
         "directory": options["WorkspaceLocation"],
@@ -97,7 +100,6 @@ def batchExperiment(details=None):
         print(CWR.largeSpacer)
 
         # This refers to the location of where each midi is along the process
-
         LocationsDict['Initial']["Default"] = []
 
         for MIDI in datasetConfig["MIDIS"]:
@@ -119,7 +121,7 @@ def batchExperiment(details=None):
 
     return LocationsDict
 
-# For Experiments that wish to compile data into knew knowledge
+# For Experiments that wish to compile data into new knowledge
 def aggregationExperiment(locationsDict, details=None):
     print("Aggregation Experiment")
     lastLocation = locationsDict[options["Stages"][-1]['options']['function']]
@@ -141,6 +143,12 @@ def aggregationExperiment(locationsDict, details=None):
 
 
     # return
+
+
+def visualisationDesign():
+
+
+    return
 
 
 # Helper Methods

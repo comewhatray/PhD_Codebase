@@ -27,6 +27,8 @@ def convertMidiToPoints(work):
 
 
     work = converter.parse(work)
+    # This line makes it so that ties are represented as single notes rather than doubles
+    work = work.stripTies()
     work = work.flatten()
     coordinates = []
 

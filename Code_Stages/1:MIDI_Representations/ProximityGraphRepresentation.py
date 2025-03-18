@@ -245,6 +245,12 @@ def SzetoGraphRepresentation(work):
     return tuneGraph
 
 
+def KarystinaiosRepresentation(work):
+
+
+    return
+
+
 # Helper Methods
 # ----------------------------------------------------------------------------------------------------------------------
 

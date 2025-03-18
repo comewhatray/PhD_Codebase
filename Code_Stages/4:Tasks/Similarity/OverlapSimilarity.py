@@ -285,6 +285,7 @@ def extractLineStringFromPattern(pattern):
 
     return lineStringList
 
+
 def extractLinesFromPattern(pattern):
     patternSize = (len(pattern) + 1) % 3
     # print(patternSize)

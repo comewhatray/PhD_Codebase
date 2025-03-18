@@ -23,6 +23,8 @@ options = {
     "trainPercentage": 0.8,
     "testing": False,
     "saveLocation": None,
+    # Do I want to save the gpickle in between
+    "saveIntermediate": None,
 }
 
 hotEncodeDictionary = {
@@ -82,10 +84,6 @@ def graphClassificationUsingNodeInformation(dataset):
 
 
     # return
-
-
-
-
 # Uses the edge features to classify the graph
 def graphClassificationUsingEdgeInformation(dataset):
     print("Classify Graph using Edge Information")
@@ -97,8 +95,14 @@ def graphClassificationUsingEdgeInformation(dataset):
     for nodeGraph in classificationFormat:
         edgeGraph = edgeNodeSwapGraph(CWR.openFile(nodeGraph['Location']))
 
+        if options["saveIntermediate"] is not None:
+            CWR.saveFile(f"{options['saveIntermediate']}/{nodeGraph['Name']}_edgeGraph.gpickle", edgeGraph)
+
+
 
         pyg_graph = from_networkx(edgeGraph)
+
+
         x = []
         for i in range(pyg_graph['num_nodes']):
             x.append([pyg_graph['pitchChange'][i], pyg_graph['onsetGap'][i], pyg_graph['endOnsetGap'][i]])
@@ -115,6 +119,11 @@ def graphClassificationUsingEdgeInformation(dataset):
             y=pyg_graph.y,
             MidiName=nodeGraph['Name']
         )
+
+        if not options["saveLocation"] == None:
+            saveTo = CWR.appendDirectory(options["saveLocation"], f"data_{idx}.pt")
+
+
 
         # dataset.append(pyg_graph)
 
