@@ -79,16 +79,16 @@ def visualiseOverlappingPolygonsUsingData(polygon1, polygon2, overlapPolygon, sa
 
 
 # without care of positioning of points
-def visualiseGraph(graph, withLabels=False):
-    nx.draw(graph, with_labels=withLabels)
+def visualiseGraph(graph, withLabels=False, size=300, color="Blue"):
+    nx.draw(graph, with_labels=withLabels, node_size=size, node_color=color)
     plt.show()
 
 # with care of positioning of points (MUST HAVE pos attribute)
-def visualiseSpatialGraph(graph, toSave=None,  withLabels=False):
+def visualiseSpatialGraph(graph, toSave=None,  withLabels=False, size=300, color="Blue"):
     # graph = CWR.openFile(work)
 
     positions = nx.get_node_attributes(graph, 'pos')
-    nx.draw(graph, positions, with_labels=withLabels)
+    nx.draw(graph, positions, with_labels=withLabels, node_size=size, node_color=color)
     plt.show()
     #
     if toSave is not None:

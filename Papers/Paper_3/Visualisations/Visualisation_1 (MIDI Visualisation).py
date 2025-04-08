@@ -57,8 +57,11 @@ def main():
     defaultGraph = CWR.openFile(szetoGraphLocation)
     edgeGraph = CWR.openFile(edgeGraphLocation)
 
-    VIS.visualiseSpatialGraph(defaultGraph, withLabels=True)
-    VIS.visualiseGraph(edgeGraph, withLabels=True)
+    color="Yellow"
+    size=1000
+
+    VIS.visualiseSpatialGraph(defaultGraph, withLabels=True, size=size, color=color)
+    VIS.visualiseGraph(edgeGraph, withLabels=True, size=size, color=color)
 
 
 

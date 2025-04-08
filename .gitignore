@@ -1,3 +1,4 @@
 *.mid
 *.gpickle
 *.pt
+/LakhDataset/lmd_matched/
