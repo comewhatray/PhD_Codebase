@@ -7,7 +7,8 @@ import json
 options = {
     "function": "SimplePathGraphDurationExtraction",
     "patternSize": 3,
-    "precision": 3
+    "precision": 3,
+    "useQuerySize": False
 }
 
 def startProcess(work, inputOptions=None):

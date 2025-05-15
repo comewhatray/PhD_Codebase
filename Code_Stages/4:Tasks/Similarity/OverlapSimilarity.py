@@ -1,6 +1,8 @@
 from Utilities import ComeWhatRayUtil as CWR
 from Utilities import BoundingGenerator as BG
 from Utilities import datasetManagment as DM
+from Utilities import Visualisations as VIS
+from shapely.affinity import translate
 import numpy as np
 
 # MAKE SURE TO SAVE THE LOOKUPTABLE IF IT IS USED
@@ -252,6 +254,201 @@ def thresholdPatternOverlapSimilarity(dataset):
     # print(f'Total number of comparisons included in a threshold is: {numberofComparisons}')
     # print(f'Reduction rate of: {(numberofComparisons-rawThreshold) / numberofComparisons}')
 
+def queryExperiment(dataset):
+
+    queryDataLocation = dataset["querySet"]
+    corpusLocation = dataset["dataSet"]
+    queryLastLocation = dataset["queryLastLocation"]
+    corpusLastLocation = dataset["datasetLastLocation"]
+    labelCount = 1
+    labelTotal = len(queryDataLocation[queryLastLocation])
+    for label in queryDataLocation[queryLastLocation]:
+        print(CWR.largeSpacer)
+        print(f"Query Label: {label}")
+        queryNumCount = 1
+        queryNumTotal = len(queryDataLocation[queryLastLocation][label])
+        for query in queryDataLocation[queryLastLocation][label]:
+            print(CWR.largeSpacer)
+            print(f"Query Location: {query}")
+            groupingCount = 1
+            groupingTotal = len(corpusLocation[corpusLastLocation])
+            for grouping in corpusLocation[corpusLastLocation]:
+                print(CWR.largeSpacer)
+                print(f"Work Label: {grouping}")
+                workCount = 1
+                workTotal = len(corpusLocation[corpusLastLocation][grouping])
+                for work in corpusLocation[corpusLastLocation][grouping]:
+                    print(CWR.largeSpacer)
+                    print(f"Work Location: {work}")
+
+                    queryData = CWR.openFile(query)
+                    workData = CWR.openFile(work)
+
+                    queryCount = 1
+                    querySize = len(queryData)
+
+                    for queryPattern in queryData:
+                        print(CWR.extraLargeSpacer)
+                        print(f"Query Label: ({labelCount}/{labelTotal})")
+                        print(f"Query: ({queryNumCount}/{queryNumTotal})")
+                        print(f"Work Label: ({groupingCount}/{groupingTotal})")
+                        print(f"Work: ({workCount}/{workTotal})")
+                        print(f"Sub Query: ({queryCount}/{querySize})")
+                        dataCount = 1
+                        dataSize = len(workData)
+                        for workPattern in workData:
+                            # Updates Every X%
+                            if dataCount % int(dataSize/5) == 0:
+                                print(CWR.midSpacer)
+                                print(f"Data ({dataCount}/{dataSize})")
+
+                            skipTo = True
+                            if skipTo:
+                                if (    labelCount == 1 and
+                                        queryNumCount == 1 and
+                                        groupingCount == 1 and
+                                        workCount == 1 and
+                                        queryCount == 4):
+                                    print(queryPattern)
+                                    print(workPattern)
+                                    patternSimilarity = modifiedJaccardSimilarityPatternMatching(queryPattern, workPattern)
+
+
+                            else:
+                                patternSimilarity = modifiedJaccardSimilarityPatternMatching(queryPattern, workPattern)
+                            # print(f"Pattern Similarity: {patternSimilarity}")
+                            dataCount += 1
+
+                        queryCount += 1
+
+
+                workCount += 1
+
+            groupingCount += 1
+
+        queryNumCount += 1
+
+    labelCount += 1
+
+    return
+
+def overlapQueryExperiment(dataset):
+
+    queryDataLocation = dataset["querySet"]
+    corpusLocation = dataset["dataSet"]
+    queryLastLocation = dataset["queryLastLocation"]
+    corpusLastLocation = dataset["datasetLastLocation"]
+
+    queryLabelCount = 1
+    queryLabelTotal = len(queryDataLocation[queryLastLocation])
+    for label in queryDataLocation[queryLastLocation]:
+        print(CWR.largeSpacer)
+        print(f"Query Label: {label}")
+        queryNumCount = 1
+        queryNumTotal = len(queryDataLocation[queryLastLocation][label])
+
+        for query in queryDataLocation[queryLastLocation][label]:
+            print(CWR.largeSpacer)
+            print(f"Query Location: {query}")
+            groupingCount = 1
+            groupingTotal = len(corpusLocation[corpusLastLocation])
+
+            queryData = CWR.openFile(query)
+            queryMultiString = BG.convertGraphToMultiLineString(queryData)
+            # print(queryPolygons)
+            # VIS.visualiseShape(queryMultiString)
+            queryLength = queryMultiString.bounds[2]
+
+            for grouping in corpusLocation[corpusLastLocation]:
+                print(CWR.largeSpacer)
+                print(f"Work Label: {grouping}")
+                workCount = 1
+                workTotal = len(corpusLocation[corpusLastLocation][grouping])
+
+                for work in corpusLocation[corpusLastLocation][grouping]:
+                    print(CWR.largeSpacer)
+                    print(f"Work Location: {work}")
+                    workData = CWR.openFile(work)
+
+                    print(CWR.extraLargeSpacer)
+                    print(f"Query Label: ({queryLabelCount}/{queryLabelTotal})")
+                    print(f"Query: ({queryNumCount}/{queryNumTotal})")
+                    print(f"Work Label: ({groupingCount}/{groupingTotal})")
+                    print(f"Work: ({workCount}/{workTotal})")
+                    print(CWR.smallSpacer)
+                    # print(f"Sub Query: ({queryCount}/{querySize})")
+
+                    # turns a piece into a multiLineString Geomtery (All the lines are notes)
+                    workMultiString = BG.generateMultiLineStringFromExtract(workData)
+
+                    polygonList = workMultiString.geoms
+                    queryCount = 0
+                    queryTotal = len(polygonList)
+                    maxScore = 0
+                    maxQuery = None
+                    maxComparison = None
+                    maxOverlap = None
+                    # Goes through each line
+                    for lineNumber in range(len(polygonList)):
+                        if queryCount % int(queryTotal/10) == 0:
+                            print(f"Query: {queryCount}/{queryTotal}")
+                            print(f"CurrentMaxScore: {maxScore}")
+                        line = polygonList[lineNumber]
+
+                        transX = line.xy[0][0]
+                        transY = line.xy[1][0]
+
+                        # Translates the query to the start of the line
+                        currentQuery = translate(queryMultiString, xoff=transX, yoff=transY)
+                        currentQuery = currentQuery.buffer(1)
+
+                        intersectionList = []
+
+                        for comparison in range(lineNumber, len(polygonList)):
+                            comparisonLine = polygonList[comparison]
+
+                            if comparisonLine.xy[0][0] > transX + queryLength:
+                                break
+                            else:
+                                if currentQuery.intersects(comparisonLine) or currentQuery.contains(comparisonLine):
+                                    intersectionList.append(comparisonLine)
+
+
+                        comparisonLines = BG.convertLineStringSequenceToMultiLineString(intersectionList)
+                        comparisonPolygon = comparisonLines.buffer(1)
+
+                        totalArea = currentQuery.area + comparisonPolygon.area
+                        overlapPolygon = currentQuery.intersection(comparisonPolygon)
+                        overlapArea = overlapPolygon.area
+
+
+                        # VIS.visualiseOverlappingPolygonsUsingData(currentQuery, comparisonPolygon, overlapPolygon)
+
+                        similarity = overlapArea / (totalArea - overlapArea)
+                        # print(similarity)
+                        if similarity > maxScore:
+                            maxScore = similarity
+                            maxQuery = currentQuery
+                            maxComparison = comparisonPolygon
+                            maxOverlap = overlapPolygon
+
+
+                    # VIS.visualiseShape(workString)
+                        queryCount += 1
+                    print(f"Max Score: {maxScore}")
+                    VIS.visualiseShape(maxQuery)
+                    VIS.visualiseShape(maxComparison)
+                    VIS.visualiseOverlappingPolygonsUsingData(maxQuery, maxComparison, maxOverlap)
+                    workCount += 1
+                groupingCount += 1
+            queryNumCount += 1
+        queryLabelCount += 1
+
+
+    # print(query)
+
+    return
+
 # Helper Methods
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -261,8 +458,10 @@ def modifiedJaccardSimilarityPatternMatching(pattern1, pattern2):
         pattern1 = eval(pattern1)
     if isinstance(pattern2, str):
         pattern2 = eval(pattern2)
-    pattern1Line = extractLineStringFromPattern(extractLinesFromPattern(pattern1))
-    pattern2Line = extractLineStringFromPattern(extractLinesFromPattern(pattern2))
+    patternCOORDS1 = BG.convertDifferenceToCoordinates(pattern1)
+    patternCOORDS2 = BG.convertDifferenceToCoordinates(pattern2)
+    pattern1Line = BG.generateLineStringFromCoordinates(patternCOORDS1)
+    pattern2Line = BG.generateLineStringFromCoordinates(patternCOORDS2)
     patter1Bounding = BG.boundingPolygon(pattern1Line, options["shapeBuffer"])
     patter2Bounding = BG.boundingPolygon(pattern2Line, options["shapeBuffer"])
     totalArea = patter1Bounding.area + patter2Bounding.area
@@ -274,53 +473,13 @@ def modifiedJaccardSimilarityPatternMatching(pattern1, pattern2):
 
     return similarity
 
-
-def extractLineStringFromPattern(pattern):
-
-    lineStringList = []
-
-    for line in pattern:
-        for point in line:
-            lineStringList.append(point)
-
-    return lineStringList
-
-
-def extractLinesFromPattern(pattern):
-    patternSize = (len(pattern) + 1) % 3
-    # print(patternSize)
-
-    points = [[(0, 0), (0, pattern[patternSize * 3])]]
-    # print(len(pattern))
-
-    previousPitch = 0
-    previousDuration = 0
-
-    for i in range(patternSize):
-        startPitch = previousPitch + pattern[i]
-        startDuration = previousDuration + pattern[i + patternSize]
-
-        endPitch = startPitch
-        endDuration = startDuration + pattern[i + (patternSize * 2) + 1]
-
-        previousPitch = endPitch
-        previousDuration = startDuration
-
-        line = [(startPitch, startDuration), (endPitch, endDuration)]
-
-        # points.append((startPitch, startDuration))
-        # points.append((endPitch, endDuration))
-        points.append(line)
-
-    # print(points)
-    return points
-
 # Finds the best overlap of the polygons
 def patternAreaComparison(pattern1, pattern2, visualisation=False):
-    pattern1Lines = extractLinesFromPattern(pattern1)
-    pattern2Lines = extractLinesFromPattern(pattern2)
+    pattern1Lines = BG.convertDifferenceToCoordinates(pattern1)
+    pattern2Lines = BG.convertDifferenceToCoordinates(pattern2)
+    visualisation = visualisation
 
-    initialLineStringSequence = extractLineStringFromPattern(pattern1Lines)
+    initialLineStringSequence = BG.generateLineStringFromCoordinates(pattern1Lines)
 
     initialPolygon = BG.boundingPolygon(initialLineStringSequence, options["shapeBuffer"])
 
@@ -339,18 +498,28 @@ def patternAreaComparison(pattern1, pattern2, visualisation=False):
 
                 newPattern.append(newLine)
 
-            newLineStringSequence = extractLineStringFromPattern(newPattern)
-
+            newLineStringSequence = BG.generateLineStringFromCoordinates(newPattern)
             newPolygon = BG.boundingPolygon(newLineStringSequence, options["shapeBuffer"])
-            overlapPolygon = BG.overlappingPolygon(initialPolygon, newPolygon)
 
-            if overlapPolygon.area > maxOverlap:
-                maxOverlap = overlapPolygon.area
-                bestOverlappingPatternPolygon = newPolygon
-                bestOverlapPolygon = overlapPolygon
+            # TODO find way to handle multipolygons
+            if newPolygon.geom_type != 'MultiPolygon' and initialPolygon.geom_type != 'MultiPolygon':
+                overlapPolygon = BG.overlappingPolygon(initialPolygon, newPolygon)
 
-    # VIS.visualisePolygonOverlapComparison(initialPolygon, bestOverlappingPatternPolygon, bestOverlapPolygon)
-    # VIS.visualisePolygon(bestOverlapPolygon)
+                if overlapPolygon.area > maxOverlap:
+                    maxOverlap = overlapPolygon.area
+                    bestOverlappingPatternPolygon = newPolygon
+                    bestOverlapPolygon = overlapPolygon
+            else:
+                print(initialPolygon)
+                print(newPolygon)
+
+
+
+    if visualisation:
+        VIS.visualiseOverlappingPolygonsUsingData(initialPolygon, bestOverlappingPatternPolygon, bestOverlapPolygon)
+        VIS.visualisePolygon(bestOverlapPolygon)
+
+
 
     return bestOverlapPolygon
 

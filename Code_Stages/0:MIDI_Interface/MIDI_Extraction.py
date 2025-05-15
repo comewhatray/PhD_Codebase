@@ -5,7 +5,8 @@ e = environment.Environment()
 e['directoryScratch'] = ""
 
 Options = {
-    "decimalPrecision": 3
+    "decimalPrecision": 3,
+    "includeRests": False
 }
 
 noteToNumber = {
@@ -25,15 +26,19 @@ def startProcess(work, inputOptions = None):
 # Intakes a midifile and returns a set of coordinates and details
 def convertMidiToPoints(work):
 
-
     work = converter.parse(work)
     # This line makes it so that ties are represented as single notes rather than doubles
     work = work.stripTies()
     work = work.flatten()
     coordinates = []
 
+    if Options["includeRests"]:
+        streamOption = work.notesAndRests
+    else:
+        streamOption = work.notes
+
     # Go through all notes in the midi file
-    for n in work.notes:
+    for n in streamOption:
 
         # If a note is present transform it into a computer friendly representation
         if "Note" in n.classSet:
@@ -53,6 +58,18 @@ def convertMidiToPoints(work):
                 # if returnedNote['pitch'] >= 0:
                 #     coordinates.append(returnedNote)
                 coordinates.append(returnedNote)
+
+        elif "Rest" in n.classSet:
+            # print("RESSSSSTTTTTTIIIIIINNNNNGGGGG")
+            noteRest = {
+                "type": "Rest",
+                "pitch": -1, # An inelegant solution is that all rests have a pitch of -1
+                "position": round(float(n.offset), Options["decimalPrecision"]),
+                "duration": round(float(n.quarterLength), Options["decimalPrecision"])
+            }
+            coordinates.append(noteRest)
+            # noteRest["position"] = round(float(n.offset), Options["decimalPrecision"])
+
 
     pointSet = sortPoints(coordinates)
 
@@ -94,7 +111,8 @@ def getNotePosition(midiInput):
         barBeat = midiInput.beat - 1
 
         # combine output
-        output = {'pitch': float(position),
+        output = {"type": "Note",
+                  'pitch': float(position),
                   'position': round(float(midiInput.offset), Options["decimalPrecision"]),
                   'duration': round(float(midiInput.quarterLength), Options["decimalPrecision"]),
                   'barBeat': round(float(barBeat), Options["decimalPrecision"])

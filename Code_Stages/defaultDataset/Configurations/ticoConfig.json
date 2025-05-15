@@ -1,0 +1,7 @@
+{
+  "Title": "Default Tiko Test",
+  "Directory": "Code_Stages/defaultDataset/MIDIS",
+  "MIDIS": [
+    "TicoTicoExtract.mid"
+  ]
+}

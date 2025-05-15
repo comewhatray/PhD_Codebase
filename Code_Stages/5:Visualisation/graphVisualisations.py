@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 options = {
     "function": None,
     "toSave": False,
+    "labelNodes": False
 
 
 }
@@ -33,7 +34,8 @@ def visualiseSpatialGraph(work):
     graph = CWR.openFile(work)
 
     positions = nx.get_node_attributes(graph, 'pos')
-    nx.draw(graph, positions)
+    nx.draw(graph, positions, with_labels=options["labelNodes"])
+
     plt.show()
 
     if options["toSave"]:

@@ -1,0 +1,7 @@
+{
+  "Title": "One Query Two Labels (Query)",
+  "Directory": "LakhDataset/ExperimentDataset/Queries",
+  "Labels": {
+    "TRADNFJ128F92FFA5A": ["TRAMDRT12903CA121C_Query.mid"]
+  }
+}

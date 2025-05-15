@@ -145,10 +145,38 @@ def aggregationExperiment(locationsDict, details=None):
     # return
 
 
-def visualisationDesign():
+def queryAggregationExperiment(queryDataLocation, datasetDataLocation, details=None):
+    print("Query Experiment")
+
+    queryLastLocation = list(queryDataLocation)[-1]
+    datasetLastLocation = list(datasetDataLocation)[-1]
+
+    CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, details)
 
 
-    return
+
+    # print(queryLastLocation)
+    # print(datasetLastLocation)
+
+    dataset = {
+        "querySet": queryDataLocation,
+        "queryLastLocation": queryLastLocation,
+        "dataSet": datasetDataLocation,
+        "datasetLastLocation": datasetLastLocation,
+    }
+
+    outputDict = {}
+
+    for process in options["Stages"]:
+
+        processFunction = process['options']['function']
+        if processFunction not in outputDict:
+            outputDict[processFunction] = {}
+
+        results = processTask(dataset, process)
+
+
+    return results
 
 
 # Helper Methods

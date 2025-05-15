@@ -25,9 +25,19 @@ def visualiseJsonAsLines(json, plotRequirements=None, saveTo=None):
         toSave(saveTo)
     plt.show()
 
+
 # This includes the constructed lines between notes
-def visualiseLineString(json, saveTo=None):
+def visualiseLineStringFromJson(json, saveTo=None):
     plotLineStringFromJson(json)
+    # plotLineString(lineString)
+    if saveTo is not None:
+        toSave(saveTo)
+    plt.show()
+
+# This includes the constructed lines between notes
+def visualiseLineString(lineString, saveTo=None):
+    # plotLineStringFromJson(json)
+    plotLineString(lineString)
     if saveTo is not None:
         toSave(saveTo)
     plt.show()
@@ -93,6 +103,10 @@ def visualiseSpatialGraph(graph, toSave=None,  withLabels=False, size=300, color
     #
     if toSave is not None:
         return
+
+def visualiseShape(shape, color="Black"):
+    plotShape(shape, color=color)
+    plt.show()
 
 # Plotting Details
 # ----------------------------------------------------------------------------------------------------------------------
@@ -164,7 +178,7 @@ def plotPolygon(shape, color="Black"):
 
 # A recursive call for shapes with multiple shapes in them
 def plotShape(shape, color='black'):
-    if shape.geom_type == "MultiPolygon" or shape.geom_type == "GeometryCollection":
+    if shape.geom_type == "MultiPolygon" or shape.geom_type == "GeometryCollection" or shape.geom_type == "MultiLineString":
         for geom in shape.geoms:
             plotShape(geom, color)
 

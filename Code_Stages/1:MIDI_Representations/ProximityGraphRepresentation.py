@@ -24,6 +24,8 @@ options = {
     "edgeAttributes": False,
     "selfLoop": False,
     "testing": False,
+    "shortestConsecutiveEvent": False,
+    "re-label": True # This corresponds to updating all the nodes such that the deleated node numbers get replaced
 
 }
 
@@ -247,8 +249,131 @@ def SzetoGraphRepresentation(work):
 
 def KarystinaiosRepresentation(work):
 
+    work = CWR.openFile(work)
+    tuneGraph = nx.empty_graph(len(work))
 
-    return
+    counter = 0
+    updateCounter = 0
+
+    # Encode note information
+    print("Encoding note information")
+    for note in work:
+        tuneGraph.nodes[counter]['type'] = note["type"]
+        tuneGraph.nodes[counter]['pitch'] = note['pitch']
+        tuneGraph.nodes[counter]['position'] = note['position']
+        tuneGraph.nodes[counter]['duration'] = note['duration']
+        tuneGraph.nodes[counter]['pos'] = (note['position'], note['pitch'])
+
+        counter += 1
+
+
+    # Setup for comparison code goes here
+    print("Scanning for edge creation")
+    for node in range(len(work)):
+
+    # Visualisation of Progress
+        if node > ((len(work) / 10) * updateCounter):
+            # print(str(counter) + '/' + str(len(points)))
+            print('Number of Points: ' + str(len(work)))
+            updateCounter += 1
+            print(str(node) + '/' + str(len(work)-1))
+
+
+        # compare current note to notes that occur after it
+        for x in range(node+1, len(work)):
+
+            comparisonIndex = x
+
+            noteEvent = karystinaiosEventCheck(tuneGraph.nodes[node], tuneGraph.nodes[comparisonIndex])
+
+            if noteEvent is not None:
+                tuneGraph.add_edge(node, comparisonIndex, label=noteEvent)
+
+    # Removes all self loops if any are created
+    tuneGraph = graphModifications(tuneGraph)
+
+    return tuneGraph
+
+# We are basically just transferring onnsecutive edges to rests to the next available note
+def karystinaiosModification(work):
+
+    initialGraph = KarystinaiosRepresentation(work)
+    # Stores the rests in a graph
+    toRemove = []
+
+    # Transfer consecutive connections from rests to join the notes before and after them
+    for node in range(len(initialGraph.nodes)):
+
+        # Get all rests from a graph
+        # Transfer their consecutive connections
+        if initialGraph.nodes[node]["type"] == "Rest":
+
+            toRemove.append(node)
+            # print(f"rest: {node}")
+            # print(initialGraph.edges(node))
+            toJoinList = []
+
+            # Check all rests for their consecutive events
+            for edge in initialGraph.edges(node):
+                # print(initialGraph[edge[0]][edge[1]])
+                if initialGraph[edge[0]][edge[1]]["label"] == "ConsecutiveEvent" or initialGraph[edge[1]][edge[0]]["label"] == "ImpliedConsecutiveEvent":
+                    if edge[1] < edge[0]:
+                        toJoinList.append(edge[1])
+
+            # add an edge between the consecutive connections before the rest to the ones after it
+            for edge in initialGraph.edges(node):
+                    if edge[1] > edge[0]:
+                        if initialGraph[edge[0]][edge[1]]["label"] == "ConsecutiveEvent" or initialGraph[edge[1]][edge[0]]["label"] == "ImpliedConsecutiveEvent":
+                            for tempNode in toJoinList:
+                                initialGraph.add_edge(tempNode, edge[1], label="ImpliedConsecutiveEvent")
+
+    # Removes rests from graph
+    initialGraph.remove_nodes_from(toRemove)
+
+    # Only maintain the shortest consecutive edges
+    if options["shortestConsecutiveEvent"]:
+        for node in initialGraph:
+            shortestPath = None
+            shortestDistance = None
+            # Calculates which path is shortest among consecutive edges for a node
+            for edge in initialGraph.edges(node):
+                if initialGraph[edge[0]][edge[1]]["label"] == "ConsecutiveEvent" or initialGraph[edge[1]][edge[0]]["label"] == "ImpliedConsecutiveEvent":
+                    if edge[1] > edge[0]:
+                        if shortestPath is None:
+                            shortestPath = edge[1]
+                            originNote = initialGraph.nodes[node]
+                            comparisonNote = initialGraph.nodes[shortestPath]
+                            shortestDistance = interEventDistance(originNote, comparisonNote)
+                        else:
+                            originNote = initialGraph.nodes[node]
+                            comparisonNote = initialGraph.nodes[edge[1]]
+                            distanceCheck = interEventDistance(originNote, comparisonNote)
+                            if distanceCheck < shortestDistance:
+                                shortestPath = edge[1]
+                                shortestDistance = distanceCheck
+
+            removeEdgeList = []
+            for edge in initialGraph.edges(node):
+                if initialGraph[edge[0]][edge[1]]["label"] == "ConsecutiveEvent" or initialGraph[edge[1]][edge[0]]["label"] == "ImpliedConsecutiveEvent":
+                    if edge[1] > edge[0]:
+                        if edge[1] != shortestPath:
+                            removeEdgeList.append(edge[1])
+
+            for edge in removeEdgeList:
+                initialGraph.remove_edge(node, edge)
+
+    if options["re-label"]:
+
+        remapping = {}
+        remainingList = list(initialGraph.nodes)
+        for node in range(len(remainingList)):
+            remapping[remainingList[node]] = node
+
+        initialGraph = nx.relabel_nodes(initialGraph, remapping)
+
+    endGraph = graphModifications(initialGraph)
+
+    return endGraph
 
 
 # Helper Methods
@@ -309,10 +434,45 @@ def interEventDistance(note1, note2):
     return distance
 
 
+# Checks which of the three karystinaios defined edge types two notes are
+def karystinaiosEventCheck(note1, note2):
+
+    if onsetEventCheck(note1, note2):
+        return "OnsetEvent"
+
+    elif consecutiveEventCheck(note1, note2):
+        return "ConsecutiveEvent"
+
+    elif simultaneousEventCheck(note1, note2):
+        return "SimultaneousEvent"
+
+    return None
+
+# Do the notes start at the same time
+def onsetEventCheck(note1, note2):
+
+    if note1['position'] == note2['position']:
+        return True
+
+    return False
+
+# Does a note start as another ends
+def consecutiveEventCheck(note1, note2):
+
+    if note1['position'] + note1['duration'] == note2['position'] or note2['position'] + note2['duration'] == note1['position'] :
+        return True
+    return False
+
+
+# Modifications on the graph
 def graphModifications(graph):
 
     if not options["selfLoop"]:
         graph.remove_edges_from(nx.selfloop_edges(graph))
+
+    # if options["re-label"]:
+    #     for node in range(len(graph.nodes)):
+    #         graph.nodes[node]['label'] = node
 
     if options["edgeAttributes"]:
         attributes = {

@@ -1,6 +1,8 @@
-from shapely.geometry import Polygon, box, LineString
+from shapely import MultiLineString
+from shapely.geometry import Polygon, box, LineString, MultiPolygon, Point
 from matplotlib.patches import Ellipse
 from Utilities import Visualisations as VIS
+from shapely.affinity import translate
 
 
 def RectangleLineGenerator(note, dimensions):
@@ -36,7 +38,7 @@ def RectanglePointGenerator(note, dimensions):
 def EllipsePointGenerator(note, dimensions):
     width = dimensions['width']
     height = dimensions["height"]
-    shape = Ellipse((note['position'], note['pitch']), width, height, 0)
+    shape = Ellipse((note['position'], note['pitch']), width, height)
     vertices = shape.get_verts()
     shape = vertices
 
@@ -49,16 +51,28 @@ def EllipsePointGenerator(note, dimensions):
 def boundingPolygon(lineString, bufferSize):
 
 
-    line = lineString.buffer(bufferSize)
+    # line = lineString.buffer(bufferSize)
+
 
     # Alternatives to default
                                 # Round flat Square     # round, mitre, bevel
-    # line = line.buffer(bufferSize, cap_style='square', join_style='mitre')
+    line = lineString.buffer(bufferSize, cap_style='square', join_style='bevel')
+
+    # if line.geom_type == 'MultiPolygon':
+    #     VIS.visualiseLineString(lineString)
+    #     VIS.visualiseShape(line)
+
 
     return line
 
 
 def overlappingPolygon(shape1, shape2):
+    #
+    # if shape1.geom_type == "MultiPolygon" or shape1.geom_type == "GeometryCollection":
+    #     shape1 = MultiPolygon([Polygon([Point(xy) for xy in zip(*geom.exterior.xy) if not p.contains(Point(xy))]) for geom in shape1.geoms])
+    #
+    # if shape2.geom_type == "MultiPolygon" or shape2.geom_type == "GeometryCollection":
+    #     shape2 = MultiPolygon([Polygon([Point(xy) for xy in zip(*geom.exterior.xy) if not p.contains(Point(xy))]) for geom in shape2.geoms])
     return shape1.intersection(shape2)
 
 
@@ -134,6 +148,32 @@ def maxOverlappingPolygon(extract1, extract2, visualisation=False, bufferSize=1)
 # Helper Methods
 # ----------------------------------------------------------------------------------------------------------------------
 
+# This converts a series of pattern differences into a set of coordinates
+#                                                                           Pitch Dif| onsetDif | durations (this is for debug mode)
+def convertDifferenceToCoordinates(pattern):
+    numPoints = int((len(pattern)+2)/3)
+
+    durations = pattern[-numPoints:]
+    points = [[(0, 0), (durations[0], 0)]]
+    previousOnset = 0
+    previousPitch = 0
+
+    for i in range(numPoints-1):
+        # print(i)
+        duration = durations[i+1]
+        # [(x1,y1),(x2,y2)]
+        x1Diff = pattern[i+numPoints-1] + previousOnset
+        y1Diff = pattern[i] + previousPitch
+
+        point = [(x1Diff, y1Diff), (x1Diff+duration, y1Diff)]
+
+        previousOnset = x1Diff
+        previousPitch = y1Diff
+
+        points.append(point)
+
+    return points
+
 def generateLineStringFromCoordinates(coordinates):
     lineStringList = []
 
@@ -146,37 +186,54 @@ def generateLineStringFromCoordinates(coordinates):
     # print(lineStringList)
     return LineString(lineStringList)
 
-def generateLineStringFromExtract(extract):
+def generateLineStringFromExtract(extract, absolutePosition=False):
 
-    patternList = generateLinesFromExtract(extract)
+    patternList = generateLinesFromExtract(extract, absolutePosition=absolutePosition)
 
     return generateLineStringFromCoordinates(patternList)
 
-def generateLinesFromExtract(extract):
+def generateLinesFromExtract(extract, absolutePosition=False):
 
-    # convert extract to start at 0
-    updateExtractStartingPosition(extract)
+    if not absolutePosition:
+        # convert extract to start at 0
+        updateExtractStartingPosition(extract)
 
-    # First Coordinate will always be a line at [0,0] going to [0, duration of first note]
-    #          x1, y1  x2, y2
-    points = [[(0, 0), (extract[0]["duration"], 0)]]
+        # First Coordinate will always be a line at [0,0] going to [0, duration of first note]
+        #          x1, y1  x2, y2
+        points = [[(0, 0), (extract[0]["duration"], 0)]]
 
-    # previousPitch = extract[0]["pitch"]
-    # previousEnd = extract[0]["duration"]
+        # previousPitch = extract[0]["pitch"]
+        # previousEnd = extract[0]["duration"]
 
-    originPitch = extract[0]["pitch"]
+        originPitch = extract[0]["pitch"]
 
-    for i in range(1, len(extract)):
+        for i in range(1, len(extract)):
 
-        currentPitch = extract[i]["pitch"]
-        startPitch = currentPitch - originPitch
-        startDuration = extract[i]["position"]
+            # Removing Rests
+            if extract[i]["type"] != "Rest":
+                currentPitch = extract[i]["pitch"]
+                startPitch = currentPitch - originPitch
+                startDuration = extract[i]["position"]
 
-        endPitch = startPitch
-        endDuration = startDuration + extract[i]["duration"]
+                endPitch = startPitch
+                endDuration = startDuration + extract[i]["duration"]
 
-        line = [(startDuration, startPitch), (endDuration, endPitch)]
-        points.append(line)
+                line = [(startDuration, startPitch), (endDuration, endPitch)]
+                points.append(line)
+    else:
+        points = []
+
+        for i in range(len(extract)):
+            # Removing rests
+            if extract[i]["type"] != "Rest":
+                startPitch = extract[i]["pitch"]
+                startDuration = extract[i]["position"]
+
+                endPitch = startPitch
+                endDuration = startDuration + extract[i]["duration"]
+
+                line = [(startDuration, startPitch), (endDuration, endPitch)]
+                points.append(line)
 
     # print(points)
     return points
@@ -187,6 +244,148 @@ def updateExtractStartingPosition(extract):
 
     for note in extract:
         note['position'] += difference
+
+def removeInteriorShapes(shape):
+
+    if shape.geom_type == 'Polygon':
+        shape = removeInteriorPolygon(shape)
+
+    if shape.geom_type == "MultiPolygon":
+        shape = removeInteriorMultiPolygon(shape)
+
+    if shape.geom_type == "GeometryCollection":
+        shape = removeInteriorGeometryCollection(shape)
+
+    return shape
+
+def removeInteriorPolygon(shape):
+
+
+    return Polygon(shape.exterior.coords)
+
+def removeInteriorMultiPolygon(shape):
+
+    return
+
+def removeInteriorGeometryCollection(shape):
+
+
+    return
+
+def convertGraphToMultiPolygon(graph):
+
+    lines = convertGraphToMultiLineString(graph)
+
+    return lines.buffer(1, cap_style='square', join_style='bevel')
+
+def convertGraphToMultiLineString(graph):
+
+    # VIS.visualiseSpatialGraph(graph, withLabels=True)
+
+    joinList = []
+
+    for edge in graph.adj:
+        # print(f"{edge} -> {graph.adj[edge]}")
+        for key in graph.adj[edge]:
+            if ((graph.adj[edge][key]["label"] == "ConsecutiveEvent" or
+                 graph.adj[edge][key]["label"] == "ImpliedConsecutiveEvent")
+                    and key > edge):
+
+                joinPair = (edge,key)
+                joinList.append(joinPair)
+                # print(joinPair)
+
+    # print(joinList)
+
+    multiLinesList = []
+    for joinPair in joinList:
+        if len(multiLinesList) == 0:
+
+            multiLinesList.append([joinPair[0], joinPair[1]])
+        else:
+
+            present = False
+
+            for linestring in multiLinesList:
+
+                if joinPair[0] in linestring:
+                    present = True
+                    linestring.append(joinPair[1])
+
+            if not present:
+                multiLinesList.append([joinPair[0], joinPair[1]])
+
+    # print(multiLinesList)
+
+    multiLineStringList = []
+    for linestring in multiLinesList:
+        tempLine = []
+        for point in linestring:
+            tempLine.append(graph.nodes[point])
+
+        currentLinestring = generateLineStringFromExtract(tempLine, absolutePosition=True)
+        multiLineStringList.append(currentLinestring)
+
+    # print(multiLineStringList)
+
+    lines = MultiLineString(multiLineStringList)
+
+    xoff = 0 - multiLineStringList[0].xy[0][0] # First x coordinate
+    yoff = 0 - multiLineStringList[0].xy[1][0] # First y coordinate
+
+    lines = translate(lines, xoff=xoff, yoff=yoff)
+    #
+    # # print(lines)
+    #
+    # # VIS.visualiseShape(lines)
+    # lines = lines.buffer(1, cap_style='square', join_style='bevel')
+    # VIS.visualiseShape(lines)
+
+    # VIS.visualiseLineString(multiLineStringList[0])
+
+    return lines
+
+def generateMultiLineStringFromExtract(extract):
+
+    return MultiLineString(generateLinesFromExtract(extract, absolutePosition=True))
+
+
+def convertLineStringSequenceToMultiLineString(sequence):
+
+    # print(sequence)
+
+    multiLineStringCoordinateList = []
+
+    for line in sequence:
+        x1 = line.coords[0][0]
+        y1 = line.coords[0][1]
+        x2 = line.coords[1][0]
+        y2 = line.coords[1][1]
+
+        append = True
+
+        if not multiLineStringCoordinateList:
+            multiLineStringCoordinateList.append([[x1, y1], [x2, y2]])
+        else:
+            for newSequence in multiLineStringCoordinateList:
+                if newSequence[-1][0] <= x1 and append:
+                    newSequence.append([x1, y1])
+                    newSequence.append([x2, y2])
+                    append = False
+            if append:
+                multiLineStringCoordinateList.append([[x1, y1], [x2, y2]])
+
+    lineStrings = []
+
+    for line in multiLineStringCoordinateList:
+        lineStrings.append(LineString(line))
+
+
+    output = MultiLineString(lineStrings)
+
+    # VIS.visualiseShape(output)
+
+    return output
 
 
 

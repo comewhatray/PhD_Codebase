@@ -1,0 +1,31 @@
+{
+  "Title": "One Query Two Labels (Label)",
+  "Directory": "LakhDataset/ExperimentDataset/Labels",
+  "Labels": {
+    "TRADNFJ128F92FFA5A": [
+      "e9d288af68bb7226d56a929333e81a83.mid",
+      "6abca4ed72e79b4f20d0a1a95df0e0c9.mid",
+      "a3e497910670d330ae1e8fe8246d2a4c.mid",
+      "19d0d918512446df7f9d3cc3bb096f25.mid",
+      "0153913900981af8f3037bec43df58d3.mid",
+      "5b593d357339ad4c9a9afae9be6e3b24.mid",
+      "5f49c2e4f838b3df9e7eb3267e8912c4.mid",
+      "08eda8fc345e6c5cb310c6babc7035b1.mid",
+      "f009e53e934533270b8354798f42a414.mid",
+      "341be2408a563e75a437a79529c56115.mid"
+    ],
+    "TRAGOAA128F422214B": [
+      "d86dd9a5780185b273447331a518a9e6.mid",
+      "72d950a3df67f24cb57f110bae92fbef.mid",
+      "01cf62a7509fcafece5a9004b24ae536.mid",
+      "ba1f7c64229ebfc84bf90297ac8a080a.mid",
+      "39702547c6f25091caa940a8efa7584d.mid",
+      "7d36cb4fb85945912f1919237ba36f2b.mid",
+      "6f3fb8055bd2f4c8977118980ea8f114.mid",
+      "6b52a053e393b5e67a19109c64acab88.mid",
+      "e3b851a35358afdc7b55968c235d448e.mid",
+      "b860959bfbf52436b3e5a97433732dae.mid"
+
+    ]
+  }
+}
