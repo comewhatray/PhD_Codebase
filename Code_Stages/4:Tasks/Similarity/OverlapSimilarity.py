@@ -1,9 +1,12 @@
+from shapely import MultiLineString
+
 from Utilities import ComeWhatRayUtil as CWR
 from Utilities import BoundingGenerator as BG
 from Utilities import datasetManagment as DM
 from Utilities import Visualisations as VIS
 from shapely.affinity import translate
 import numpy as np
+import os
 
 # MAKE SURE TO SAVE THE LOOKUPTABLE IF IT IS USED
 
@@ -23,7 +26,12 @@ options = {
             }
         },
     # Provide the location of a look up table
-    "LookUpTable": None
+    "LookUpTable": None,
+    "interimSave": True,
+    "queryType": "graphQueryTuneComparison",
+    "inspectionBuffer": 1,
+    "comparisonBuffer": 1,
+    "saveResultsLabel": "DefaultPath"
 }
 
 # LookUpTable = CWR.openFile("Papers/Paper 2/dynamicSimilarityDictionary.json")
@@ -33,7 +41,9 @@ def startProcess(dataset, inputOptions):
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)
     methodInstanciated = getattr(this_module, options['function'])
 
-    methodInstanciated(dataset)
+    results = methodInstanciated(dataset)
+
+    return results
 
 
 
@@ -341,11 +351,17 @@ def overlapQueryExperiment(dataset):
 
     queryLabelCount = 1
     queryLabelTotal = len(queryDataLocation[queryLastLocation])
+
+    experimentResults = {}
+
     for label in queryDataLocation[queryLastLocation]:
         print(CWR.largeSpacer)
         print(f"Query Label: {label}")
         queryNumCount = 1
         queryNumTotal = len(queryDataLocation[queryLastLocation][label])
+
+        if label not in experimentResults:
+            experimentResults[label] = {}
 
         for query in queryDataLocation[queryLastLocation][label]:
             print(CWR.largeSpacer)
@@ -354,10 +370,10 @@ def overlapQueryExperiment(dataset):
             groupingTotal = len(corpusLocation[corpusLastLocation])
 
             queryData = CWR.openFile(query)
-            queryMultiString = BG.convertGraphToMultiLineString(queryData)
+            # queryMultiString = BG.convertGraphToMultiLineString(queryData)
             # print(queryPolygons)
             # VIS.visualiseShape(queryMultiString)
-            queryLength = queryMultiString.bounds[2]
+            # queryLength = queryMultiString.bounds[2]
 
             for grouping in corpusLocation[corpusLastLocation]:
                 print(CWR.largeSpacer)
@@ -365,10 +381,16 @@ def overlapQueryExperiment(dataset):
                 workCount = 1
                 workTotal = len(corpusLocation[corpusLastLocation][grouping])
 
+                if grouping not in experimentResults[label]:
+                    experimentResults[label][grouping] = {}
+
                 for work in corpusLocation[corpusLastLocation][grouping]:
                     print(CWR.largeSpacer)
                     print(f"Work Location: {work}")
                     workData = CWR.openFile(work)
+
+
+
 
                     print(CWR.extraLargeSpacer)
                     print(f"Query Label: ({queryLabelCount}/{queryLabelTotal})")
@@ -376,78 +398,66 @@ def overlapQueryExperiment(dataset):
                     print(f"Work Label: ({groupingCount}/{groupingTotal})")
                     print(f"Work: ({workCount}/{workTotal})")
                     print(CWR.smallSpacer)
-                    # print(f"Sub Query: ({queryCount}/{querySize})")
-
-                    # turns a piece into a multiLineString Geomtery (All the lines are notes)
-                    workMultiString = BG.generateMultiLineStringFromExtract(workData)
-
-                    polygonList = workMultiString.geoms
-                    queryCount = 0
-                    queryTotal = len(polygonList)
-                    maxScore = 0
-                    maxQuery = None
-                    maxComparison = None
-                    maxOverlap = None
-                    # Goes through each line
-                    for lineNumber in range(len(polygonList)):
-                        if queryCount % int(queryTotal/10) == 0:
-                            print(f"Query: {queryCount}/{queryTotal}")
-                            print(f"CurrentMaxScore: {maxScore}")
-                        line = polygonList[lineNumber]
-
-                        transX = line.xy[0][0]
-                        transY = line.xy[1][0]
-
-                        # Translates the query to the start of the line
-                        currentQuery = translate(queryMultiString, xoff=transX, yoff=transY)
-                        currentQuery = currentQuery.buffer(1)
-
-                        intersectionList = []
-
-                        for comparison in range(lineNumber, len(polygonList)):
-                            comparisonLine = polygonList[comparison]
-
-                            if comparisonLine.xy[0][0] > transX + queryLength:
-                                break
-                            else:
-                                if currentQuery.intersects(comparisonLine) or currentQuery.contains(comparisonLine):
-                                    intersectionList.append(comparisonLine)
-
-
-                        comparisonLines = BG.convertLineStringSequenceToMultiLineString(intersectionList)
-                        comparisonPolygon = comparisonLines.buffer(1)
-
-                        totalArea = currentQuery.area + comparisonPolygon.area
-                        overlapPolygon = currentQuery.intersection(comparisonPolygon)
-                        overlapArea = overlapPolygon.area
-
-
-                        # VIS.visualiseOverlappingPolygonsUsingData(currentQuery, comparisonPolygon, overlapPolygon)
-
-                        similarity = overlapArea / (totalArea - overlapArea)
-                        # print(similarity)
-                        if similarity > maxScore:
-                            maxScore = similarity
-                            maxQuery = currentQuery
-                            maxComparison = comparisonPolygon
-                            maxOverlap = overlapPolygon
-
-
-                    # VIS.visualiseShape(workString)
-                        queryCount += 1
-                    print(f"Max Score: {maxScore}")
-                    VIS.visualiseShape(maxQuery)
-                    VIS.visualiseShape(maxComparison)
-                    VIS.visualiseOverlappingPolygonsUsingData(maxQuery, maxComparison, maxOverlap)
                     workCount += 1
+                    # print(f"Sub Query: ({queryCount}/{querySize})")
+                    saveDirectory = f"ExperimentResults/{options['saveResultsLabel']}/AllSimilarity/{label}/{grouping}"
+                    currentFile = CWR.getFileNameFromPath(work)
+
+                    if os.path.exists(f"{saveDirectory}/{currentFile}.json"):
+                        print("Data already exists")
+                        continue
+
+                    # turns a piece into a multiLineString Geometry (All the lines are notes)
+                    # workMultiString = BG.generateMultiLineStringFromExtract(workData)
+
+                    # polygonList = workMultiString.geoms
+
+                    resultsStats = {
+                        "queryCount": 0,
+                        "queryTotal": len(workData),
+                        "maxScore": 0,
+                        "transformedQuery": None,
+                        "maxQuery": None,
+                        "maxComparison": None,
+                        "maxOverlap": None,
+                        "overlapScoreList": []
+                    }
+                    #
+                    # queryCount = 0
+                    # queryTotal = len(workData)
+                    # maxScore = 0
+                    # maxQuery = None
+                    # maxComparison = None
+                    # maxOverlap = None
+                    # overlapScoreList = []
+
+                    # Goes through each line
+
+                    methodInstanciated = getattr(this_module, options['queryType'])
+                    methodInstanciated(queryData ,workData, resultsStats)
+
+
+                    print(f"Max Score: {resultsStats['maxScore']}")
+                    # VIS.visualiseShape(maxQuery)
+                    # VIS.visualiseShape(maxComparison)
+                    # VIS.visualiseOverlappingPolygonsUsingData(maxQuery, maxComparison, maxOverlap)
+
+                    if options["interimSave"]:
+                        CWR.ensureDirectory(saveDirectory)
+                        CWR.saveFile(f"{saveDirectory}/{currentFile}.json", resultsStats["overlapScoreList"])
+
+                    # fileName = CWR.getFileNameFromPath(work)
+                    # experimentResults[label][grouping][fileName] = resultsStats["maxScore"]
+
+
                 groupingCount += 1
             queryNumCount += 1
         queryLabelCount += 1
 
 
     # print(query)
-
-    return
+    print(experimentResults)
+    return experimentResults
 
 # Helper Methods
 # ----------------------------------------------------------------------------------------------------------------------
@@ -568,6 +578,142 @@ def updateLookUpTable(pattern1, pattern2, sim):
             options["LookUpTable"][pattern1] = {}
 
         options["LookUpTable"][pattern1][pattern2] = sim
+
+def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
+
+    if scorebord["transformedQuery"] is None:
+        # TODO choose one line or the other
+        scorebord["transformedQuery"]  = BG.convertGraphToMultiLineString(queryGraph)
+        # scorebord["transformedQuery"] = BG.generateMultiLineListFromGraph(queryGraph)
+        scorebord["queryLength"] = scorebord["transformedQuery"].bounds[2]
+
+
+    for lineNumber in range(scorebord["queryTotal"]):
+        if scorebord["queryCount"] % int(scorebord["queryTotal"] / 10) == 0:
+            print(f"Query: {scorebord['queryCount']}/{scorebord['queryTotal']}")
+            print(f"CurrentMaxScore: {scorebord['maxScore']}")
+        line = tuneGraph.nodes[lineNumber]
+
+        transX = line["position"]
+        transY = line["pitch"]
+
+        # Translates the query to the start of the line
+        currentQuery = translate(scorebord["transformedQuery"], xoff=transX, yoff=transY)
+        currentQueryInspetion = BG.boundingPolygon(currentQuery, options["inspectionBuffer"])
+
+        intersectionList = []
+
+        for comparison in range(lineNumber, scorebord["queryTotal"]):
+            comparisonLine = tuneGraph.nodes[comparison]
+            comparisonLineString = BG.generateLineStringFromExtract([comparisonLine], absolutePosition=True)
+
+            if comparisonLine["position"] > transX + scorebord['queryLength']:
+                break
+            else:
+                if currentQueryInspetion.intersects(comparisonLineString) or currentQueryInspetion.contains(comparisonLineString):
+                    intersectionList.append(comparison)
+
+        # comparisonLines = BG.convertLineStringSequenceToMultiLineString(intersectionList)
+        subGraph = tuneGraph.subgraph(intersectionList)
+
+        # VIS.visualiseSpatialGraph(subGraph)
+        # TODO choose one line or the other
+        comparisonLines = BG.convertGraphToMultiLineString(subGraph, absoluteValue=True)
+        # comparisonLines = BG.generateMultiLineListFromGraph(subGraph, absoluteValue=True)
+
+        comparisonPolygon = BG.boundingPolygon(comparisonLines, options['comparisonBuffer'])
+        currentQueryComparison = BG.boundingPolygon(currentQuery, options["comparisonBuffer"])
+
+        totalArea = currentQueryComparison.area + comparisonPolygon.area
+        overlapPolygon = currentQueryComparison.intersection(comparisonPolygon)
+        overlapArea = overlapPolygon.area
+
+        # VIS.visualiseOverlappingPolygonsUsingData(currentQuery, comparisonPolygon, overlapPolygon)
+
+        similarity = overlapArea / (totalArea - overlapArea)
+        scorebord['overlapScoreList'].append(similarity)
+        # print(similarity)
+        if similarity > scorebord['maxScore']:
+            scorebord['maxScore'] = similarity
+            scorebord['maxQuery'] = currentQuery
+            scorebord['maxComparison'] = comparisonPolygon
+            scorebord['maxOverlap'] = overlapPolygon
+
+        # VIS.visualiseShape(workString)
+        scorebord["queryCount"] += 1
+
+    return
+
+
+def linesQueryTuneComparison(queryLines, tuneLines, scorebord):
+
+    if scorebord["transformedQuery"] is None:
+        scorebord["transformedQuery"]  = BG.generateMultiLineStringFromExtract(queryLines)
+        # Translate to origin
+        tempTransX = 0 - queryLines[0]['position']
+        tempTransY = 0 - queryLines[0]['pitch']
+        scorebord["transformedQuery"] = translate(scorebord["transformedQuery"], xoff=tempTransX, yoff=tempTransY)
+        scorebord["queryLength"] = scorebord["transformedQuery"].bounds[2]
+
+    notesLineList = []
+    for note in range(scorebord["queryTotal"]):
+        notesLineList.append(BG.generateLineStringFromExtract([tuneLines[note]], absolutePosition=True))
+
+    for lineNumber in range(scorebord["queryTotal"]):
+        if scorebord["queryCount"] % int(scorebord["queryTotal"] / 10) == 0:
+            print(f"Query: {scorebord['queryCount']}/{scorebord['queryTotal']}")
+            print(f"CurrentMaxScore: {scorebord['maxScore']}")
+        # line = BG.generateLineStringFromCoordinates(tuneLines[lineNumber])
+        line = tuneLines[lineNumber]
+
+        transX = line["position"]
+        transY = line["pitch"]
+
+        # Translates the query to the start of the line
+        currentQuery = translate(scorebord["transformedQuery"], xoff=transX, yoff=transY)
+        currentQueryInspection = BG.boundingPolygon(currentQuery, options["inspectionBuffer"])
+
+        intersectionList = []
+
+        for comparison in range(lineNumber, scorebord["queryTotal"]):
+
+            comparisonLine = tuneLines[comparison]
+            comparisonLineString = notesLineList[comparison]
+
+            if comparisonLine["position"] > transX + scorebord['queryLength']:
+                break
+            else:
+                if currentQueryInspection.intersects(comparisonLineString) or currentQueryInspection.contains(comparisonLineString):
+                    intersectionList.append(comparisonLineString)
+
+        # newLinesList = [tuneLines[x] for x in intersectionList]
+        # comparisonMultiLine = BG.generateMultiLineStringFromExtract(newLinesList)
+        comparisonMultiLine = MultiLineString(intersectionList)
+        comparisonPolygon = BG.boundingPolygon(comparisonMultiLine, options['comparisonBuffer'])
+
+        # VIS.visualiseShape(comparisonPolygon)
+        currentQueryComparison = BG.boundingPolygon(currentQuery, options["comparisonBuffer"])
+        # VIS.visualiseShape(currentQueryComparison)
+
+        totalArea = currentQueryComparison.area + comparisonPolygon.area
+        overlapPolygon = currentQueryComparison.intersection(comparisonPolygon)
+        overlapArea = overlapPolygon.area
+
+        # VIS.visualiseOverlappingPolygonsUsingData(currentQueryComparison, comparisonPolygon, overlapPolygon)
+
+        similarity = overlapArea / (totalArea - overlapArea)
+        scorebord['overlapScoreList'].append(similarity)
+        # print(similarity)
+        if similarity > scorebord['maxScore']:
+            scorebord['maxScore'] = similarity
+            scorebord['maxQuery'] = currentQuery
+            scorebord['maxComparison'] = comparisonPolygon
+            scorebord['maxOverlap'] = overlapPolygon
+
+        # VIS.visualiseShape(workString)
+        scorebord["queryCount"] += 1
+
+    return
 
 # Transforms new dataset format into old one
 # def convertDataset(dataset):

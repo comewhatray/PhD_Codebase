@@ -123,81 +123,83 @@ def getNotePosition(midiInput):
 # Order -> Onset (Early to Late) | Pitch (Bottom to Top)
 def sortPoints(pointSet):
     subGroups = []
-
-    for value in pointSet:
-
-        if not subGroups:
-            subGroups.append([value])
-
-        # if the position of the current note comes before the last note observed we make a new list(this is probably another instrument)
-        elif subGroups[len(subGroups) - 1][len(subGroups[len(subGroups) - 1]) - 1]['position'] > value['position']:
-            subGroups.append([value])
-
-        elif subGroups[len(subGroups) - 1][len(subGroups[len(subGroups) - 1]) - 1]['position'] == value['position'] and \
-                subGroups[len(subGroups) - 1][len(subGroups[len(subGroups) - 1]) - 1]['pitch'] > value['pitch']:
-            subGroups.append([value])
-        else:
-            subGroups[len(subGroups) - 1].append(value)
-
     temp = []
 
-    for i in range(0, len(subGroups)):
-        combined = []
-        while len(temp) != 0 or len(subGroups[i]) != 0:
+    if pointSet:
+        for value in pointSet:
 
-            if len(temp) == 0:
-                combined += subGroups[i]
-                subGroups[i].clear()
-                continue
+            if not subGroups:
+                subGroups.append([value])
 
-            if len(subGroups[i]) == 0:
-                combined += temp
-                temp.clear()
-                continue
+            # if the position of the current note comes before the last note observed we make a new list(this is probably another instrument)
+            elif subGroups[len(subGroups) - 1][len(subGroups[len(subGroups) - 1]) - 1]['position'] > value['position']:
+                subGroups.append([value])
 
-            # Checking positions
+            elif subGroups[len(subGroups) - 1][len(subGroups[len(subGroups) - 1]) - 1]['position'] == value['position'] and \
+                    subGroups[len(subGroups) - 1][len(subGroups[len(subGroups) - 1]) - 1]['pitch'] > value['pitch']:
+                subGroups.append([value])
+            else:
+                subGroups[len(subGroups) - 1].append(value)
 
-            if temp[0]['position'] == subGroups[i][0]['position']:
-                # print(i)
-                # if i == 98:
-                # print('test')
-                if temp[0]['pitch'] == subGroups[i][0]['pitch'] or (
-                        len(combined) > 0 and combined[-1]['pitch'] == subGroups[i][0]['pitch']):
-                    subGroups[i].pop(0)
 
-                elif temp[0]['pitch'] < subGroups[i][0]['pitch']:
-                    combined.append(temp.pop(0))
+
+        for i in range(0, len(subGroups)):
+            combined = []
+            while len(temp) != 0 or len(subGroups[i]) != 0:
+
+                if len(temp) == 0:
+                    combined += subGroups[i]
+                    subGroups[i].clear()
+                    continue
+
+                if len(subGroups[i]) == 0:
+                    combined += temp
+                    temp.clear()
+                    continue
+
+                # Checking positions
+
+                if temp[0]['position'] == subGroups[i][0]['position']:
+                    # print(i)
+                    # if i == 98:
+                    # print('test')
+                    if temp[0]['pitch'] == subGroups[i][0]['pitch'] or (
+                            len(combined) > 0 and combined[-1]['pitch'] == subGroups[i][0]['pitch']):
+                        subGroups[i].pop(0)
+
+                    elif temp[0]['pitch'] < subGroups[i][0]['pitch']:
+                        combined.append(temp.pop(0))
+
+                    else:
+                        combined.append(subGroups[i].pop(0))
 
                 else:
-                    combined.append(subGroups[i].pop(0))
 
-            else:
+                    if temp[0]['position'] < subGroups[i][0]['position']:
+                        combined.append(temp.pop(0))
 
-                if temp[0]['position'] < subGroups[i][0]['position']:
-                    combined.append(temp.pop(0))
+                    elif temp[0]['position'] > subGroups[i][0]['position']:
+                        combined.append(subGroups[i].pop(0))
 
-                elif temp[0]['position'] > subGroups[i][0]['position']:
-                    combined.append(subGroups[i].pop(0))
+            temp = combined.copy()
 
-        temp = combined.copy()
+        # This just checked to see if everything was in order
+        weG = True
+        afterPos = temp[0]['position']
+        afterPit = temp[0]['pitch']
+        for value in temp[1:]:
 
-    # This just checked to see if everything was in order
-    weG = True
-    afterPos = temp[0]['position']
-    afterPit = temp[0]['pitch']
-    for value in temp[1:]:
+            if afterPos > value['position'] and afterPit > value['pitch']:
+                weG = False
 
-        if afterPos > value['position'] and afterPit > value['pitch']:
-            weG = False
+            afterPos = value['position']
+            afterPit = value['pitch']
 
-        afterPos = value['position']
-        afterPit = value['pitch']
+        if weG:
+            print('Notes are in order')
 
-    if weG:
-        print('Notes are in order')
-
-    else:
-        print('Notes are not in order')
+        else:
+            print('Notes are not in order')
 
     return temp
 

@@ -19,7 +19,7 @@ datasetConfiguration = {
 
 # Given a folder of data such that each sub folder is a label and contains all examples of that label.
 # Create a dataset configuration json file and move the data to a specified location
-def exampleTagging(datasetOrigin, datasetTarget, configurationLocation):
+def exampleTagging(datasetOrigin, datasetTarget, configurationLocation, moveDataset=True):
     print("Naming files in Directory")
 
     # Updating the Directory to be where we want to store the dataset
@@ -59,8 +59,8 @@ def exampleTagging(datasetOrigin, datasetTarget, configurationLocation):
             datasetConfiguration["Labels"][labelName].append(updateName)
 
             # os.rename(toUpdate, update)
-
-            CWR.moveFile(toUpdate, CWR.appendDirectory(datasetTarget, updateName))
+            if moveDataset:
+                CWR.moveFile(toUpdate, CWR.appendDirectory(datasetTarget, updateName))
 
             fileCount += 1
             totalCount += 1

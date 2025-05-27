@@ -167,6 +167,8 @@ def queryAggregationExperiment(queryDataLocation, datasetDataLocation, details=N
 
     outputDict = {}
 
+    results = None
+
     for process in options["Stages"]:
 
         processFunction = process['options']['function']

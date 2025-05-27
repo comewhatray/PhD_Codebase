@@ -60,8 +60,8 @@ datasetDetails = {
     "ExperimentSignifier": "",
     "Description": "A sample Query being tested against two catagories",
     "WorkspaceLocation": workspace,
-    # "Dataset_Configuration": "LakhDataset/Configs/1Query2Labels(Label).json",
-    "Dataset_Configuration": "problemConfig.json",
+    "Dataset_Configuration": "LakhDataset/Configs/1Query2Labels(Label).json",
+    # "Dataset_Configuration": "problemConfig.json",
     "Stages": stages
     # "Stages": datasetStages
 }
@@ -99,7 +99,9 @@ if __name__ == '__main__':
     CWR.saveFile(datasetSaveLoc, locationDetails)
 
     #TODO create method for evaluating the query results
-    EP.queryAggregationExperiment(CWR.openFile(querySaveLoc), CWR.openFile(datasetSaveLoc), aggregationDetails)
+    experimentResults = EP.queryAggregationExperiment(CWR.openFile(querySaveLoc), CWR.openFile(datasetSaveLoc), aggregationDetails)
+
+    CWR.saveFile(CWR.appendDirectory(workspace, "ExperimentResults.json"), experimentResults)
 
 
     # EP.aggregationExperiment(locationDetails, aggregationDetails)

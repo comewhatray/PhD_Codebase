@@ -79,8 +79,10 @@ def visualiseOverlappingPolygons(json1, json2, boundary=1, saveTo=None):
     plt.show()
 
 def visualiseOverlappingPolygonsUsingData(polygon1, polygon2, overlapPolygon, saveTo=None):
-    plotPolygon(polygon1, color="Red")
-    plotPolygon(polygon2, color="Blue")
+    # plotPolygon(polygon1, color="Red")
+    # plotPolygon(polygon2, color="Blue")
+    plotShape(polygon1, color="Red")
+    plotShape(polygon2, color="Blue")
     plotShape(overlapPolygon, color="Black")
 
     if saveTo is not None:

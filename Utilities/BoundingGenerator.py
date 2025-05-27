@@ -278,7 +278,7 @@ def convertGraphToMultiPolygon(graph):
 
     return lines.buffer(1, cap_style='square', join_style='bevel')
 
-def convertGraphToMultiLineString(graph):
+def convertGraphToMultiLineString(graph, absoluteValue=False):
 
     # VIS.visualiseSpatialGraph(graph, withLabels=True)
 
@@ -330,14 +330,15 @@ def convertGraphToMultiLineString(graph):
 
     lines = MultiLineString(multiLineStringList)
 
-    xoff = 0 - multiLineStringList[0].xy[0][0] # First x coordinate
-    yoff = 0 - multiLineStringList[0].xy[1][0] # First y coordinate
+    if not absoluteValue:
+        xoff = 0 - lines.geoms[0].xy[0][0] # First x coordinate
+        yoff = 0 - lines.geoms[0].xy[1][0] # First y coordinate
 
-    lines = translate(lines, xoff=xoff, yoff=yoff)
+        lines = translate(lines, xoff=xoff, yoff=yoff)
     #
-    # # print(lines)
-    #
-    # # VIS.visualiseShape(lines)
+    # print(lines)
+
+    # VIS.visualiseShape(lines)
     # lines = lines.buffer(1, cap_style='square', join_style='bevel')
     # VIS.visualiseShape(lines)
 
@@ -345,10 +346,30 @@ def convertGraphToMultiLineString(graph):
 
     return lines
 
+# This makes them all individual lines
+def generateMultiLineListFromGraph(graph, absoluteValue=False):
+
+    lineStringList = []
+    startNode = list(graph.nodes)[0]
+    xoff = graph.nodes[startNode]["position"]
+    yoff = graph.nodes[startNode]["pitch"]
+
+    for node in graph.nodes:
+        nodeData = graph.nodes[node]
+        xcoords = [nodeData["position"], nodeData["position"]+nodeData["duration"]]
+        ycoords = [nodeData["pitch"], nodeData["pitch"]]
+        lineStringList.append(LineString([xcoords, ycoords]))
+
+    multiLineString = MultiLineString(lineStringList)
+
+    if not absoluteValue:
+        translate(multiLineString, xoff=xoff, yoff=yoff)
+
+    return multiLineString
+
 def generateMultiLineStringFromExtract(extract):
 
     return MultiLineString(generateLinesFromExtract(extract, absolutePosition=True))
-
 
 def convertLineStringSequenceToMultiLineString(sequence):
 
