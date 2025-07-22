@@ -262,8 +262,13 @@ if __name__ == '__main__':
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
     print(model)
 
-    trainSplit = dataset[:dataSplit]
-    testSplit = dataset[dataSplit:]
+    # trainSplit = dataset[:dataSplit]
+    # testSplit = dataset[dataSplit:]
+
+    torch.save(trainSplit, os.path.join(fileRoot, 'trainPerm0.pt'))
+    torch.save(testSplit, os.path.join(fileRoot, 'testPerm0.pt'))
+
+    temp = torch.load(os.path.join(fileRoot, 'trainTest.pt'))
 
     if batchSize is not None:
         trainSplit = DataLoader(trainSplit, batch_size=batchSize, shuffle=True)

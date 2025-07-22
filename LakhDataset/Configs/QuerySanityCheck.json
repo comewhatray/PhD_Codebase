@@ -1,0 +1,9 @@
+{
+  "Title": "Full Dataset",
+  "Directory": "LakhDataset/ExperimentDataset/SanityCheck",
+  "Labels": {
+    "Angel": ["AngelsThesisQuery.mid"]
+  }
+}
+
+

@@ -1,0 +1,9 @@
+{
+  "Title": "One Query Two Labels (Label)",
+  "Directory": "LakhDataset/ExperimentDataset/SanityCheck",
+  "Labels": {
+    "Angel": [
+      "AngelsThesisFull.mid"
+    ]
+  }
+}
