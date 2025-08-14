@@ -467,6 +467,7 @@ def consecutiveEventCheck(note1, note2):
 # Modifications on the graph
 def graphModifications(graph):
 
+    # Remove or keep self loops
     if not options["selfLoop"]:
         graph.remove_edges_from(nx.selfloop_edges(graph))
 
@@ -474,6 +475,7 @@ def graphModifications(graph):
     #     for node in range(len(graph.nodes)):
     #         graph.nodes[node]['label'] = node
 
+    # Adds relevant attributes to the edges in a graph
     if options["edgeAttributes"]:
         attributes = {
             "pitchChange": 0,

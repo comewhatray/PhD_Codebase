@@ -10,8 +10,11 @@ toSave = False
 # saveLocation = "Papers/Paper_2/Visualisations/StoreImages"
 # Directory = "Extracts/Beethoven5/"
 # Extract = "Beethovens5Extract-Complete.mid"
-Directory = "LakhDataset/ExperimentDataset/Queries"
-Extract = "TRADNFJ128F92FFA5A_Query.mid"
+# Directory = "LakhDataset/ExperimentDataset/Queries"
+# Extract = "TRADNFJ128F92FFA5A_Query.mid"
+
+Directory = "Papers/Paper_2/Visualisations/Extension/Data"
+Extract = "HouseRisingSunExtract.mid"
 
 
 # Update datasetConfiguration with directory information

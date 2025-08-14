@@ -159,7 +159,7 @@ def plotLineStringFromJson(json, color="black"):
 def plotLineString(lineString, color="black"):
 
     x, y = lineString.coords.xy
-    plt.plot(x, y)
+    plt.plot(x, y, color=color)
     return lineString
 
 
@@ -180,15 +180,16 @@ def plotPolygon(shape, color="Black"):
 
 # A recursive call for shapes with multiple shapes in them
 def plotShape(shape, color='black'):
-    if shape.geom_type == "MultiPolygon" or shape.geom_type == "GeometryCollection" or shape.geom_type == "MultiLineString":
-        for geom in shape.geoms:
-            plotShape(geom, color)
+    if shape is not None:
+        if shape.geom_type == "MultiPolygon" or shape.geom_type == "GeometryCollection" or shape.geom_type == "MultiLineString":
+            for geom in shape.geoms:
+                plotShape(geom, color)
 
-    elif shape.geom_type == "Polygon":
-        plotPolygon(shape, color)
+        elif shape.geom_type == "Polygon":
+            plotPolygon(shape, color)
 
-    elif shape.geom_type == "LineString":
-        plotLineString(shape, color)
+        elif shape.geom_type == "LineString":
+            plotLineString(shape, color)
 
 def toSave(location):
     plt.savefig(location)

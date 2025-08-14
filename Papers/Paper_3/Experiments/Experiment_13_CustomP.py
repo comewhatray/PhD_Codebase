@@ -11,6 +11,8 @@ import os
 import torch
 from torch_geometric.data import Dataset, download_url
 
+import timeit
+
 ExperimentDetails = {
     # Experiment Name left blank is just for experiments we don't want to store the results of
     # "ExperimentName": "GNN Experiment 4",
@@ -240,6 +242,7 @@ def test(loader, logging):
 
 
 if __name__ == '__main__':
+    start = timeit.default_timer()
 
     # Configuration Data
     epochs = 100
@@ -350,3 +353,5 @@ if __name__ == '__main__':
     CWR.saveFile(resultsLocation, analysis)
     torch.save(model.state_dict(), modelLocation)
 
+    stop = timeit.default_timer()
+    print('Time: ', stop - start)

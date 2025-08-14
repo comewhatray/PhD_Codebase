@@ -5,6 +5,7 @@ from Utilities import BoundingGenerator as BG
 from Utilities import datasetManagment as DM
 from Utilities import Visualisations as VIS
 from shapely.affinity import translate
+import copy
 import numpy as np
 import os
 
@@ -35,7 +36,8 @@ options = {
     "debugging": False,
     "additionalParameters": {
         "minimumOverlap": 0,
-        "framgmentisationCheck": False,
+        "framgmentisationCheck": 0,
+        "fragments": None
     }
 }
 
@@ -408,21 +410,8 @@ def overlapQueryExperiment(dataset):
                     saveDirectory = f"ExperimentResults/{options['saveResultsLabel']}/AllSimilarity/{label}/{grouping}"
                     currentFile = CWR.getFileNameFromPath(work)
 
+                    # If the data already exists we can move on to the next one
                     if os.path.exists(f"{saveDirectory}/{currentFile}.json"):
-                        # tempFileName = f"{saveDirectory}/{currentFile}.json"
-                        # oScore = CWR.openFile(tempFileName)
-                        # # workData
-                        # pieceLength = 0
-                        #
-                        # if workData:
-                        #     pieceLength = workData[-1]['position'] + workData[-1]['duration']
-                        #
-                        # tempJson = {
-                        #     "overlapScoreList": oScore,
-                        #     "pieceLength": pieceLength
-                        # }
-                        #
-                        # CWR.saveFile(tempFileName, tempJson)
                         print("Data already exists")
                         continue
 
@@ -440,7 +429,8 @@ def overlapQueryExperiment(dataset):
                         "maxComparison": None,
                         "maxOverlap": None,
                         "pieceLength": 0,
-                        "overlapScoreList": []
+                        "overlapScoreList": [],
+                        "fragmentedScoreList": []
                     }
                     #
                     # queryCount = 0
@@ -612,11 +602,12 @@ def updateLookUpTable(pattern1, pattern2, sim):
         options["LookUpTable"][pattern1][pattern2] = sim
 
 
+# intakes a series of lines and a query that is a polygon
 def minimumOverlap(patternList, query):
     membershipList = []
 
     # Checks that each line that intersects has a minimum overlap with the query
-    if options["additionalParameters"]["miniumumOverlap"] != 0:
+    if options["additionalParameters"]["minimumOverlap"] != 0:
         for line in patternList:
             membershipTest = BG.boundingPolygon(line, options["comparisonBuffer"])
             membershipOverlap = membershipTest.intersection(query)
@@ -636,12 +627,99 @@ def minimumOverlap(patternList, query):
 
     return membershipList
 
+def allignmentSimilarity(query, pattern):
+
+    query
+    pattern
+
+    return
+
+#                            (graph, number   , graph, number, number)
+def fragmentedSimilarity(queryGraph, queryLength, pattern, transX, transY):
+
+    fragmentScores = None
+    numFragments = options["additionalParameters"]["fragmentisationCheck"]
+
+    if numFragments > 0:
+        intervalSize = queryLength/numFragments
+
+        # transform the values of the query graph
+        transformGraph = copy.deepcopy(queryGraph)
+        xDiff = transX - transformGraph.nodes[0]["position"]
+        yDiff = transY - transformGraph.nodes[0]["pitch"]
+        for node in transformGraph.nodes:
+            transformGraph.nodes[node]["position"] = transformGraph.nodes[node]["position"] + xDiff
+            transformGraph.nodes[node]["pitch"] = transformGraph.nodes[node]["pitch"] + yDiff
+            transformGraph.nodes[node]["pos"] = (transformGraph.nodes[node]["position"], transformGraph.nodes[node]["pitch"])
+
+        # Fragmenting part
+        if options["debugging"]:
+            VIS.visualiseShape(BG.boundingPolygon(BG.convertGraphToMultiLineString(transformGraph)))
+            VIS.visualiseShape(BG.boundingPolygon(BG.convertGraphToMultiLineString(pattern)))
+
+
+        oldStart = transformGraph.nodes[0]["position"]
+        newEnd = oldStart + intervalSize
+
+        fragmentScores = []
+
+        while newEnd <= transformGraph.nodes[0]["position"] + queryLength:
+
+            queryFragment = []
+            for node in transformGraph.nodes:
+                if isBetween(transformGraph.nodes[node], oldStart, newEnd):
+                    queryFragment.append(node)
+
+
+            patternFragment = []
+            for node in pattern.nodes:
+                if isBetween(pattern.nodes[node], oldStart, newEnd):
+                    patternFragment.append(node)
+
+            querySubFragment = transformGraph.subgraph(queryFragment)
+            patternSubFragment = pattern.subgraph(patternFragment)
+
+            queryLines = BG.convertGraphToMultiLineString(querySubFragment, absoluteValue=True)
+            queryBounds = BG.boundingPolygon(queryLines, options["comparisonBuffer"])
+            patternLines = BG.convertGraphToMultiLineString(patternSubFragment, absoluteValue=True)
+            patternBounds = BG.boundingPolygon(patternLines, options["comparisonBuffer"])
+
+
+            totalArea = queryBounds.area + patternBounds.area
+            overlapPolygon = queryBounds.intersection(patternBounds)
+            overlapArea = overlapPolygon.area
+
+            if options["debugging"]:
+                VIS.visualiseShape(queryBounds)
+                VIS.visualiseShape(patternBounds)
+                VIS.visualiseOverlappingPolygonsUsingData(queryBounds, patternBounds, overlapPolygon)
+
+            similarity = 0
+            if totalArea - overlapArea != 0:
+                similarity = overlapArea / (totalArea - overlapArea)
+
+            fragmentScores.append(similarity)
+
+
+            oldStart = newEnd
+            newEnd = newEnd + intervalSize
+    if options["debugging"]:
+        print(f"Fragmented Similarity: {fragmentScores}")
+    return fragmentScores
+#               node, num, num
+def isBetween(query, start, end):
+
+    if query["position"] + query["duration"] > start and query["position"]< end:
+        return True
+    else:
+        return False
+
 def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
 
     if scorebord["transformedQuery"] is None:
         # TODO choose one line or the other
         scorebord["transformedQuery"]  = BG.convertGraphToMultiLineString(queryGraph)
-        # scorebord["transformedQuery"] = BG.generateMultiLineListFromGraph(queryGraph)
+        # scorebord["transformedQueryNoAttachments"] = BG.generateMultiLineListFromGraph(queryGraph)
         scorebord["queryLength"] = scorebord["transformedQuery"].bounds[2]
 
 
@@ -656,10 +734,14 @@ def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
 
         # Translates the query to the start of the line
         currentQuery = translate(scorebord["transformedQuery"], xoff=transX, yoff=transY)
+        # currentQueryLinesNoAttachment = translate(scorebord["transformedQueryNoAttachments"], xoff=transX, yoff=transY)
         currentQueryInspetion = BG.boundingPolygon(currentQuery, options["inspectionBuffer"])
 
         intersectionList = []
+        graphPositionList = []
 
+# ----------------------------------------------------------------------------------------------------------------------
+        # This gets the node numbers on the graph not the lines themselves
         for comparison in range(lineNumber, scorebord["queryTotal"]):
             comparisonLine = tuneGraph.nodes[comparison]
             comparisonLineString = BG.generateLineStringFromExtract([comparisonLine], absolutePosition=True)
@@ -668,24 +750,44 @@ def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
                 break
             else:
                 if currentQueryInspetion.intersects(comparisonLineString) or currentQueryInspetion.contains(comparisonLineString):
-                    intersectionList.append(comparison)
+                    intersectionList.append(comparisonLineString)
+                    graphPositionList.append((comparison, comparisonLineString))
+
+
 
         # comparisonLines = BG.convertLineStringSequenceToMultiLineString(intersectionList)
 
-        # Generate bounding of query
-        comparisonPolygon = BG.boundingPolygon(comparisonLines, options['comparisonBuffer'])
+        membershipList = minimumOverlap(intersectionList, currentQueryInspetion)
 
-        membershipList = minimumOverlap(intersectionList, comparisonPolygon)
+        # allignmentSimilarity(scorebord["transformedQuery"], MultiLineString(intersectionList))
 
-        subGraph = tuneGraph.subgraph(membershipList)
+        subGraphList = []
+        for position in graphPositionList:
+            for member in membershipList:
+                if member.equals(position[1]):
+                    subGraphList.append(position[0])
+                    break
+
+        subGraph = tuneGraph.subgraph(subGraphList)
+
+        fragmentedScores = fragmentedSimilarity(queryGraph, scorebord["queryLength"], subGraph, transX, transY)
+
+# ----------------------------------------------------------------------------------------------------------------------
 
         # VIS.visualiseSpatialGraph(subGraph)
         # TODO choose one line or the other
         comparisonLines = BG.convertGraphToMultiLineString(subGraph, absoluteValue=True)
+        comparisonPolygon = BG.boundingPolygon(comparisonLines, options['comparisonBuffer'])
         # comparisonLines = BG.generateMultiLineListFromGraph(subGraph, absoluteValue=True)
 
-
         currentQueryComparison = BG.boundingPolygon(currentQuery, options["comparisonBuffer"])
+
+        if options["debugging"]:
+            VIS.visualiseShape(comparisonLines)
+            VIS.visualiseShape(comparisonPolygon)
+            VIS.visualiseShape(currentQuery)
+            VIS.visualiseShape(currentQueryComparison)
+
 
         totalArea = currentQueryComparison.area + comparisonPolygon.area
         overlapPolygon = currentQueryComparison.intersection(comparisonPolygon)
@@ -695,10 +797,12 @@ def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
 
         similarity = overlapArea / (totalArea - overlapArea)
         scorebord['overlapScoreList'].append(similarity)
+        scorebord["fragmentedScoreList"].append(fragmentedScores)
+
         # print(similarity)
         if similarity > scorebord['maxScore']:
             scorebord['maxScore'] = similarity
-            scorebord['maxQuery'] = currentQuery
+            scorebord['maxQuery'] = currentQueryComparison
             scorebord['maxComparison'] = comparisonPolygon
             scorebord['maxOverlap'] = overlapPolygon
 

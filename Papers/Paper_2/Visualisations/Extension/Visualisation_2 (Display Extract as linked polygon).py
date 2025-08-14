@@ -10,9 +10,11 @@ toSave = False
 # saveLocation = "Papers/Paper_2/Visualisations/StoreImages"
 # Directory = "Extracts/Beethoven5/"
 # Extract = "Beethovens5Extract-Complete.mid"
-Directory = "LakhDataset/ExperimentDataset/Queries"
-Extract = "TRADNFJ128F92FFA5A_Query.mid"
+# Directory = "LakhDataset/ExperimentDataset/Queries"
+# Extract = "TRADNFJ128F92FFA5A_Query.mid"
 
+Directory = "Papers/Paper_2/Visualisations/Extension/Data"
+Extract = "HouseRisingSunExtract.mid"
 
 # Update datasetConfiguration with directory information
 datasetConfiguration = {
@@ -52,7 +54,7 @@ options = {
                 "options": {
                     "function": "karystinaiosModification",
                     "saveType": ".gpickle",
-                    "shortestConsecutiveEvent": True
+                    "shortestConsecutiveEvent": False
                 }
             }
 
@@ -80,7 +82,7 @@ def main():
 
         # Display Point Representation
         # -----------------------------------------------
-        plt.title("Graph Generation")
+        # plt.title("Graph Generation")
         VIS.visualiseSpatialGraph(fileInfo)
 
         # Display Line Representation
@@ -91,7 +93,7 @@ def main():
         multiString = BG.convertGraphToMultiLineString(fileInfo, absoluteValue=True)
         VIS.visualiseShape(multiString)
 
-        multiPolygon = BG.convertGraphToMultiPolygon(fileInfo)
+        multiPolygon = BG.convertGraphToMultiPolygon(fileInfo, 0.5)
         VIS.visualiseShape(multiPolygon)
         # multiString = BG.generateMultiLineStringFromExtract(fileInfo)
         #

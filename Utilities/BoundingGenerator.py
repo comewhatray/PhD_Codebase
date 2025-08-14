@@ -48,7 +48,7 @@ def EllipsePointGenerator(note, dimensions):
 
 
 #Requires a line string
-def boundingPolygon(lineString, bufferSize):
+def boundingPolygon(lineString, bufferSize=1):
 
 
     # line = lineString.buffer(bufferSize)
@@ -272,12 +272,13 @@ def removeInteriorGeometryCollection(shape):
 
     return
 
-def convertGraphToMultiPolygon(graph):
+def convertGraphToMultiPolygon(graph, buffer=1):
 
     lines = convertGraphToMultiLineString(graph)
 
-    return lines.buffer(1, cap_style='square', join_style='bevel')
+    return lines.buffer(buffer, cap_style='square', join_style='bevel')
 
+# Joins the lines together
 def convertGraphToMultiLineString(graph, absoluteValue=False):
 
     # VIS.visualiseSpatialGraph(graph, withLabels=True)

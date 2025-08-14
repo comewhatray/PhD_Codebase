@@ -2,12 +2,17 @@ from Utilities import ComeWhatRayUtil as CWR
 from Utilities import Visualisations as VIS
 from Code_Stages import ExperimentProcess as EP
 
+# experimentName = "LisztVis"
+# datasetConfig = "Papers/Paper_3/VisualisaitonData/config/lisztExtractConfig.json"
+
+experimentName = "BachVis"
+datasetConfig = "Papers/Paper_3/VisualisaitonData/config/bachExampleConfig.json"
 
 ExperimentDetails = {
-    "ExperimentName": "LisztVis",
+    "ExperimentName": experimentName,
     "Description": "Get graph representation of extract",
     "WorkspaceLocation": "Papers/Paper_3/VisualisaitonData/infered",
-    "Dataset_Configuration": "Papers/Paper_3/VisualisaitonData/config/lisztExtractConfig.json",
+    "Dataset_Configuration": datasetConfig,
     "Stages": [
         # First Extract the midi file into points
         {
@@ -43,10 +48,11 @@ aggregationDetails = {
     ]
 }
 
-midiLocation = "Papers/Paper_3/VisualisaitonData/Liebestraum Extract.mid"
+# szetoGraphLocation = "Papers/Paper_3/VisualisaitonData/infered/LisztVis/Default/SzetoGraphRepresentation/LiebestraumExtract.gpickle"
+# edgeGraphLocation = "Papers/Paper_3/VisualisaitonData/infered/LiebestraumExtract_edgeGraph.gpickle"
 
-szetoGraphLocation = "Papers/Paper_3/VisualisaitonData/infered/LisztVis/Default/SzetoGraphRepresentation/LiebestraumExtract.gpickle"
-edgeGraphLocation = "Papers/Paper_3/VisualisaitonData/infered/LiebestraumExtract_edgeGraph.gpickle"
+szetoGraphLocation = "Papers/Paper_3/VisualisaitonData/infered/BachVis/Default/SzetoGraphRepresentation/Bach_1.gpickle"
+edgeGraphLocation = "Papers/Paper_3/VisualisaitonData/infered/Bach_1_edgeGraph.gpickle"
 
 
 def main():
@@ -60,8 +66,14 @@ def main():
     color="Yellow"
     size=1000
 
-    VIS.visualiseSpatialGraph(defaultGraph, withLabels=True, size=size, color=color)
-    VIS.visualiseGraph(edgeGraph, withLabels=True, size=size, color=color)
+    # VIS.visualiseSpatialGraph(defaultGraph, withLabels=True, size=size, color=color)
+    # VIS.visualiseGraph(edgeGraph, withLabels=True, size=size, color=color)
+
+    print(f"DefaultGraph Nodes: {len(defaultGraph.nodes())}")
+    print(f"DefaultGraph Edges: {len(defaultGraph.edges())}")
+
+    print(f"EdgeGraph Nodes: {len(edgeGraph.nodes())}")
+    print(f"EdgeGraph Edges: {len(edgeGraph.edges())}")
 
 
 

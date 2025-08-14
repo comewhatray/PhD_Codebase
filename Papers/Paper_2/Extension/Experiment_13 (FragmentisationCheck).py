@@ -18,14 +18,14 @@ stages = [
             # "includeRests": True
         }
     },
-    # {
-    #     "file": "Code_Stages/1:MIDI_Representations/ProximityGraphRepresentation.py",
-    #     "options": {
-    #         "function": "karystinaiosModification",
-    #         "saveType": ".gpickle",
-    #         "shortestConsecutiveEvent": True
-    #     }
-    # },
+    {
+        "file": "Code_Stages/1:MIDI_Representations/ProximityGraphRepresentation.py",
+        "options": {
+            "function": "karystinaiosModification",
+            "saveType": ".gpickle",
+            "shortestConsecutiveEvent": True
+        }
+    }
     # {
     #     "file": "Code_Stages/2:Pattern_Extraction/SimplePathPatternExtraction.py",
     #     "options": {
@@ -69,8 +69,9 @@ aggregationDetails = {
                 "saveResultsLabel": experimentName,
                 "additionalParameters": {
                     "minimumOverlap": 0,
-                    "fragmentisationCheck": True
-                }
+                    "fragmentisationCheck": 3
+                },
+                "debugging": False
                 # "LookUpTable": CWR.openFile("Papers/Paper_2/LookUpTables/SzetoClassicalTest.json")
             },
         }
