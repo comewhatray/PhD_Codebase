@@ -283,8 +283,8 @@ def convertGraphToMultiLineString(graph, absoluteValue=False):
 
     # VIS.visualiseSpatialGraph(graph, withLabels=True)
 
+    # This gets a list of sequential events
     joinList = []
-
     for edge in graph.adj:
         # print(f"{edge} -> {graph.adj[edge]}")
         for key in graph.adj[edge]:
@@ -300,19 +300,23 @@ def convertGraphToMultiLineString(graph, absoluteValue=False):
 
     multiLinesList = []
     for joinPair in joinList:
+
+        # If the list is empty add a starting line string
         if len(multiLinesList) == 0:
-
             multiLinesList.append([joinPair[0], joinPair[1]])
-        else:
 
+        # Otherwise iterate through what already exists and see if it can be connected to it
+        else:
             present = False
 
             for linestring in multiLinesList:
 
-                if joinPair[0] in linestring:
+                if joinPair[0] == linestring[-1]:
                     present = True
+                    # linestring.append(joinPair[0])
                     linestring.append(joinPair[1])
 
+            # If there is nothing to connect it to create a new starting line
             if not present:
                 multiLinesList.append([joinPair[0], joinPair[1]])
 

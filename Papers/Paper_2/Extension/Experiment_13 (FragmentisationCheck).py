@@ -15,7 +15,7 @@ stages = [
         "options": {
             "function": "convertMidiToPoints",
             "saveType": ".json",
-            # "includeRests": True
+            "includeRests": True
         }
     },
     {

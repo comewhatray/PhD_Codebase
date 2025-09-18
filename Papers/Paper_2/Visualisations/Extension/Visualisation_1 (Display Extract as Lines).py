@@ -77,9 +77,9 @@ def main():
 
         # Display Line Representation
         # -----------------------------------------------
-        plt.title("Line Generation")
-        VIS.visualiseJsonAsLines(fileInfo,{"alternateColours": ["Blue", "Orange"]})
-
+        # plt.title("Line Generation")
+        # VIS.visualiseJsonAsLines(fileInfo,{"alternateColours": ["Blue", "Orange"]})
+        VIS.visualiseJsonAsLines(fileInfo)
 
         multiString = BG.generateMultiLineStringFromExtract(fileInfo)
 

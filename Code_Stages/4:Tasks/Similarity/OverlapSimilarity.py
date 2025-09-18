@@ -34,6 +34,7 @@ options = {
     "comparisonBuffer": 1,
     "saveResultsLabel": "DefaultPath",
     "debugging": False,
+    "simplifiedSave": True,
     "additionalParameters": {
         "minimumOverlap": 0,
         "framgmentisationCheck": 0,
@@ -454,7 +455,7 @@ def overlapQueryExperiment(dataset):
                         print(f"Max Score: {resultsStats['maxScore']}")
                         # VIS.visualiseShape(resultsStats["maxQuery"])
                         # VIS.visualiseShape(resultsStats["maxComparison"])
-                        VIS.visualiseOverlappingPolygonsUsingData(resultsStats['maxQuery'], resultsStats["maxComparison"], resultsStats["maxOverlap"])
+                        # VIS.visualiseOverlappingPolygonsUsingData(resultsStats['maxQuery'], resultsStats["maxComparison"], resultsStats["maxOverlap"])
 
                     if options["interimSave"]:
                         CWR.ensureDirectory(saveDirectory)
@@ -463,10 +464,15 @@ def overlapQueryExperiment(dataset):
                             "queryTotal": resultsStats["queryTotal"],
                             "maxScore": resultsStats["maxScore"],
                             "pieceLength": resultsStats["pieceLength"],
-                            "overlapScoreList": resultsStats["overlapScoreList"]
+                            "overlapScoreList": resultsStats["overlapScoreList"],
+                            "fragmentedScoreList": resultsStats["fragmentedScoreList"]
 
                         }
-                        CWR.saveFile(f"{saveDirectory}/{currentFile}.json", simplifiedStats)
+                        if options["simplifiedSave"]:
+                            CWR.saveFile(f"{saveDirectory}/{currentFile}.json", simplifiedStats)
+
+                        else:
+                            CWR.saveFile(f"{saveDirectory}/{currentFile}.json", resultsStats)
 
                     # fileName = CWR.getFileNameFromPath(work)
                     # experimentResults[label][grouping][fileName] = resultsStats["maxScore"]
@@ -716,6 +722,12 @@ def isBetween(query, start, end):
 
 def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
 
+
+    lengthStart = tuneGraph.nodes[0]['position']
+    endPosition = tuneGraph.nodes[len(tuneGraph.nodes)-1]
+    lengthEnd = endPosition['position'] + endPosition['duration']
+    scorebord["pieceLength"] = lengthEnd - lengthStart
+
     if scorebord["transformedQuery"] is None:
         # TODO choose one line or the other
         scorebord["transformedQuery"]  = BG.convertGraphToMultiLineString(queryGraph)
@@ -815,6 +827,11 @@ def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
 def linesQueryTuneComparison(queryLines, tuneLines, scorebord):
 
     sanityList = []
+
+    lengthStart = tuneLines[0]['position']
+    lengthEnd = tuneLines[-1]['position'] + tuneLines[-1]['duration']
+    scorebord["pieceLength"] = lengthEnd - lengthStart
+
     # First transoforms the query to start at the origin
     # The is none part prevents it from performing this step more than once
     if scorebord["transformedQuery"] is None:
@@ -927,6 +944,7 @@ def linesQueryTuneComparison(queryLines, tuneLines, scorebord):
         for result in sanityList:
             VIS.visualiseOverlappingPolygonsUsingData(result[0], result[1], result[2])
             print(f"Similarity: {result[3]}")
+
     return
 
 # Transforms new dataset format into old one

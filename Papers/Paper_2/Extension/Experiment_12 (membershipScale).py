@@ -71,6 +71,8 @@ aggregationDetails = {
                 "additionalParameters": {
                     "minimumOverlap": 0.7,
                 }
+
+
                 # "LookUpTable": CWR.openFile("Papers/Paper_2/LookUpTables/SzetoClassicalTest.json")
             },
         }

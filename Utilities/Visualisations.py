@@ -2,12 +2,35 @@ from Utilities import ComeWhatRayUtil as CWR
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+import importlib
 from Utilities import BoundingGenerator as BG
 from Utilities.ShapeVisualisation import visualisePolygon
+extraction =  "Code_Stages/0:MIDI_Interface/MIDI_Extraction.py"
+geometry = "Code_Stages/1:MIDI_Representations/GeometricRepresentation.py"
 
 plotDetails = {
     "alternateColours": None
 }
+
+def visualiseMIDIAsLines(midiLocation):
+
+
+    processName = CWR.removeExtension(extraction)
+    processName = processName.replace('/', '.')
+
+    stage = importlib.import_module(processName)
+    results = stage.startProcess(midiLocation, "convertMidiToPoints")
+
+    # processName = CWR.removeExtension(geometry)
+    # processName = processName.replace('/', '.')
+    # stage = importlib.import_module(processName)
+    # results = stage.startProcess(midiLocation, "convertMidiToPoints")
+
+
+
+    visualiseJsonAsLines(results)
+
+    return results
 
 # Intakes json of points
 # [{"pitch": 67.0, "position": 0.5, "duration": 0.5, "barBeat": 0.5}, {"pitch": 67.0, "position": 1.0, "duration": 0.5, "barBeat": 1.0}, ...]
