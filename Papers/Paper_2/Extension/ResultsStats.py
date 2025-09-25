@@ -18,11 +18,12 @@ import seaborn as sns
 fileLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment8Results.json"
 # startFileLocation = "ExperimentResults/Experiment8/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment9 (BreathingRoom)/AllSimilarity"
-# startFileLocation = "ExperimentResults/Experiment12 (membershipScale)/AllSimilarity"
+startFileLocation = "ExperimentResults/Experiment12 (membershipScale)/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment13 (FragmentisationCheck)/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment14 (FragAndMember)/AllSimilarity"
-startFileLocation = "ExperimentResults/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
+# startFileLocation = "ExperimentResults/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
 
+experimentName = startFileLocation.split("/")[1]
 queryLocations = "LakhDataset/ExperimentDataset/Queries"
 precissionAt = 10
 
@@ -392,6 +393,7 @@ def thresholdResults(threshold):
 
     df = pd.DataFrame(precisionTransform, columns=["Label", "Precision"])
 
+    plt.suptitle(experimentName)
     plt.title(f"Precision at {precissionAt}")
     sns.barplot(x="Label", y="Precision", data=df)
     plt.xticks(rotation=90)

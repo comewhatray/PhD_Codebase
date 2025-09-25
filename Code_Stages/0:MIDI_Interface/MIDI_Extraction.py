@@ -6,9 +6,11 @@ e['directoryScratch'] = ""
 
 Options = {
     "decimalPrecision": 3,
-    "includeRests": False
+    "includeRests": False,
+    "debugging": False
 }
 
+# Hard coded note name conversions to numbers
 noteToNumber = {
     'A': 9,
     'B': 11,
@@ -195,11 +197,12 @@ def sortPoints(pointSet):
             afterPos = value['position']
             afterPit = value['pitch']
 
-        if weG:
-            print('Notes are in order')
+        if Options["debugging"]:
+            if weG:
+                print('Notes are in order')
 
-        else:
-            print('Notes are not in order')
+            else:
+                print('Notes are not in order')
 
     return temp
 

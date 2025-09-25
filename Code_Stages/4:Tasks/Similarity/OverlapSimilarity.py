@@ -37,8 +37,8 @@ options = {
     "simplifiedSave": True,
     "additionalParameters": {
         "minimumOverlap": 0,
-        "framgmentisationCheck": 0,
-        "fragments": None
+        "fragmentationCheck": 0,
+        "fragments": None,
     }
 }
 
@@ -644,7 +644,7 @@ def allignmentSimilarity(query, pattern):
 def fragmentedSimilarity(queryGraph, queryLength, pattern, transX, transY):
 
     fragmentScores = None
-    numFragments = options["additionalParameters"]["fragmentisationCheck"]
+    numFragments = options["additionalParameters"]["fragmentationCheck"]
 
     if numFragments > 0:
         intervalSize = queryLength/numFragments
@@ -781,8 +781,9 @@ def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
                     break
 
         subGraph = tuneGraph.subgraph(subGraphList)
-
-        fragmentedScores = fragmentedSimilarity(queryGraph, scorebord["queryLength"], subGraph, transX, transY)
+        fragmentedScores = 0
+        if options["additionalParameters"]["fragmentationCheck"] > 0:
+            fragmentedScores = fragmentedSimilarity(queryGraph, scorebord["queryLength"], subGraph, transX, transY)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
