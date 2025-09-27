@@ -1,12 +1,13 @@
 from Utilities import ComeWhatRayUtil as CWR
-import os
-import shutil
 from Code_Stages import ExperimentProcess as EP
+from Utilities import parrallelism as PM
+
 
 experimentName = "Experiment_16 (Kyna_Membership).py"
 workspace = "Papers/Paper_2/Extension/ExtensionWorkspace"
 QueryConfiguration = "LakhDataset/Configs/Lakh20Experiment(Queries).json"
 DatasetConfiguration = "LakhDataset/Configs/Lakh20Experiment(Dataset).json"
+
 
 
 stages = [
@@ -79,6 +80,61 @@ aggregationDetails = {
 }
 
 
+# def threadedAnalysis(allQuery, allData, config):
+#
+#
+#
+#     query_keys = [k for k in allQuery.keys() if k != 'directory']
+#     dataset_keys = [k for k in allData.keys() if k != 'directory']
+#
+#     queryLabelList = []
+#     # Getting all the queries for an individual label
+#     for label in allQuery['Initial']:
+#
+#         singleQuery = {
+#             'directory': allQuery['directory']
+#         }
+#
+#         for query_key in query_keys:
+#             singleQuery[query_key] = {label: allQuery[query_key][label]}
+#
+#         queryLabelList.append(singleQuery)
+#
+#     # Getting all data for each label
+#     datasetLabelList = []
+#     for label in allData['Initial']:
+#
+#         singleData = {
+#             'directory': allData['directory']
+#         }
+#
+#         for query_key in dataset_keys:
+#             singleData[query_key] = {label: allData[query_key][label]}
+#
+#         datasetLabelList.append(singleData)
+#
+#     comparison_args = []
+#
+#     for query in queryLabelList:
+#         for data in datasetLabelList:
+#             comparisonData = (query, data, config)
+#             comparison_args.append(comparisonData)
+#
+#     with ProcessPoolExecutor(max_workers=maxWorkers) as executor:
+#         results = list(executor.map(singleComparison, comparison_args))
+#
+#
+#
+#
+# def singleComparison(args):
+#
+#     query = args[0]
+#     datum = args[1]
+#     config = args[2]
+#
+#     EP.queryAggregationExperiment(query, datum, config)
+
+
 if __name__ == '__main__':
 
     # Query Run
@@ -97,5 +153,12 @@ if __name__ == '__main__':
     # Save the details of the experiment
     CWR.saveFile(datasetSaveLoc, locationDetails)
 
-    experimentResults = EP.queryAggregationExperiment(CWR.openFile(querySaveLoc), CWR.openFile(datasetSaveLoc), aggregationDetails)
+    queryDeets = CWR.openFile(querySaveLoc)
+    datasetDeets = CWR.openFile(datasetSaveLoc)
+
+
+
+    PM.threadedAnalysis(queryDeets, datasetDeets, aggregationDetails)
+
+    # experimentResults = EP.queryAggregationExperiment(CWR.openFile(querySaveLoc), CWR.openFile(datasetSaveLoc), aggregationDetails)
     # CWR.saveFile("ExperimentResults/ExtensionExperiment4/test.json", aggregationDetails["Stages"][0]['options']["LookUpTable"])

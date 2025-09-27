@@ -35,6 +35,7 @@ options = {
     "saveResultsLabel": "DefaultPath",
     "debugging": False,
     "simplifiedSave": True,
+    "threading": True,
     "additionalParameters": {
         "minimumOverlap": 0,
         "fragmentationCheck": 0,
@@ -363,8 +364,9 @@ def overlapQueryExperiment(dataset):
     experimentResults = {}
 
     for label in queryDataLocation[queryLastLocation]:
-        print(CWR.largeSpacer)
-        print(f"Query Label: {label}")
+        if not options['threading']:
+            print(CWR.largeSpacer)
+            print(f"Query Label: {label}")
         queryNumCount = 1
         queryNumTotal = len(queryDataLocation[queryLastLocation][label])
 
@@ -372,8 +374,9 @@ def overlapQueryExperiment(dataset):
             experimentResults[label] = {}
 
         for query in queryDataLocation[queryLastLocation][label]:
-            print(CWR.largeSpacer)
-            print(f"Query Location: {query}")
+            if not options['threading']:
+                print(CWR.largeSpacer)
+                print(f"Query Location: {query}")
             groupingCount = 1
             groupingTotal = len(corpusLocation[corpusLastLocation])
 
@@ -384,8 +387,9 @@ def overlapQueryExperiment(dataset):
             # queryLength = queryMultiString.bounds[2]
 
             for grouping in corpusLocation[corpusLastLocation]:
-                print(CWR.largeSpacer)
-                print(f"Work Label: {grouping}")
+                if not options['threading']:
+                    print(CWR.largeSpacer)
+                    print(f"Work Label: {grouping}")
                 workCount = 1
                 workTotal = len(corpusLocation[corpusLastLocation][grouping])
 
@@ -393,19 +397,18 @@ def overlapQueryExperiment(dataset):
                     experimentResults[label][grouping] = {}
 
                 for work in corpusLocation[corpusLastLocation][grouping]:
-                    print(CWR.largeSpacer)
-                    print(f"Work Location: {work}")
+                    if not options['threading']:
+                        print(CWR.largeSpacer)
+                        print(f"Work Location: {work}")
                     workData = CWR.openFile(work)
 
-
-
-
-                    print(CWR.extraLargeSpacer)
-                    print(f"Query Label: ({queryLabelCount}/{queryLabelTotal})")
-                    print(f"Query: ({queryNumCount}/{queryNumTotal})")
-                    print(f"Work Label: ({groupingCount}/{groupingTotal})")
-                    print(f"Work: ({workCount}/{workTotal})")
-                    print(CWR.smallSpacer)
+                    if not options['threading']:
+                        print(CWR.extraLargeSpacer)
+                        print(f"Query Label: ({queryLabelCount}/{queryLabelTotal})")
+                        print(f"Query: ({queryNumCount}/{queryNumTotal})")
+                        print(f"Work Label: ({groupingCount}/{groupingTotal})")
+                        print(f"Work: ({workCount}/{workTotal})")
+                        print(CWR.smallSpacer)
                     workCount += 1
                     # print(f"Sub Query: ({queryCount}/{querySize})")
                     saveDirectory = f"ExperimentResults/{options['saveResultsLabel']}/AllSimilarity/{label}/{grouping}"
@@ -452,10 +455,11 @@ def overlapQueryExperiment(dataset):
                         methodInstanciated(queryData ,workData, resultsStats)
 
                     if len(workData) != 0:
-                        print(f"Max Score: {resultsStats['maxScore']}")
-                        # VIS.visualiseShape(resultsStats["maxQuery"])
-                        # VIS.visualiseShape(resultsStats["maxComparison"])
-                        # VIS.visualiseOverlappingPolygonsUsingData(resultsStats['maxQuery'], resultsStats["maxComparison"], resultsStats["maxOverlap"])
+                        if not options['threading']:
+                            print(f"Max Score: {resultsStats['maxScore']}")
+                            # VIS.visualiseShape(resultsStats["maxQuery"])
+                            # VIS.visualiseShape(resultsStats["maxComparison"])
+                            # VIS.visualiseOverlappingPolygonsUsingData(resultsStats['maxQuery'], resultsStats["maxComparison"], resultsStats["maxOverlap"])
 
                     if options["interimSave"]:
                         CWR.ensureDirectory(saveDirectory)

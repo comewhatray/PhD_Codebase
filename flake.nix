@@ -8,16 +8,20 @@
   outputs = { nixpkgs, ... }:
     let
       system = "aarch64-darwin";
-      pkgs = nixpkgs.legacyPackages.;
+      pkgs = nixpkgs.legacyPackages.${system};
     in
     {
-      devShells..default = pkgs.mkShell {
+      devShells.${system}.default = pkgs.mkShell {
         buildInputs = with pkgs; [
-          python311
-          python311Packages.pip
-          python311Packages.setuptools
-          python311Packages.wheel
+          python312
+          python312Packages.pip
           # Add your project dependencies here:
+	  #python312Packages.numpy
+	  #python312Packages.pandas
+          #python312Packages.matplotlib
+	  #python312Packages.networkx
+	  #python312Packages.shapely
+	  #python312Packages.scipy
         ];
 
         shellHook = ''
