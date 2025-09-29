@@ -2,11 +2,14 @@ from Utilities import ComeWhatRayUtil as CWR
 import os
 import shutil
 from Code_Stages import ExperimentProcess as EP
+from Utilities import parrallelism as PM
 
 experimentName = "Experiment13 (FragmentisationCheck)"
 workspace = "Papers/Paper_2/Extension/ExtensionWorkspace"
 QueryConfiguration = "LakhDataset/Configs/Lakh20Experiment(Queries).json"
 DatasetConfiguration = "LakhDataset/Configs/Lakh20Experiment(Dataset).json"
+
+multiProcess = True
 
 
 stages = [
@@ -43,7 +46,8 @@ queryDetails = {
     "WorkspaceLocation": workspace,
     "Dataset_Configuration": QueryConfiguration,
     # "Dataset_Configuration": "LakhDataset/Configs/polyphonicQuery.json",
-    "Stages": stages
+    "Stages": stages,
+    "threading": multiProcess
 }
 
 datasetDetails = {
@@ -54,8 +58,8 @@ datasetDetails = {
     "WorkspaceLocation": workspace,
     "Dataset_Configuration": DatasetConfiguration,
     # "Dataset_Configuration": "problemConfig.json",
-    "Stages": stages
-    # "Stages": datasetStages
+    "Stages": stages,
+    "threading": multiProcess
 }
 
 aggregationDetails = {
@@ -69,9 +73,10 @@ aggregationDetails = {
                 "saveResultsLabel": experimentName,
                 "additionalParameters": {
                     "minimumOverlap": 0,
-                    "fragmentisationCheck": 3
+                    "fragmentationCheck": 3
                 },
-                "debugging": False
+                "debugging": False,
+                "threading": multiProcess,
                 # "LookUpTable": CWR.openFile("Papers/Paper_2/LookUpTables/SzetoClassicalTest.json")
             },
         }
@@ -97,5 +102,13 @@ if __name__ == '__main__':
     # Save the details of the experiment
     CWR.saveFile(datasetSaveLoc, locationDetails)
 
-    experimentResults = EP.queryAggregationExperiment(CWR.openFile(querySaveLoc), CWR.openFile(datasetSaveLoc), aggregationDetails)
-    # CWR.saveFile("ExperimentResults/ExtensionExperiment4/test.json", aggregationDetails["Stages"][0]['options']["LookUpTable"])
+    # Prep for MultiProcess
+    queryDeets = CWR.openFile(querySaveLoc)
+    datasetDeets = CWR.openFile(datasetSaveLoc)
+
+    # MultiProcess
+    if multiProcess:
+        PM.threadedAnalysis(queryDeets, datasetDeets, aggregationDetails)
+    else:
+        # SingleProcess
+        experimentResults = EP.queryAggregationExperiment(CWR.openFile(querySaveLoc), CWR.openFile(datasetSaveLoc), aggregationDetails)

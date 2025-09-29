@@ -18,14 +18,15 @@ import seaborn as sns
 fileLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment8Results.json"
 # startFileLocation = "ExperimentResults/Experiment8/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment9 (BreathingRoom)/AllSimilarity"
-startFileLocation = "ExperimentResults/Experiment12 (membershipScale)/AllSimilarity"
-# startFileLocation = "ExperimentResults/Experiment13 (FragmentisationCheck)/AllSimilarity"
+# startFileLocation = "ExperimentResults/Experiment12 (membershipScale)/AllSimilarity"
+startFileLocation = "ExperimentResults/Experiment13 (FragmentisationCheck)/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment14 (FragAndMember)/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
 
 experimentName = startFileLocation.split("/")[1]
 queryLocations = "LakhDataset/ExperimentDataset/Queries"
 precissionAt = 10
+showInter = False
 
 def main():
     # maxResults()
@@ -244,17 +245,18 @@ def thresholdResults(threshold):
 
         for queryLoc in queries:
             if query in queryLoc:
-                VIS.visualiseMIDIAsLines(queryLocations+"/"+queryLoc)
+                if showInter:
+                    VIS.visualiseMIDIAsLines(queryLocations+"/"+queryLoc)
 
 
 
-
-        sns.stripplot(dataFrameData)
-        plt.xticks(rotation=90)
-        plt.title(f"Recall: {len(dataFrameData[nameMapping[query]])}/{resultsTracking[query][query]['total']}")
-        plt.suptitle(f"Query {nameMapping[query]}: {query}")
-        plt.show()
-        print(dataFrameData)
+        if showInter:
+            sns.stripplot(dataFrameData)
+            plt.xticks(rotation=90)
+            plt.title(f"Recall: {len(dataFrameData[nameMapping[query]])}/{resultsTracking[query][query]['total']}")
+            plt.suptitle(f"Query {nameMapping[query]}: {query}")
+            plt.show()
+            print(dataFrameData)
 
 
 
@@ -403,83 +405,6 @@ def thresholdResults(threshold):
     print(nameMapping)
 
 
-        # Checks if the label highest average comparison is equal to the query label
-        # match = False
-        # if highestComparison == queryLabel:
-        #     match = True
-        #
-        # if match:
-        #     trueCount += 1
-        # else:
-        #     falseCount += 1
-        #
-        # # Prints out the query label, its highest average label if it was a match and its average and its standard deviations
-        # print(
-        #     f"Highest Similarity: {queryLabel} -> {highestComparison} | "
-        #     f"Match: {match} | "
-        #     f"Average: {resultsTracking[queryLabel][highestComparison]['average']} | "
-        #     f"StdDev: {resultsTracking[queryLabel][highestComparison]['stdDev']}")
-        #
-        #
-        # # get the
-        # for tuple in orderingDictionary[queryLabel]:
-        #     averagePosition[queryLabel][tuple[0]]["averagingList"].append(orderingDictionary[queryLabel].index(tuple))
-        #     # The next line is inelegant but serves as duplicant removal so if there exists duplicant they don't all score the lowest value
-        #     orderingDictionary[queryLabel][orderingDictionary[queryLabel].index(tuple)] = None
-        #
-        #
-        # for comparison in averagePosition[queryLabel]:
-        #     if len(averagePosition[queryLabel][comparison]["averagingList"]) > 0:
-        #         averagePosition[queryLabel][comparison]["average"] = statistics.mean(averagePosition[queryLabel][comparison]["averagingList"])
-        #     if len(averagePosition[queryLabel][comparison]["averagingList"]) > 1:
-        #         averagePosition[queryLabel][comparison]["stdDev"] = statistics.stdev(averagePosition[queryLabel][comparison]["averagingList"])
-
-
-
-
-    # print(f"True Count: {trueCount}")
-    # print(f"False Count: {falseCount}")
-    #
-    # lowestPositions = []
-    #
-    # for queryLabel in averagePosition:
-    #     print(CWR.largeSpacer)
-    #     lowestPosition = None
-    #     lowestTuple = None
-    #
-    #     for comparison in averagePosition[queryLabel]:
-    #         if lowestPosition is None:
-    #             lowestPosition = 10000
-    #
-    #
-    #         comparisonAverage = averagePosition[queryLabel][comparison]['average']
-    #         if comparisonAverage < lowestPosition:
-    #             lowestTuple = (queryLabel, comparison, comparisonAverage, averagePosition[queryLabel][comparison]['stdDev'])
-    #             lowestPosition = comparisonAverage
-    #
-    #         print(f"Average position {queryLabel} -> {comparison} | Avg {comparisonAverage} | stdDev: {averagePosition[queryLabel][comparison]['stdDev']}")
-    #     lowestPositions.append(lowestTuple)
-    #
-    # print(CWR.extraLargeSpacer)
-    # print("Lowest average positions")
-    # print(CWR.extraLargeSpacer)
-    # desiredOutcome = 0
-    # undesiredOutcome = 0
-    # for x in lowestPositions:
-    #     # print(x)
-    #
-    #     match = False
-    #     if x[0] == x[1]:
-    #         desiredOutcome += 1
-    #         match = True
-    #
-    #     else:
-    #         undesiredOutcome += 1
-    #
-    #     print(f"Lowest Position {x[0]} -> {x[1]} | Match: {match} | AVG: {x[2]} | stdDev: {x[3]}")
-    #
-    # print(f"Desired Outcome: {desiredOutcome}")
-    # print(f"Undesired Outcome: {undesiredOutcome}")
 
     return
 

@@ -25,13 +25,16 @@ def printCounter(startText, current, total):
 # ----------------------------------------------------------------------------------------------------
 
 # Function to save files (Append file types as necessary )
-def saveFile(fileLocation, file, delimiter=None):
-    print(midSpacer)
+def saveFile(fileLocation, file, delimiter=None, printDisplay=True):
+    if printDisplay:
+        print(midSpacer)
     if "." in fileLocation:
-        print("Saving File: " + fileLocation)
+        if printDisplay:
+            print("Saving File: " + fileLocation)
     else:
         print("No file Type Specified in: " + fileLocation)
-    print(midSpacer)
+    if printDisplay:
+        print(midSpacer)
 
     # Json files
     if ".json" in fileLocation:
@@ -188,8 +191,9 @@ def updateOldDictionaryEntriesWithNewDictionaryEntries(oldDictionary, newDiction
                 if isinstance(oldDictionary[option], dict):
 
                     # Update the oldSubDictionary
-                    for subOption in newDictionary[option]:
-                        oldDictionary[option][subOption] = newDictionary[option][subOption]
+                    for subOption in oldDictionary[option]:
+                        if subOption in newDictionary[option]:
+                            oldDictionary[option][subOption] = newDictionary[option][subOption]
                 # Otherwise just update the old value with the new one
                 else:
                     oldDictionary[option] = newDictionary[option]

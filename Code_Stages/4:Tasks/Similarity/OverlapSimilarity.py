@@ -66,7 +66,7 @@ def MaxOverlapSimilarity(dataset):
     dataset = DM.convertDatasetToOldFormat(dataset)
 
     for piece in dataset:
-        openedPiece = CWR.openFile(piece['Location'])
+        openedPiece = CWR.openFile(piece['Location'], printDisplay=not options["threading"])
 
         for comparedPiece in dataset[dataset.index(piece):]:
 
@@ -74,7 +74,7 @@ def MaxOverlapSimilarity(dataset):
             totalPatterns = len(openedPiece)
             patternCounter = 1
 
-            comparisonPiece = CWR.openFile(comparedPiece["Location"])
+            comparisonPiece = CWR.openFile(comparedPiece["Location"], printDisplay=not options["threading"])
 
             for pattern1 in openedPiece:
                 maxSim = 0
@@ -129,7 +129,7 @@ def totalPatternOverlapSimilarity(dataset):
     dataset = DM.convertDatasetToOldFormat(dataset)
 
     for piece in dataset:
-        openedPiece = CWR.openFile(piece['Location'])
+        openedPiece = CWR.openFile(piece['Location'], printDisplay=not options["threading"])
 
         for comparedPiece in dataset[dataset.index(piece):]:
 
@@ -140,7 +140,7 @@ def totalPatternOverlapSimilarity(dataset):
             patternCounter = 1
             newPatterns = 0
 
-            comparisonPiece = CWR.openFile(comparedPiece["Location"])
+            comparisonPiece = CWR.openFile(comparedPiece["Location"], printDisplay=not options["threading"])
 
             for pattern1 in openedPiece:
                 totalPatternSim = 0
@@ -177,7 +177,7 @@ def totalPatternOverlapSimilarity(dataset):
             correlationMatrix[dataset.index(piece), dataset.index(comparedPiece)] = normalSim
 
             if options["LookUpTable"] is not None:
-                CWR.saveFile("Papers/Paper_2/LookUpTables/SzetoClassicalTestEnd.json", options["LookUpTable"])
+                CWR.saveFile("Papers/Paper_2/LookUpTables/SzetoClassicalTestEnd.json", options["LookUpTable"], printDisplay=not options["threading"])
 
     return correlationMatrix
     # workspace = details["ExperimentDirectories"]["SimilarityWorkspace"]
@@ -197,7 +197,7 @@ def thresholdPatternOverlapSimilarity(dataset):
     numberofComparisons = 0
     partialMatches = 0
     for piece in dataset:
-        openedPiece = CWR.openFile(piece['Location'])
+        openedPiece = CWR.openFile(piece['Location'], printDisplay=not options["threading"])
 
         for comparedPiece in dataset[dataset.index(piece):]:
 
@@ -209,7 +209,7 @@ def thresholdPatternOverlapSimilarity(dataset):
             patternCounter = 1
             newPatterns = 0
 
-            comparisonPiece = CWR.openFile(comparedPiece["Location"])
+            comparisonPiece = CWR.openFile(comparedPiece["Location"], printDisplay=not options["threading"])
 
             for pattern1 in openedPiece:
                 totalPatternSim = 0
@@ -300,8 +300,8 @@ def queryExperiment(dataset):
                     print(CWR.largeSpacer)
                     print(f"Work Location: {work}")
 
-                    queryData = CWR.openFile(query)
-                    workData = CWR.openFile(work)
+                    queryData = CWR.openFile(query, printDisplay=not options["threading"])
+                    workData = CWR.openFile(work, printDisplay=not options["threading"])
 
                     queryCount = 1
                     querySize = len(queryData)
@@ -380,7 +380,7 @@ def overlapQueryExperiment(dataset):
             groupingCount = 1
             groupingTotal = len(corpusLocation[corpusLastLocation])
 
-            queryData = CWR.openFile(query)
+            queryData = CWR.openFile(query, printDisplay=not options["threading"])
             # queryMultiString = BG.convertGraphToMultiLineString(queryData)
             # print(queryPolygons)
             # VIS.visualiseShape(queryMultiString)
@@ -400,7 +400,7 @@ def overlapQueryExperiment(dataset):
                     if not options['threading']:
                         print(CWR.largeSpacer)
                         print(f"Work Location: {work}")
-                    workData = CWR.openFile(work)
+                    workData = CWR.openFile(work, printDisplay=not options["threading"])
 
                     if not options['threading']:
                         print(CWR.extraLargeSpacer)
@@ -416,7 +416,8 @@ def overlapQueryExperiment(dataset):
 
                     # If the data already exists we can move on to the next one
                     if os.path.exists(f"{saveDirectory}/{currentFile}.json"):
-                        print("Data already exists")
+                        if not options["threading"]:
+                            print("Data already exists")
                         continue
 
                     # turns a piece into a multiLineString Geometry (All the lines are notes)
@@ -448,7 +449,8 @@ def overlapQueryExperiment(dataset):
                     # Goes through each line
 
                     if len(workData) == 0:
-                        print("No data")
+                        if not options["threading"]:
+                            print("No data")
 
                     else:
                         methodInstanciated = getattr(this_module, options['queryType'])
@@ -473,10 +475,10 @@ def overlapQueryExperiment(dataset):
 
                         }
                         if options["simplifiedSave"]:
-                            CWR.saveFile(f"{saveDirectory}/{currentFile}.json", simplifiedStats)
+                            CWR.saveFile(f"{saveDirectory}/{currentFile}.json", simplifiedStats, printDisplay=not options["threading"])
 
                         else:
-                            CWR.saveFile(f"{saveDirectory}/{currentFile}.json", resultsStats)
+                            CWR.saveFile(f"{saveDirectory}/{currentFile}.json", resultsStats, printDisplay=not options["threading"])
 
                     # fileName = CWR.getFileNameFromPath(work)
                     # experimentResults[label][grouping][fileName] = resultsStats["maxScore"]
@@ -488,7 +490,7 @@ def overlapQueryExperiment(dataset):
 
 
     # print(query)
-    print(experimentResults)
+    # print(experimentResults)
     return experimentResults
 
 # Helper Methods
@@ -740,9 +742,10 @@ def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
 
 
     for lineNumber in range(scorebord["queryTotal"]):
-        if scorebord["queryCount"] % int(scorebord["queryTotal"] / 10) == 0:
-            print(f"Query: {scorebord['queryCount']}/{scorebord['queryTotal']}")
-            print(f"CurrentMaxScore: {scorebord['maxScore']}")
+        if not options['threading']:
+            if scorebord["queryCount"] % int(scorebord["queryTotal"] / 10) == 0:
+                print(f"Query: {scorebord['queryCount']}/{scorebord['queryTotal']}")
+                print(f"CurrentMaxScore: {scorebord['maxScore']}")
         line = tuneGraph.nodes[lineNumber]
 
         transX = line["position"]
@@ -856,9 +859,11 @@ def linesQueryTuneComparison(queryLines, tuneLines, scorebord):
     # going through all the notes
     for lineNumber in range(scorebord["queryTotal"]):
         # Print statemesnts for progress clarity
+
         if scorebord["queryCount"] % int(scorebord["queryTotal"] / 10) == 0:
-            print(f"Query: {scorebord['queryCount']}/{scorebord['queryTotal']}")
-            print(f"CurrentMaxScore: {scorebord['maxScore']}")
+            if not options["threading"]:
+                print(f"Query: {scorebord['queryCount']}/{scorebord['queryTotal']}")
+                print(f"CurrentMaxScore: {scorebord['maxScore']}")
         # line = BG.generateLineStringFromCoordinates(tuneLines[lineNumber])
 
         # Gets the coordinates of the current line

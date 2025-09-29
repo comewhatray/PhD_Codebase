@@ -1,13 +1,21 @@
-from Code_Stages import ExperimentProcess as EP
-from concurrent.futures import ProcessPoolExecutor
-import multiprocessing as mp
-from Utilities import ComeWhatRayUtil as CWR
+from networkx.algorithms.core import core_number
 
-maxWorkers = 25
+from Code_Stages import ExperimentProcess as EP
+# from concurrent.futures import ProcessPoolExecutor
+from parallelbar import progress_map
+
+
+maxWorkers = 24
+
+
+def singleComparison(args):
+    query = args[0]
+    datum = args[1]
+    config = args[2]
+
+    EP.queryAggregationExperiment(query, datum, config)
 
 def threadedAnalysis(allQuery, allData, config):
-
-    global progress_counter, total_comparisons
 
     query_keys = [k for k in allQuery.keys() if k != 'directory']
     dataset_keys = [k for k in allData.keys() if k != 'directory']
@@ -45,33 +53,16 @@ def threadedAnalysis(allQuery, allData, config):
             comparisonData = (query, data, config)
             comparison_args.append(comparisonData)
 
-    progress_counter = mp.Value('i', 0)
-    total_comparisons = len(comparison_args)
+    # For running the program without showing a progress bar
+    # with ProcessPoolExecutor(max_workers=maxWorkers) as executor:
+    #     results = list(executor.map(singleComparison, comparison_args))
+
+    # For running a program while running showing a progress bar
+    results = progress_map(singleComparison, comparison_args, n_cpu=maxWorkers, chunk_size=1)
+
+
+    print(f"Completed all comparisons!")
 
 
 
-    with ProcessPoolExecutor(max_workers=maxWorkers) as executor:
-        results = list(executor.map(singleComparison, comparison_args))
-
-    print(f"Completed all {total_comparisons} comparisons!")
-
-
-def singleComparison(args):
-
-    query = args[0]
-    datum = args[1]
-    config = args[2]
-
-    EP.queryAggregationExperiment(query, datum, config)
-
-    with progress_counter.get_lock():
-        progress_counter.value += 1
-        current = progress_counter.value
-
-        # Print progress every 1 completions (adjust frequency as needed)
-        if current % 100 == 0:
-            percentage = (current / total_comparisons) * 1
-            print(CWR.extraLargeSpacer)
-            print(f"Completed {current}/{total_comparisons} ({percentage:.1f}%)")
-            print(CWR.extraLargeSpacer)
 

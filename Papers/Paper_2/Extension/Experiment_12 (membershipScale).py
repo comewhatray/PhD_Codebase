@@ -2,6 +2,7 @@ from Utilities import ComeWhatRayUtil as CWR
 import os
 import shutil
 from Code_Stages import ExperimentProcess as EP
+from Utilities import parrallelism as PM
 
 experimentName = "Experiment12 (membershipScale)"
 # experimentName = "Experiment12 (TODELETE)"
@@ -98,5 +99,8 @@ if __name__ == '__main__':
     # Save the details of the experiment
     CWR.saveFile(datasetSaveLoc, locationDetails)
 
-    experimentResults = EP.queryAggregationExperiment(CWR.openFile(querySaveLoc), CWR.openFile(datasetSaveLoc), aggregationDetails)
+    queryDeets = CWR.openFile(querySaveLoc)
+    datasetDeets = CWR.openFile(datasetSaveLoc)
+    PM.threadedAnalysis(queryDeets, datasetDeets, aggregationDetails)
+    # experimentResults = EP.queryAggregationExperiment(CWR.openFile(querySaveLoc), CWR.openFile(datasetSaveLoc), aggregationDetails)
     # CWR.saveFile("ExperimentResults/ExtensionExperiment4/test.json", aggregationDetails["Stages"][0]['options']["LookUpTable"])

@@ -106,7 +106,6 @@ if __name__ == '__main__':
 
     queryDeets = CWR.openFile(querySaveLoc)
     datasetDeets = CWR.openFile(datasetSaveLoc)
-
     PM.threadedAnalysis(queryDeets, datasetDeets, aggregationDetails)
     # experimentResults = EP.queryAggregationExperiment(CWR.openFile(querySaveLoc), CWR.openFile(datasetSaveLoc), aggregationDetails)
     # CWR.saveFile("ExperimentResults/ExtensionExperiment4/test.json", aggregationDetails["Stages"][0]['options']["LookUpTable"])

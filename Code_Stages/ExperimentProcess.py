@@ -7,6 +7,7 @@ options = {
     "ExperimentName": "Testing",
     "WorkspaceLocation": "Code_Stages/TestingWorkspace",
     "Dataset_Configuration": "Code_Stages/defaultDataset/Configurations/defaultConfig.json",
+    "threading": True,
     "Stages": [
         # Default Experiment
         # First Extract the midi file into points
@@ -123,7 +124,8 @@ def batchExperiment(details=None):
 
 # For Experiments that wish to compile data into new knowledge
 def aggregationExperiment(locationsDict, details=None):
-    print("Aggregation Experiment")
+    if not options['threading']:
+        print("Aggregation Experiment")
     lastLocation = locationsDict[options["Stages"][-1]['options']['function']]
 
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, details)
@@ -146,7 +148,8 @@ def aggregationExperiment(locationsDict, details=None):
 
 
 def queryAggregationExperiment(queryDataLocation, datasetDataLocation, details=None):
-    print("Query Experiment")
+    if not options['threading']:
+        print("Query Experiment")
 
     queryLastLocation = list(queryDataLocation)[-1]
     datasetLastLocation = list(datasetDataLocation)[-1]
@@ -186,10 +189,12 @@ def queryAggregationExperiment(queryDataLocation, datasetDataLocation, details=N
 
 # Iteratively goes through the dataset
 def iterationStep(locationsDict, previousLocation, label, process):
-    print("Iterative step")
+    if not options['threading']:
+        print("Iterative step")
     processName = process['options']['function']
-    print(f"Process: {processName}")
-    print(CWR.midSpacer)
+    if not options['threading']:
+        print(f"Process: {processName}")
+        print(CWR.midSpacer)
 
     # Go through all locations for files
     for location in locationsDict[previousLocation][label]:
@@ -217,9 +222,11 @@ def iterationStep(locationsDict, previousLocation, label, process):
                 locationsDict[processName][label].append(fileLocation)
 
         else:
-            print("Results for current file already exist")
+            if not options["threading"]:
+                print(f"Results for {fileLocation} file already exist")
             if process['options']['saveType'] is not None:
                 locationsDict[processName][label].append(fileLocation)
+
 
 # Sends data to the relevant file
 def processTask(location, process):
