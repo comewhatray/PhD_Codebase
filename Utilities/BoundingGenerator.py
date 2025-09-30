@@ -320,6 +320,11 @@ def convertGraphToMultiLineString(graph, absoluteValue=False):
             if not present:
                 multiLinesList.append([joinPair[0], joinPair[1]])
 
+    # We add nodes that dont' have any pairs here at the end
+    for node in graph.nodes:
+        if node not in (item for sublist in multiLinesList for item in sublist):
+            multiLinesList.append([node])
+
     # print(multiLinesList)
 
     multiLineStringList = []

@@ -1,0 +1,23 @@
+{
+  "ExperimentName": "Testing",
+  "WorkspaceLocation": "Code_Stages/TestingWorkspace",
+  "Dataset_Configuration": "Code_Stages/defaultDataset/Configurations/defaultConfig.json",
+  "threading": true,
+  "Stages": [
+      {
+          "file": "Code_Stages/0:MIDI_Interface/MIDI_Extraction.py",
+           "options": {
+              "function": "convertMidiToPoints",
+              "saveType": ".json"
+           }
+       },
+
+      {
+          "file": "Code_Stages/1:MIDI_Representations/GeometricRepresentation.py",
+           "options": {
+              "function": "generateRepresentation",
+              "saveType": ".json"
+           }
+      }
+  ]
+}

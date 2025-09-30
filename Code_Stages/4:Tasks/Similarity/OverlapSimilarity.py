@@ -381,10 +381,6 @@ def overlapQueryExperiment(dataset):
             groupingTotal = len(corpusLocation[corpusLastLocation])
 
             queryData = CWR.openFile(query, printDisplay=not options["threading"])
-            # queryMultiString = BG.convertGraphToMultiLineString(queryData)
-            # print(queryPolygons)
-            # VIS.visualiseShape(queryMultiString)
-            # queryLength = queryMultiString.bounds[2]
 
             for grouping in corpusLocation[corpusLastLocation]:
                 if not options['threading']:
@@ -410,7 +406,7 @@ def overlapQueryExperiment(dataset):
                         print(f"Work: ({workCount}/{workTotal})")
                         print(CWR.smallSpacer)
                     workCount += 1
-                    # print(f"Sub Query: ({queryCount}/{querySize})")
+
                     saveDirectory = f"ExperimentResults/{options['saveResultsLabel']}/AllSimilarity/{label}/{grouping}"
                     currentFile = CWR.getFileNameFromPath(work)
 
@@ -419,11 +415,6 @@ def overlapQueryExperiment(dataset):
                         if not options["threading"]:
                             print("Data already exists")
                         continue
-
-                    # turns a piece into a multiLineString Geometry (All the lines are notes)
-                    # workMultiString = BG.generateMultiLineStringFromExtract(workData)
-
-                    # polygonList = workMultiString.geoms
 
                     resultsStats = {
                         "queryCount": 0,
@@ -437,16 +428,6 @@ def overlapQueryExperiment(dataset):
                         "overlapScoreList": [],
                         "fragmentedScoreList": []
                     }
-                    #
-                    # queryCount = 0
-                    # queryTotal = len(workData)
-                    # maxScore = 0
-                    # maxQuery = None
-                    # maxComparison = None
-                    # maxOverlap = None
-                    # overlapScoreList = []
-
-                    # Goes through each line
 
                     if len(workData) == 0:
                         if not options["threading"]:
@@ -480,17 +461,10 @@ def overlapQueryExperiment(dataset):
                         else:
                             CWR.saveFile(f"{saveDirectory}/{currentFile}.json", resultsStats, printDisplay=not options["threading"])
 
-                    # fileName = CWR.getFileNameFromPath(work)
-                    # experimentResults[label][grouping][fileName] = resultsStats["maxScore"]
-
-
                 groupingCount += 1
             queryNumCount += 1
         queryLabelCount += 1
 
-
-    # print(query)
-    # print(experimentResults)
     return experimentResults
 
 # Helper Methods
@@ -646,6 +620,7 @@ def allignmentSimilarity(query, pattern):
 
     return
 
+
 #                            (graph, number   , graph, number, number)
 def fragmentedSimilarity(queryGraph, queryLength, pattern, transX, transY):
 
@@ -718,6 +693,7 @@ def fragmentedSimilarity(queryGraph, queryLength, pattern, transX, transY):
     if options["debugging"]:
         print(f"Fragmented Similarity: {fragmentScores}")
     return fragmentScores
+
 #               node, num, num
 def isBetween(query, start, end):
 
@@ -746,6 +722,7 @@ def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
             if scorebord["queryCount"] % int(scorebord["queryTotal"] / 10) == 0:
                 print(f"Query: {scorebord['queryCount']}/{scorebord['queryTotal']}")
                 print(f"CurrentMaxScore: {scorebord['maxScore']}")
+
         line = tuneGraph.nodes[lineNumber]
 
         transX = line["position"]
@@ -956,22 +933,3 @@ def linesQueryTuneComparison(queryLines, tuneLines, scorebord):
             print(f"Similarity: {result[3]}")
 
     return
-
-# Transforms new dataset format into old one
-# def convertDataset(dataset):
-#     oldFormat = []
-#     for label in dataset:
-#
-#         for piece in dataset[label]:
-#
-#             Name = CWR.getFileNameFromPath(piece)
-#             Label = label
-#             Location = piece
-#
-#             oldFormat.append({
-#                 "Name": Name,
-#                 "Label": Label,
-#                 "Location": Location
-#             })
-#
-#     return oldFormat

@@ -1,13 +1,16 @@
 from Utilities import ComeWhatRayUtil as CWR
 import os.path
 import importlib
+from parallelbar import progress_map
 
 # The Default Experiment run if no details are provided
 options = {
     "ExperimentName": "Testing",
+    "ExperimentSignifier": "",
     "WorkspaceLocation": "Code_Stages/TestingWorkspace",
     "Dataset_Configuration": "Code_Stages/defaultDataset/Configurations/defaultConfig.json",
     "threading": True,
+    "maxWorkers": 24,
     "Stages": [
         # Default Experiment
         # First Extract the midi file into points
@@ -47,7 +50,8 @@ def batchExperiment(details=None):
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, details)
 
     # Get Workspace Name
-    options["WorkspaceLocation"] = CWR.appendDirectory(options["WorkspaceLocation"], options["ExperimentName"])
+    WorkspaceName = CWR.appendDirectory(options["WorkspaceLocation"], [options["ExperimentSignifier"], options["ExperimentName"]])
+    options["WorkspaceLocation"] = WorkspaceName
     # Deletes all contents of the default directory
     if options["ExperimentName"] == "Testing":
         CWR.deleteDirectory(options["WorkspaceLocation"])
@@ -82,14 +86,21 @@ def batchExperiment(details=None):
 
             # Create the current task key if it doesn't exist
             processFunction = process['options']['function']
+
             if processFunction not in LocationsDict:
                 LocationsDict[processFunction] = {}
 
             # Iterate through the labels
             for label in datasetConfig["Labels"]:
 
+                # TODO MultiProcess
                 # update midi location data
-                iterationStep(LocationsDict, previousLocation,label, process)
+
+                if not options["threading"]:
+                    iterationStep(LocationsDict, previousLocation, label, process)
+                else:
+                    multiProcessItterationStep(LocationsDict, previousLocation, label, process)
+
                 # update where to find the relevant midis
             previousLocation = process['options']['function']
 
@@ -189,9 +200,12 @@ def queryAggregationExperiment(queryDataLocation, datasetDataLocation, details=N
 
 # Iteratively goes through the dataset
 def iterationStep(locationsDict, previousLocation, label, process):
+
     if not options['threading']:
         print("Iterative step")
+
     processName = process['options']['function']
+
     if not options['threading']:
         print(f"Process: {processName}")
         print(CWR.midSpacer)
@@ -211,6 +225,7 @@ def iterationStep(locationsDict, previousLocation, label, process):
         # getting final location and saving data
         fileLocation = CWR.appendDirectory(saveLocation, fileName)
 
+        # If we don't want to multiProcess the approach
         if not os.path.exists(fileLocation):
 
             # checking that the results don't already exist
@@ -224,9 +239,66 @@ def iterationStep(locationsDict, previousLocation, label, process):
         else:
             if not options["threading"]:
                 print(f"Results for {fileLocation} file already exist")
+
             if process['options']['saveType'] is not None:
                 locationsDict[processName][label].append(fileLocation)
 
+
+def multiProcessItterationStep(locationsDict, previousLocation, label, process):
+
+    # List of arguments to be processed
+    multiProcessArgsList = []
+
+    # New Location to store the files to be worked on
+    processName = process['options']['function']
+
+    locationsDict[processName][label] = []
+
+    # Ensures each piece
+    saveLocation = CWR.appendDirectory(locationsDict['directory'], [label, process['options']['function']])
+    CWR.ensureDirectory(saveLocation)
+
+    # Going through each piece associated with the label
+    for location in locationsDict[previousLocation][label]:
+
+        # Getting the name of the file
+        fileName = CWR.getFileNameFromPath(location)
+        # Get the filetype
+        if process['options']['saveType'] is not None:
+            fileName += process['options']['saveType']
+
+        # getting final location to save to
+        finalLocation = CWR.appendDirectory(saveLocation, fileName)
+
+        # If the finalLocation already exists just append that value to the locationsDict as we don't need to process it
+        if os.path.exists(finalLocation):
+            if not options["threading"]:
+                print(f"Results for {finalLocation} file already exist")
+
+            if process['options']['saveType'] is not None:
+                locationsDict[processName][label].append(finalLocation)
+
+        # Else we need to process this file.
+        else:
+            # Creating an entry in the multiProcessArgs list for each piece
+            multiArg = (location, process, finalLocation)
+            multiProcessArgsList.append(multiArg)
+
+    # Run with multiprocessing
+    print(f"MultiProcessing: Process-> {processName}| Label-> {label} | Size-> {len(multiProcessArgsList)}")
+    results = progress_map(multiProcessTask, multiProcessArgsList, n_cpu=options["maxWorkers"], chunk_size=1)
+
+
+    for i in range(len(results)):
+        CWR.saveFile(multiProcessArgsList[i][2], results[i], printDisplay=False)
+        locationsDict[processName][label].append(multiProcessArgsList[i][2])
+
+    return
+
+# Mask to transform our arguments into how the process task function reads it
+def multiProcessTask(arguments):
+
+    return processTask(arguments[0], arguments[1])
 
 # Sends data to the relevant file
 def processTask(location, process):
@@ -239,6 +311,5 @@ def processTask(location, process):
     stage = importlib.import_module(processName)
 
     # Calls the startProcess function of the relevant file
-    results = stage.startProcess(location, process['options'])
+    return stage.startProcess(location, process['options'])
 
-    return results

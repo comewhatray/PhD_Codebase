@@ -194,6 +194,7 @@ def updateOldDictionaryEntriesWithNewDictionaryEntries(oldDictionary, newDiction
                     for subOption in oldDictionary[option]:
                         if subOption in newDictionary[option]:
                             oldDictionary[option][subOption] = newDictionary[option][subOption]
+
                 # Otherwise just update the old value with the new one
                 else:
                     oldDictionary[option] = newDictionary[option]

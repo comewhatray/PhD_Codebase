@@ -1,0 +1,7 @@
+{
+  "title": "PolygonBoundingChanges_0.5_0.5",
+  "aggregationModification": {
+    "inspectionBuffer": 0.5,
+    "comparisonBuffer": 0.5
+  }
+}

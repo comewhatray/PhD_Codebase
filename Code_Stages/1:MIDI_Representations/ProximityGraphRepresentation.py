@@ -25,6 +25,7 @@ options = {
     "selfLoop": False,
     "testing": False,
     "shortestConsecutiveEvent": False,
+    "threading": True,
     "re-label": True # This corresponds to updating all the nodes such that the deleated node numbers get replaced
 
 }
@@ -41,7 +42,9 @@ def startProcess(work, inputOptions=None):
     this_module = sys.modules[__name__]
     methodInstanciated = getattr(this_module, options['function'])
 
-    print(f"Pattern Extraction Approach: {options['function']}")
+    if not options["threading"]:
+        print(f"Pattern Extraction Approach: {options['function']}")
+
     proximityGraphRepresentation = methodInstanciated(work)
 
     if options['pruningMethod'] is not None:
@@ -249,14 +252,15 @@ def SzetoGraphRepresentation(work):
 
 def KarystinaiosRepresentation(work):
 
-    work = CWR.openFile(work)
+    work = CWR.openFile(work, printDisplay= not options['threading'])
     tuneGraph = nx.empty_graph(len(work))
 
     counter = 0
     updateCounter = 0
 
     # Encode note information
-    print("Encoding note information")
+    if not options['threading']:
+        print("Encoding note information")
     for note in work:
         tuneGraph.nodes[counter]['type'] = note["type"]
         tuneGraph.nodes[counter]['pitch'] = note['pitch']
@@ -268,15 +272,19 @@ def KarystinaiosRepresentation(work):
 
 
     # Setup for comparison code goes here
-    print("Scanning for edge creation")
+    if not options['threading']:
+        print("Scanning for edge creation")
     for node in range(len(work)):
 
     # Visualisation of Progress
+
         if node > ((len(work) / 10) * updateCounter):
             # print(str(counter) + '/' + str(len(points)))
-            print('Number of Points: ' + str(len(work)))
+            if not options['threading']:
+                print('Number of Points: ' + str(len(work)))
             updateCounter += 1
-            print(str(node) + '/' + str(len(work)-1))
+            if not options['threading']:
+                print(str(node) + '/' + str(len(work)-1))
 
 
         # compare current note to notes that occur after it
@@ -294,7 +302,7 @@ def KarystinaiosRepresentation(work):
 
     return tuneGraph
 
-# We are basically just transferring onnsecutive edges to rests to the next available note
+# We are basically just transferring connsecutive edges to rests to the next available note
 def karystinaiosModification(work):
 
     initialGraph = KarystinaiosRepresentation(work)

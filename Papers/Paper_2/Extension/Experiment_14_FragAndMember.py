@@ -1,14 +1,12 @@
-from Utilities import ComeWhatRayUtil as CWR
-import os
-import shutil
-from Code_Stages import ExperimentProcess as EP
-from Utilities import parrallelism as PM
+import sys
+from Utilities import ExperimentCommons as EC
 
 experimentName = "Experiment14 (FragAndMember)"
 workspace = "Papers/Paper_2/Extension/ExtensionWorkspace"
 QueryConfiguration = "LakhDataset/Configs/Lakh20Experiment(Queries).json"
 DatasetConfiguration = "LakhDataset/Configs/Lakh20Experiment(Dataset).json"
 
+multiProcess = True
 
 stages = [
     {
@@ -43,8 +41,8 @@ queryDetails = {
     "Description": "Full Scale Test",
     "WorkspaceLocation": workspace,
     "Dataset_Configuration": QueryConfiguration,
-    # "Dataset_Configuration": "LakhDataset/Configs/polyphonicQuery.json",
-    "Stages": stages
+    "Stages": stages,
+    "threading": multiProcess
 }
 
 datasetDetails = {
@@ -54,9 +52,9 @@ datasetDetails = {
     "Description": "Full Scale Test",
     "WorkspaceLocation": workspace,
     "Dataset_Configuration": DatasetConfiguration,
-    # "Dataset_Configuration": "problemConfig.json",
-    "Stages": stages
-    # "Stages": datasetStages
+    "Stages": stages,
+    "threading": multiProcess
+
 }
 
 aggregationDetails = {
@@ -70,10 +68,12 @@ aggregationDetails = {
                 "saveResultsLabel": experimentName,
                 "additionalParameters": {
                     "minimumOverlap": 0.7,
-                    "fragmentisationCheck": 3
+                    "fragmentationCheck": 3
                 },
-                "debugging": False
-                # "LookUpTable": CWR.openFile("Papers/Paper_2/LookUpTables/SzetoClassicalTest.json")
+                "debugging": False,
+                "threading": multiProcess,
+                "inspectionBuffer": 1,
+                "comparisonBuffer": 1,
             },
         }
     ]
@@ -82,24 +82,12 @@ aggregationDetails = {
 
 if __name__ == '__main__':
 
-    # Query Run
-    # Where to save
-    querySaveLoc = CWR.appendDirectory(queryDetails["WorkspaceLocation"], "QueryLocationData.json")
-    # Run Experiment
-    locationDetails = EP.batchExperiment(queryDetails)
-    # Save the details of the experiment
-    CWR.saveFile(querySaveLoc, locationDetails)
+    configuration = None
 
-    # Dataset Run
-    # Where to save
-    datasetSaveLoc = CWR.appendDirectory(datasetDetails["WorkspaceLocation"], "DatasetLocationData.json")
-    # Run Experiment
-    locationDetails = EP.batchExperiment(datasetDetails)
-    # Save the details of the experiment
-    CWR.saveFile(datasetSaveLoc, locationDetails)
+    if len(sys.argv) > 1:
+        configuration = sys.argv[1]
 
-    queryDeets = CWR.openFile(querySaveLoc)
-    datasetDeets = CWR.openFile(datasetSaveLoc)
-    PM.threadedAnalysis(queryDeets, datasetDeets, aggregationDetails)
-    # experimentResults = EP.queryAggregationExperiment(CW/R.openFile(querySaveLoc), CWR.openFile(datasetSaveLoc), aggregationDetails)
-    # CWR.saveFile("ExperimentResults/ExtensionExperiment4/test.json", aggregationDetails["Stages"][0]['options']["LookUpTable"])
+    configuration = "CoreConfigurations/BoundingModificationConfig.json"
+
+    print(f"Threaded Analysis: {experimentName}")
+    EC.runExperiment(queryDetails, datasetDetails, aggregationDetails, systemArgs=configuration)

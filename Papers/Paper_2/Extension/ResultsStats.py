@@ -19,20 +19,24 @@ fileLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment8Results.j
 # startFileLocation = "ExperimentResults/Experiment8/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment9 (BreathingRoom)/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment12 (membershipScale)/AllSimilarity"
-startFileLocation = "ExperimentResults/Experiment13 (FragmentisationCheck)/AllSimilarity"
+# startFileLocation = "ExperimentResults/Experiment13 (FragmentisationCheck)/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment14 (FragAndMember)/AllSimilarity"
-# startFileLocation = "ExperimentResults/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
+startFileLocation = "ExperimentResults/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
+# startFileLocation = "ExperimentResults/Experiment16 (Kyna_Membership)/AllSimilarity"
+# startFileLocation = "ExperimentResults/Experiment17 (Default Overlap)/AllSimilarity"
 
 experimentName = startFileLocation.split("/")[1]
 queryLocations = "LakhDataset/ExperimentDataset/Queries"
 precissionAt = 10
-showInter = False
+
+showInter = True
+showQuery = True
 
 def main():
     # maxResults()
     # topXResults(1)
     # topXResults(4)
-    thresholdResults(0.9)
+    thresholdResults(0.75)
     return
 
 
@@ -178,7 +182,11 @@ def thresholdResults(threshold):
 
 
                 topXResult = []
-                if "fragmentedScoreList" in data and len(data["fragmentedScoreList"]) > 0:
+                if (
+                        "fragmentedScoreList" in data and
+                        len(data["fragmentedScoreList"]) > 0 and
+                        isinstance(data["fragmentedScoreList"][0], list)
+                ):
 
                     for i in range(len(data["overlapScoreList"])):
                         tempScore = 0
@@ -245,7 +253,7 @@ def thresholdResults(threshold):
 
         for queryLoc in queries:
             if query in queryLoc:
-                if showInter:
+                if showInter and showQuery:
                     VIS.visualiseMIDIAsLines(queryLocations+"/"+queryLoc)
 
 

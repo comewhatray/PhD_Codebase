@@ -1,8 +1,5 @@
-from Utilities import ComeWhatRayUtil as CWR
-import os
-import shutil
-from Code_Stages import ExperimentProcess as EP
-from Utilities import parrallelism as PM
+import sys
+from Utilities import ExperimentCommons as EC
 
 experimentName = "Experiment13 (FragmentisationCheck)"
 workspace = "Papers/Paper_2/Extension/ExtensionWorkspace"
@@ -29,13 +26,6 @@ stages = [
             "shortestConsecutiveEvent": True
         }
     }
-    # {
-    #     "file": "Code_Stages/2:Pattern_Extraction/SimplePathPatternExtraction.py",
-    #     "options": {
-    #         "function": "SimplePathGraphDurationExtraction",
-    #         "saveType": ".json",
-    #     }
-    # }
 ]
 
 queryDetails = {
@@ -45,7 +35,6 @@ queryDetails = {
     "Description": "Full Scale Test",
     "WorkspaceLocation": workspace,
     "Dataset_Configuration": QueryConfiguration,
-    # "Dataset_Configuration": "LakhDataset/Configs/polyphonicQuery.json",
     "Stages": stages,
     "threading": multiProcess
 }
@@ -77,7 +66,8 @@ aggregationDetails = {
                 },
                 "debugging": False,
                 "threading": multiProcess,
-                # "LookUpTable": CWR.openFile("Papers/Paper_2/LookUpTables/SzetoClassicalTest.json")
+                "inspectionBuffer": 1,
+                "comparisonBuffer": 1,
             },
         }
     ]
@@ -86,29 +76,10 @@ aggregationDetails = {
 
 if __name__ == '__main__':
 
-    # Query Run
-    # Where to save
-    querySaveLoc = CWR.appendDirectory(queryDetails["WorkspaceLocation"], "QueryLocationData.json")
-    # Run Experiment
-    locationDetails = EP.batchExperiment(queryDetails)
-    # Save the details of the experiment
-    CWR.saveFile(querySaveLoc, locationDetails)
+    configuration = None
 
-    # Dataset Run
-    # Where to save
-    datasetSaveLoc = CWR.appendDirectory(datasetDetails["WorkspaceLocation"], "DatasetLocationData.json")
-    # Run Experiment
-    locationDetails = EP.batchExperiment(datasetDetails)
-    # Save the details of the experiment
-    CWR.saveFile(datasetSaveLoc, locationDetails)
+    if len(sys.argv) > 1:
+        configuration = sys.argv[1]
 
-    # Prep for MultiProcess
-    queryDeets = CWR.openFile(querySaveLoc)
-    datasetDeets = CWR.openFile(datasetSaveLoc)
-
-    # MultiProcess
-    if multiProcess:
-        PM.threadedAnalysis(queryDeets, datasetDeets, aggregationDetails)
-    else:
-        # SingleProcess
-        experimentResults = EP.queryAggregationExperiment(CWR.openFile(querySaveLoc), CWR.openFile(datasetSaveLoc), aggregationDetails)
+    print(f"Threaded Analysis: {experimentName}")
+    EC.runExperiment(queryDetails, datasetDetails, aggregationDetails, systemArgs=configuration)

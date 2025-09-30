@@ -3,11 +3,18 @@ import os
 import sys
 
 experimentsToRun = [
-    "Papers/Paper_3/Experiments/Experiment_13_CustomP.py",
-    "Papers/Paper_3/Experiments/Experiment_14_ComparisonP.py"
+    "Papers/Paper_2/Extension/Experiment_13_FragmentisationCheck.py",
+    "Papers/Paper_2/Extension/Experiment_14_FragAndMember.py",
+    "Papers/Paper_2/Extension/Experiment_15 (Breathing_membership).py",
+    "Papers/Paper_2/Extension/Experiment_16_Kyna_Membership.py",
+    "Papers/Paper_2/Extension/Experiment_17 (Default Overlap).py"
 ]
 
-itterations = 5
+modificationParameters  = {
+
+}
+
+itterations = 1
 
 if __name__ == '__main__':
 

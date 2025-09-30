@@ -11,10 +11,11 @@ nameMapping = CWR.openFile("Papers/Paper_2/Datasets/NamingConvention.json")
 # dataLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment15 (BreathingRoom_Membership)"
 # dataLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment14 (FragAndMember)"
 # dataLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment13 (FragmentisationCheck)"
-dataLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment12 (membershipScale)"
+# dataLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment12 (membershipScale)"
+dataLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment16 (Kyna_Membership)"
 
-finalQuery = "convertMidiToPoints"
-# finalQuery = "karystinaiosModification"
+# finalQuery = "convertMidiToPoints"
+finalQuery = "karystinaiosModification"
 
 def main():
 
