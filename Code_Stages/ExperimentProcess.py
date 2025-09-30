@@ -93,9 +93,6 @@ def batchExperiment(details=None):
             # Iterate through the labels
             for label in datasetConfig["Labels"]:
 
-                # TODO MultiProcess
-                # update midi location data
-
                 if not options["threading"]:
                     iterationStep(LocationsDict, previousLocation, label, process)
                 else:
