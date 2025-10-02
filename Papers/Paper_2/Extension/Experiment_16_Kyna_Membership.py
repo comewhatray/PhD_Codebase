@@ -49,6 +49,7 @@ datasetDetails = {
 }
 
 aggregationDetails = {
+    "experimentName": experimentName,
     "Stages": [
         {
             "file": "Code_Stages/4:Tasks/Similarity/OverlapSimilarity.py",
@@ -74,7 +75,8 @@ if __name__ == '__main__':
     configuration = None
 
     if len(sys.argv) > 1:
-        configuration = sys.argv[1]
+        configuration = [sys.argv[i] for i in range(1, len(sys.argv))]
+
 
     print(f"Threaded Analysis: {experimentName}")
     EC.runExperiment(queryDetails,datasetDetails,aggregationDetails, systemArgs=configuration)

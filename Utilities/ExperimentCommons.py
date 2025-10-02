@@ -9,11 +9,12 @@ def runExperiment(queryDetails, datasetDetails, aggregationDetails, systemArgs=N
 
     if systemArgs is not None:
 
-        experimentModification = CWR.openFile(systemArgs)
+        experimentModification = CWR.openFile(systemArgs[0])
 
         # Update Identifier to create new Directories
-        queryDetails["ExperimentSignifier"] = experimentModification["title"]
-        datasetDetails["ExperimentSignifier"] = experimentModification["title"]
+        print(experimentModification["title"])
+        queryDetails["ExperimentSignifier"] = experimentModification["title"].split('/')[0]
+        datasetDetails["ExperimentSignifier"] = experimentModification["title"].split('/')[0]
 
         # Update Query with modifications
         if "queryModifications" in experimentModification:
@@ -26,7 +27,7 @@ def runExperiment(queryDetails, datasetDetails, aggregationDetails, systemArgs=N
         # Update Aggregation with modifications
         if "aggregationModification" in experimentModification:
             for stage in aggregationDetails["Stages"]:
-                stage["options"]["saveResultsLabel"] = experimentModification["title"]
+                stage["options"]["saveResultsLabel"] = f"{experimentModification['title']}/{aggregationDetails["experimentName"]}"
                 CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(stage["options"], experimentModification["aggregationModification"])
 
 

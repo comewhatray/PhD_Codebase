@@ -21,10 +21,13 @@ if __name__ == '__main__':
 
     for i in range(itterations):
         for experiment in experimentsToRun:
+
             print(CWR.extraLargeSpacer)
             print(f"Experiment: {experiment}")
             print(f"Itteration: {i}")
             print(CWR.extraLargeSpacer)
 
-            os.system(f"python3 {experiment}")
+            experimentName = CWR.getFileNameFromPath(experiment)
+
+            os.system(f"python3 {experiment} {modificationParameters}")
 
