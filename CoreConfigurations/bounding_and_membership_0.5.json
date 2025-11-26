@@ -1,0 +1,10 @@
+{
+  "title": "bounding_and_membership_0.5",
+  "aggregationModification": {
+      "additionalParameters": {
+        "minimumOverlap": 0.5
+      },
+    "inspectionBuffer": 0.5,
+    "comparisonBuffer": 0.5
+  }
+}

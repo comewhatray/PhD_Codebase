@@ -3,7 +3,16 @@ from Utilities import ExperimentCommons as EC
 
 experimentName = "Experiment15 (BreathingRoom_Membership)"
 workspace = "Papers/Paper_2/Extension/ExtensionWorkspace"
-multiProcess = True
+
+# queryLoc = "LakhDataset/Configs/Lakh20Experiment(Queries).json"
+# datasetLoc = "LakhDataset/Configs/Lakh20Experiment(Dataset).json"
+
+## Label2
+queryLoc = "LakhDataset/Configs/SanityChecks/Label2/query.json"
+datasetLoc = "LakhDataset/Configs/SanityChecks/Label2/dataset.json"
+
+
+multiProcess = False
 
 stages = [
     {
@@ -21,8 +30,9 @@ queryDetails = {
     "ExperimentSignifier": "",
     "Description": "Full Scale Test",
     "WorkspaceLocation": workspace,
-    "Dataset_Configuration": "LakhDataset/Configs/Lakh20Experiment(Queries).json",
-    "Stages": stages
+    "Dataset_Configuration": queryLoc,
+    "Stages": stages,
+    "threading": multiProcess
 }
 
 datasetDetails = {
@@ -31,7 +41,7 @@ datasetDetails = {
     "ExperimentSignifier": "",
     "Description": "Full Scale Test",
     "WorkspaceLocation": workspace,
-    "Dataset_Configuration": "LakhDataset/Configs/Lakh20Experiment(Dataset).json",
+    "Dataset_Configuration": datasetLoc,
     "Stages": stages
 }
 
@@ -52,6 +62,7 @@ aggregationDetails = {
                 "threading": multiProcess,
                 "inspectionBuffer": 1,
                 "comparisonBuffer": 1,
+                "visualiseProcess": True,
             },
         }
     ]
@@ -65,4 +76,4 @@ if __name__ == '__main__':
         configuration = [sys.argv[i] for i in range(1, len(sys.argv))]
 
     print(f"Threaded Analysis: {experimentName}")
-    EC.runExperiment(queryDetails,datasetDetails,aggregationDetails, systemArgs=configuration)
+    EC.runExperiment(queryDetails, datasetDetails,aggregationDetails, systemArgs=configuration)

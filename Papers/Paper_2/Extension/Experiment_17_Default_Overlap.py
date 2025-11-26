@@ -3,6 +3,23 @@ from Utilities import ExperimentCommons as EC
 
 multiProcess = True
 
+queryLoc = "LakhDataset/Configs/Lakh20Experiment(Queries).json"
+datasetLoc = "LakhDataset/Configs/Lakh20Experiment(Dataset).json"
+
+# SanityChecks
+
+## Cruel Angels Thesis
+# queryLoc = "LakhDataset/Configs/QuerySanityCheck.json"
+# datasetLoc = "LakhDataset/Configs/DatasetSanityCheckShort.json"
+
+## Yesterday
+# queryLoc = "LakhDataset/Configs/yesterdaySanityCheck(Query).json"
+# datasetLoc = "LakhDataset/Configs/yesterdaySanityCheck(Dataset).json"
+
+## Label2
+# queryLoc = "LakhDataset/Configs/SanityChecks/Label2/query.json"
+# datasetLoc = "LakhDataset/Configs/SanityChecks/Label2/dataset.json"
+
 experimentName = "Experiment17 (Default Overlap)"
 workspace = "Papers/Paper_2/Extension/ExtensionWorkspace"
 
@@ -22,7 +39,7 @@ queryDetails = {
     "ExperimentSignifier": "",
     "Description": "Full Scale Test",
     "WorkspaceLocation": workspace,
-    "Dataset_Configuration": "LakhDataset/Configs/Lakh20Experiment(Queries).json",
+    "Dataset_Configuration": queryLoc,
     "Stages": stages,
     "threading": multiProcess
 }
@@ -33,7 +50,7 @@ datasetDetails = {
     "ExperimentSignifier": "",
     "Description": "Full Scale Test",
     "WorkspaceLocation": workspace,
-    "Dataset_Configuration": "LakhDataset/Configs/Lakh20Experiment(Dataset).json",
+    "Dataset_Configuration": datasetLoc,
     "Stages": stages,
     "threading": multiProcess
 
@@ -56,6 +73,7 @@ aggregationDetails = {
                 "threading": multiProcess,
                 "inspectionBuffer": 1,
                 "comparisonBuffer": 1,
+                "visualiseProcess": False,
             },
         }
     ]

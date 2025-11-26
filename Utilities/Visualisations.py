@@ -101,12 +101,15 @@ def visualiseOverlappingPolygons(json1, json2, boundary=1, saveTo=None):
         toSave(saveTo)
     plt.show()
 
-def visualiseOverlappingPolygonsUsingData(polygon1, polygon2, overlapPolygon, saveTo=None):
-    # plotPolygon(polygon1, color="Red")
-    # plotPolygon(polygon2, color="Blue")
+def plotOverlappingPolygonsUsingData(polygon1, polygon2, overlapPolygon, saveTo=None):
     plotShape(polygon1, color="Red")
     plotShape(polygon2, color="Blue")
     plotShape(overlapPolygon, color="Black")
+
+def visualiseOverlappingPolygonsUsingData(polygon1, polygon2, overlapPolygon, saveTo=None):
+    # plotPolygon(polygon1, color="Red")
+    # plotPolygon(polygon2, color="Blue")
+    plotOverlappingPolygonsUsingData(polygon1, polygon2, overlapPolygon, saveTo=saveTo)
 
     if saveTo is not None:
         toSave(saveTo)
@@ -149,10 +152,8 @@ def plotJsonAsPoints(json):
     plt.scatter(xList, yList)
 
 # Given a json file of notes, plot the notes
-def plotJsonAsLines(json, plotRequirements=None):
+def plotJsonAsLines(json, plotRequirements=None, colour="Black"):
     linesList = json
-
-    colour = "Black"
 
     for num in range(0, len(linesList)):
         startx = linesList[num]["position"]
@@ -206,13 +207,17 @@ def plotShape(shape, color='black'):
     if shape is not None:
         if shape.geom_type == "MultiPolygon" or shape.geom_type == "GeometryCollection" or shape.geom_type == "MultiLineString":
             for geom in shape.geoms:
-                plotShape(geom, color)
+                plotShape(geom, color=color)
 
         elif shape.geom_type == "Polygon":
-            plotPolygon(shape, color)
+            plotPolygon(shape, color=color)
 
         elif shape.geom_type == "LineString":
-            plotLineString(shape, color)
+            plotLineString(shape, color=color)
+
+# Call to show plot
+def showPlot():
+    plt.show()
 
 def toSave(location):
     plt.savefig(location)

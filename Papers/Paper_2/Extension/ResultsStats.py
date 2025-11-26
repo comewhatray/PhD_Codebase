@@ -25,6 +25,27 @@ startFileLocation = "ExperimentResults/Experiment15 (BreathingRoom_Membership)/A
 # startFileLocation = "ExperimentResults/Experiment16 (Kyna_Membership)/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment17 (Default Overlap)/AllSimilarity"
 
+# Membership 0.9
+# ----------------------------------------------------------------------------------------------------------------------
+# startFileLocation = "ExperimentResults/membership_0.9/Experiment14 (FragAndMember)/AllSimilarity"
+# startFileLocation = "ExperimentResults/membership_0.9/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
+# startFileLocation = "ExperimentResults/membership_0.9/Experiment16 (Kyna_Membership)/AllSimilarity"
+# ----------------------------------------------------------------------------------------------------------------------
+
+# Membership 0.5
+# ----------------------------------------------------------------------------------------------------------------------
+# startFileLocation = "ExperimentResults/membership_0.5/Experiment14 (FragAndMember)/AllSimilarity"
+# startFileLocation = "ExperimentResults/membership_0.5/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
+# startFileLocation = "ExperimentResults/membership_0.5/Experiment16 (Kyna_Membership)/AllSimilarity"
+# ----------------------------------------------------------------------------------------------------------------------
+
+# startFileLocation = "ExperimentResults/PolygonBoundingChanges_0.5_0.5/Experiment13 (FragmentisationCheck)/AllSimilarity"
+# startFileLocation = "ExperimentResults/PolygonBoundingChanges_0.5_0.5/Experiment14 (FragAndMember)/AllSimilarity"
+# startFileLocation = "ExperimentResults/PolygonBoundingChanges_0.5_0.5/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
+# startFileLocation = "ExperimentResults/PolygonBoundingChanges_0.5_0.5/Experiment16 (Kyna_Membership)/AllSimilarity"
+# startFileLocation = "ExperimentResults/PolygonBoundingChanges_0.5_0.5/Experiment17 (Default Overlap)/AllSimilarity"
+
+
 experimentName = startFileLocation.split("/")[1]
 queryLocations = "LakhDataset/ExperimentDataset/Queries"
 precissionAt = 10
@@ -36,7 +57,7 @@ def main():
     # maxResults()
     # topXResults(1)
     # topXResults(4)
-    thresholdResults(0.75)
+    thresholdResults(0.9)
     return
 
 
