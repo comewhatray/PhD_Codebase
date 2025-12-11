@@ -84,7 +84,9 @@ def main():
         multiString = BG.generateMultiLineStringFromExtract(fileInfo)
 
         polygon = BG.boundingPolygon(multiString,1)
-        VIS.visualiseShape(polygon)
+        VIS.plotShape(polygon, color = "red")
+        VIS.visualiseJsonAsLines(fileInfo)
+        # VIS.visualiseShape(polygon)
 
 
 

@@ -15,7 +15,7 @@ import seaborn as sns
 
 # fileLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/ExperimentResults.json"
 # fileLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment7Results.json"
-fileLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment8Results.json"
+# fileLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment8Results.json"
 # startFileLocation = "ExperimentResults/Experiment8/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment9 (BreathingRoom)/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment12 (membershipScale)/AllSimilarity"
@@ -24,6 +24,10 @@ fileLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment8Results.j
 startFileLocation = "ExperimentResults/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment16 (Kyna_Membership)/AllSimilarity"
 # startFileLocation = "ExperimentResults/Experiment17 (Default Overlap)/AllSimilarity"
+
+# startFileLocation = "ExperimentResults/Experiment18 (Membership_Rhythmn)/AllSimilarity"
+startFileLocation = "ExperimentResults/Experiment19 (Membership_Rhythmn_No_Deletion)/AllSimilarity"
+# startFileLocation = "ExperimentResults/Experiment120 (Kyna_Membership_Rhythmn)/AllSimilarity"
 
 # Membership 0.9
 # ----------------------------------------------------------------------------------------------------------------------

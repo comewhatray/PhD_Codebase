@@ -1,0 +1,12 @@
+{
+  "Title": "Label16 (Dataset)",
+  "Directory": "LakhDataset/Configs/SanityChecks/ShortMidis",
+  "Labels": {
+    "Label16": [
+      "Label16Short.mid"
+    ]
+  }
+}
+
+
+

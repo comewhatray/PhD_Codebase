@@ -1,5 +1,6 @@
 from shapely import MultiLineString, MultiPolygon
 from scipy.stats import wasserstein_distance
+from scipy.special import expit
 from Utilities import ComeWhatRayUtil as CWR
 from Utilities import BoundingGenerator as BG
 from Utilities import datasetManagment as DM
@@ -8,6 +9,11 @@ from shapely.affinity import translate
 import copy
 import numpy as np
 import os
+
+
+# Temp Printing out values
+import fcntl
+recordRhythm = False
 
 # MAKE SURE TO SAVE THE LOOKUPTABLE IF IT IS USED
 
@@ -43,7 +49,10 @@ options = {
         "fragmentationCheck": 0,
         "fragments": None,
         # Default of a number that can't be achieved so it doesn't run by default
-        "similarityThreshold": 0
+        # "similarityThreshold": 1,
+        "rhythmThresholdCheck":1,
+        "insertionPenalty": 1,
+        "deletionPenalty": 1,
     }
 }
 
@@ -824,7 +833,6 @@ def minimumOverlap(patternList, query):
 
     return membershipList
 
-
 #                            (graph, number   , graph, number, number)
 def fragmentedSimilarity(queryGraph, queryLength, pattern, transX, transY):
     fragmentScores = None
@@ -895,8 +903,8 @@ def fragmentedSimilarity(queryGraph, queryLength, pattern, transX, transY):
     return fragmentScores
 
 
-# TODO IMPLEMENT METHOD
-def rhythmicDistance(query, comparison):
+# Measure the distance between rhythms
+def rhythmicSimilarity(query, comparison):
     # Get onset values for query
     queryOnsets = []
     for line in query.geoms:
@@ -907,8 +915,8 @@ def rhythmicDistance(query, comparison):
     for line in comparison:
         comparisonOnsets.append(line.bounds[0])
 
-    numInsertions = 0
-    numDeletions = 0
+    # 1 good, 0 bad
+    penalty = 1
 
     # Insertions required
     if len(queryOnsets) > len(comparisonOnsets):
@@ -932,11 +940,10 @@ def rhythmicDistance(query, comparison):
                 tempDistance = abs(cOnset - qOnset)
 
                 # If the distance is 0 we can end the loop
-                if tempDistance == 0:
-                    index = i
-                    break
+                # if tempDistance == 0:
+                #     index = i
 
-                elif distance is None:
+                if distance is None:
                     distance = tempDistance
                     index = i
 
@@ -945,6 +952,7 @@ def rhythmicDistance(query, comparison):
                 elif tempDistance < distance:
                     distance = tempDistance
                     index = i
+                    distance = tempDistance
 
             # allignment.append(index)
             allignment[index] = cOnset
@@ -959,11 +967,12 @@ def rhythmicDistance(query, comparison):
             else:
                 insertedComparisonOnsets.append(queryOnsets[i])
 
-        # I think all of the details required for calculating the rhythmic distance
+        #
+        penalty = 1 - ((numInsertions/len(queryOnsets)) * options["additionalParameters"]["insertionPenalty"])
         comparisonOnsets = insertedComparisonOnsets
 
     # Deletions required
-    if len(queryOnsets) < len(comparisonOnsets):
+    elif len(queryOnsets) < len(comparisonOnsets):
 
         numDeletions = len(comparisonOnsets) - len(queryOnsets)
 
@@ -978,14 +987,9 @@ def rhythmicDistance(query, comparison):
 
             for cOnset in range(len(comparisonOnsets)):
 
-                tempDistance = abs(qOnset - cOnset)
+                tempDistance = abs(qOnset - comparisonOnsets[cOnset])
 
-                # If the distance is 0 we can end the loop
-                if tempDistance == 0:
-                    value = cOnset
-                    break
-
-                elif distance is None:
+                if distance is None:
                     distance = tempDistance
                     value = cOnset
 
@@ -995,20 +999,35 @@ def rhythmicDistance(query, comparison):
                     distance = tempDistance
                     value = cOnset
 
-            allignment[i] = value
+            allignment[i] = comparisonOnsets[value]
 
         deletedComparisonOnsets = []
         for i in range(len(queryOnsets)):
             deletedComparisonOnsets.append(allignment[i])
 
+        penalty = 1 - ((numDeletions/len(comparisonOnsets)) * options["additionalParameters"]["deletionPenalty"])
         comparisonOnsets = deletedComparisonOnsets
 
     # Earth movers distance between the two rhythm onset vectors
-    rhythmicDistance = wasserstein_distance(queryOnsets, comparisonOnsets)
+    # TODO I'm not sure what on earth I should actually do here
+    rhythmicDist = wasserstein_distance(queryOnsets, comparisonOnsets)
 
-    #TODO INCLUDE MODIFIERS BASED ON NUMBER OF INSERTIONS AND DELETIONS
+    # Currently similarity measure (Colm mentioned an approach were I would divide the distance by N (i'm not sure what N refers too
+    rhythmicSim = 1 - rhythmicDist
 
-    return rhythmicDistance
+    # Open file in append mode and write with locking
+    if recordRhythm:
+        with open('results.txt', 'a') as f:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)  # Exclusive lock
+            f.write(f"{rhythmicDist}\n")
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)  # Unlock
+
+
+    # rhythmicSim = 1/1+rhythmicDist
+
+    rhythmicSim *= penalty
+
+    return rhythmicSim
 
 #              node, num, num
 def isBetween(query, start, end):
@@ -1039,15 +1058,15 @@ def calculateSimilarity(query, comparison):
     # similarity is determined by the overlapping area divided by the difference in total area - the overlapping area
     similarity = overlapArea / (totalArea - overlapArea)
 
-    if similarity > options["additionalParameters"]["similarityThreshold"]:
-        modifier = rhythmicDistance(query, comparison)
-
-        similarity += modifier
-
     if options["visualiseProcess"]:
         VIS.plotOverlappingPolygonsUsingData(queryBounding, comparisonBounding, overlapPolygon)
         VIS.plotShape(comparisonMultiLine, color="green")
         VIS.showPlot()
         print(similarity)
+
+    if similarity > options["additionalParameters"]["rhythmThresholdCheck"]:
+        modifier = rhythmicSimilarity(query, comparison)
+
+        similarity *= modifier
 
     return similarity, (queryBounding, comparisonBounding, overlapPolygon)

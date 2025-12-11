@@ -1,0 +1,9 @@
+{
+  "Title": "yesterdaySanityCheck (Work)",
+  "Directory": "LakhDataset/ExperimentDataset/SanityCheck",
+  "Labels": {
+    "Yesterday": [
+      "yesterdayShort.mid"
+    ]
+  }
+}

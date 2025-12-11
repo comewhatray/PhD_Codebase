@@ -1,0 +1,9 @@
+{
+  "Title": "Label1 (Query)",
+  "Directory": "LakhDataset/ExperimentDataset/Queries",
+  "Labels": {
+    "Label1": [
+      "TRAJMZR128F42556D2_Query.mid"
+    ]
+  }
+}

@@ -4,15 +4,20 @@ from Utilities import ExperimentCommons as EC
 experimentName = "Experiment15 (BreathingRoom_Membership)"
 workspace = "Papers/Paper_2/Extension/ExtensionWorkspace"
 
-# queryLoc = "LakhDataset/Configs/Lakh20Experiment(Queries).json"
-# datasetLoc = "LakhDataset/Configs/Lakh20Experiment(Dataset).json"
+queryLoc = "LakhDataset/Configs/Lakh20Experiment(Queries).json"
+datasetLoc = "LakhDataset/Configs/Lakh20Experiment(Dataset).json"
 
 ## Label2
-queryLoc = "LakhDataset/Configs/SanityChecks/Label2/query.json"
-datasetLoc = "LakhDataset/Configs/SanityChecks/Label2/dataset.json"
+# queryLoc = "LakhDataset/Configs/SanityChecks/Label9/query.json"
+# datasetLoc = "LakhDataset/Configs/SanityChecks/Label9/dataset.json"
+
+## Label16
+# queryLoc = "LakhDataset/Configs/SanityChecks/Label16/query.json"
+# datasetLoc = "LakhDataset/Configs/SanityChecks/Label16/dataset.json"
 
 
-multiProcess = False
+multiProcess = True
+vis = False
 
 stages = [
     {
@@ -62,7 +67,7 @@ aggregationDetails = {
                 "threading": multiProcess,
                 "inspectionBuffer": 1,
                 "comparisonBuffer": 1,
-                "visualiseProcess": True,
+                "visualiseProcess": vis,
             },
         }
     ]
