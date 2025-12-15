@@ -1,0 +1,11 @@
+{
+  "title": "NoiseIntro",
+  "datasetModification": {
+    "Noise":
+    {
+      "Chance": 0.1,
+      "XRange": [-1,1],
+      "YRange": [-1,1]
+    }
+  }
+}

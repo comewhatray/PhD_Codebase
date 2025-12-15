@@ -52,7 +52,8 @@ datasetDetails = {
     "WorkspaceLocation": workspace,
     "Dataset_Configuration": datasetLoc,
     "Stages": stages,
-    "threading": multiProcess
+    "threading": multiProcess,
+    "Noise": None
 
 }
 

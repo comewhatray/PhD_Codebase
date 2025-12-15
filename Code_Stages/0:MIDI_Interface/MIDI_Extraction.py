@@ -55,7 +55,7 @@ def convertMidiToPoints(work):
             tempNote = getNotePosition(n)
             if tempNote['pitch'] >= 0:
                 # Do not include notes with a negative pitch as these are likely percussion
-                if Options["Noise"]["Chance"] > 0:
+                if Options["Noise"] is not None and Options["Noise"]["Chance"] > 0:
                     tempNote = addNoise(tempNote)
                 coordinates.append(tempNote)
 
@@ -69,7 +69,7 @@ def convertMidiToPoints(work):
                 # (Hopefully this has been fixed with the later code increasing the octave of the notes)
                 # if returnedNote['pitch'] >= 0:
                 #     coordinates.append(returnedNote)
-                if Options["Noise"]["Chance"] > 0:
+                if Options["Noise"] is not None and Options["Noise"]["Chance"] > 0:
                     returnedNote = addNoise(returnedNote)
                 coordinates.append(returnedNote)
 
@@ -82,7 +82,7 @@ def convertMidiToPoints(work):
                 "duration": round(float(n.quarterLength), Options["decimalPrecision"])
             }
 
-            if Options["Noise"]["Chance"] > 0:
+            if Options["Noise"] is not None and Options["Noise"]["Chance"] > 0:
                 noteRest = addNoise(noteRest)
             noteRest["pitch"] = -1
             coordinates.append(noteRest)

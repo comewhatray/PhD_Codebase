@@ -46,7 +46,9 @@ datasetDetails = {
     "Description": "Full Scale Test",
     "WorkspaceLocation": workspace,
     "Dataset_Configuration": datasetLoc,
-    "Stages": stages
+    "Stages": stages,
+    "threading": multiProcess,
+    "Noise": None
 }
 
 aggregationDetails = {

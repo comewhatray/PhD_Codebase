@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from Utilities import ComeWhatRayUtil as CWR
 from Utilities import Visualisations as VIS
 from Utilities import BoundingGenerator as BG
+import numpy
 
 nameMapping = CWR.openFile("Papers/Paper_2/Datasets/NamingConvention.json")
 
@@ -25,9 +26,40 @@ def main():
         for file in os.listdir(loc):
             if "query" in file:
                 queryCon = CWR.openFile(os.path.join(loc,file))
+
+                startPosition = queryCon[0]["position"]
+                endPosition = queryCon[-1]["position"]+ queryCon[0]["duration"]
+                xRange = endPosition - startPosition
+
+                lowest = queryCon[0]["pitch"]
+                highest = queryCon[0]["pitch"]
+                pitchRange = []
+                for note in queryCon:
+                    pitchRange.append(note["pitch"])
+                    if note["pitch"] < lowest:
+                        lowest = note["pitch"]
+                    if note["pitch"] > highest:
+                        highest = note["pitch"]
+
+                yRange = highest - lowest
+
+                print(f"Query_{nameMapping[query]}")
+                print(f"xRange = {xRange}")
+                print(f"Size = {len(queryCon)}")
+                print(f"yRange = {yRange}")
+                print(f"Highest = {highest}")
+                print(f"Lowest = {lowest}")
+
+                avg = numpy.average(pitchRange)
+                std = numpy.std(pitchRange)
+                print(f"yAvg: {avg}")
+                print(f"yStd: {std}")
+
+
                 if finalQuery == "convertMidiToPoints":
                     # plt.title(f"Query_{nameMapping[query]}")
                     # VIS.visualiseJsonAsLines(queryCon)
+
                     queryTemp = BG.generateMultiLineStringFromExtract(queryCon)
                     plt.title(f"Query_{nameMapping[query]}")
                     VIS.plotJsonAsLines(queryCon)

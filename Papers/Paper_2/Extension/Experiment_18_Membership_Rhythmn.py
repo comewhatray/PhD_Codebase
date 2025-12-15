@@ -38,7 +38,6 @@ queryDetails = {
     "Stages": stages,
     "threading": multiProcess
 }
-
 datasetDetails = {
     # Experiment Name left blank is just for experiments we don't want to store the results of
     "ExperimentName": experimentName,
@@ -46,7 +45,9 @@ datasetDetails = {
     "Description": "Full Scale Test",
     "WorkspaceLocation": workspace,
     "Dataset_Configuration": datasetLoc,
-    "Stages": stages
+    "Stages": stages,
+    "threading": multiProcess,
+    "Noise": None
 }
 
 aggregationDetails = {
