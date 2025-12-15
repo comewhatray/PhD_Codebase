@@ -33,6 +33,10 @@ options = {
             "width": 4
         }
     },
+    "Scaling":{
+        "xScale": 1,
+        "yScale": 1,
+    },
     # Provide the location of a look up table
     "LookUpTable": None,
     "interimSave": True,
@@ -511,7 +515,7 @@ def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
         # Translates the query to the start of the line
         currentQuery = translate(scorebord["transformedQuery"], xoff=transX, yoff=transY)
         # currentQueryLinesNoAttachment = translate(scorebord["transformedQueryNoAttachments"], xoff=transX, yoff=transY)
-        currentQueryInspetion = BG.boundingPolygon(currentQuery, options["inspectionBuffer"])
+        currentQueryInspetion = BG.boundingPolygon(currentQuery, options["inspectionBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
 
         intersectionList = []
         graphPositionList = []
@@ -553,10 +557,10 @@ def graphQueryTuneComparison(queryGraph, tuneGraph, scorebord):
         # VIS.visualiseSpatialGraph(subGraph)
         # TODO choose one line or the other
         comparisonLines = BG.convertGraphToMultiLineString(subGraph, absoluteValue=True)
-        comparisonPolygon = BG.boundingPolygon(comparisonLines, options['comparisonBuffer'])
+        comparisonPolygon = BG.boundingPolygon(comparisonLines, options['comparisonBuffer'], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
         # comparisonLines = BG.generateMultiLineListFromGraph(subGraph, absoluteValue=True)
 
-        currentQueryComparison = BG.boundingPolygon(currentQuery, options["comparisonBuffer"])
+        currentQueryComparison = BG.boundingPolygon(currentQuery, options["comparisonBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
 
         if options["debugging"]:
             VIS.visualiseShape(comparisonLines)
@@ -606,7 +610,7 @@ def linesQueryTuneComparison(queryLines, tuneLines, scorebord):
         scorebord["queryLength"] = scorebord["transformedQuery"].bounds[2]
 
     if options["visualiseProcess"]:
-        VIS.plotShape(BG.boundingPolygon(scorebord["transformedQuery"], options["inspectionBuffer"]), color="Red")
+        VIS.plotShape(BG.boundingPolygon(scorebord["transformedQuery"], options["inspectionBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"]), color="Red")
         VIS.plotShape(scorebord["transformedQuery"])
         VIS.showPlot()
 
@@ -639,7 +643,7 @@ def linesQueryTuneComparison(queryLines, tuneLines, scorebord):
         # Translates the query to the start of the line
         currentQuery = translate(scorebord["transformedQuery"], xoff=transX, yoff=transY)
         # Creates the polygon which will inspect intersections
-        currentQueryInspection = BG.boundingPolygon(currentQuery, options["inspectionBuffer"])
+        currentQueryInspection = BG.boundingPolygon(currentQuery, options["inspectionBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
 
         if options["visualiseProcess"]:
             VIS.plotShape(currentQueryInspection, color="red")
@@ -705,8 +709,8 @@ def modifiedJaccardSimilarityPatternMatching(pattern1, pattern2):
     patternCOORDS2 = BG.convertDifferenceToCoordinates(pattern2)
     pattern1Line = BG.generateLineStringFromCoordinates(patternCOORDS1)
     pattern2Line = BG.generateLineStringFromCoordinates(patternCOORDS2)
-    patter1Bounding = BG.boundingPolygon(pattern1Line, options["shapeBuffer"])
-    patter2Bounding = BG.boundingPolygon(pattern2Line, options["shapeBuffer"])
+    patter1Bounding = BG.boundingPolygon(pattern1Line, options["shapeBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
+    patter2Bounding = BG.boundingPolygon(pattern2Line, options["shapeBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
     totalArea = patter1Bounding.area + patter2Bounding.area
     overlapShape = patternAreaComparison(pattern1, pattern2)
     overlapArea = overlapShape.area
@@ -725,7 +729,7 @@ def patternAreaComparison(pattern1, pattern2, visualisation=False):
 
     initialLineStringSequence = BG.generateLineStringFromCoordinates(pattern1Lines)
 
-    initialPolygon = BG.boundingPolygon(initialLineStringSequence, options["shapeBuffer"])
+    initialPolygon = BG.boundingPolygon(initialLineStringSequence, options["shapeBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
 
     maxOverlap = 0
 
@@ -742,7 +746,7 @@ def patternAreaComparison(pattern1, pattern2, visualisation=False):
                 newPattern.append(newLine)
 
             newLineStringSequence = BG.generateLineStringFromCoordinates(newPattern)
-            newPolygon = BG.boundingPolygon(newLineStringSequence, options["shapeBuffer"])
+            newPolygon = BG.boundingPolygon(newLineStringSequence, options["shapeBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
 
             # TODO find way to handle multipolygons
             if newPolygon.geom_type != 'MultiPolygon' and initialPolygon.geom_type != 'MultiPolygon':
@@ -816,7 +820,7 @@ def minimumOverlap(patternList, query):
     # Checks that each line that intersects has a minimum overlap with the query
     if options["additionalParameters"]["minimumOverlap"] != 0:
         for line in patternList:
-            membershipTest = BG.boundingPolygon(line, options["comparisonBuffer"])
+            membershipTest = BG.boundingPolygon(line, options["comparisonBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
             membershipOverlap = membershipTest.intersection(query)
 
             if options["debugging"]:
@@ -853,8 +857,8 @@ def fragmentedSimilarity(queryGraph, queryLength, pattern, transX, transY):
 
         # Fragmenting part
         if options["debugging"]:
-            VIS.visualiseShape(BG.boundingPolygon(BG.convertGraphToMultiLineString(transformGraph)))
-            VIS.visualiseShape(BG.boundingPolygon(BG.convertGraphToMultiLineString(pattern)))
+            VIS.visualiseShape(BG.boundingPolygon(BG.convertGraphToMultiLineString(transformGraph), xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"]))
+            VIS.visualiseShape(BG.boundingPolygon(BG.convertGraphToMultiLineString(pattern), xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"]))
 
         oldStart = transformGraph.nodes[0]["position"]
         newEnd = oldStart + intervalSize
@@ -877,9 +881,9 @@ def fragmentedSimilarity(queryGraph, queryLength, pattern, transX, transY):
             patternSubFragment = pattern.subgraph(patternFragment)
 
             queryLines = BG.convertGraphToMultiLineString(querySubFragment, absoluteValue=True)
-            queryBounds = BG.boundingPolygon(queryLines, options["comparisonBuffer"])
+            queryBounds = BG.boundingPolygon(queryLines, options["comparisonBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
             patternLines = BG.convertGraphToMultiLineString(patternSubFragment, absoluteValue=True)
-            patternBounds = BG.boundingPolygon(patternLines, options["comparisonBuffer"])
+            patternBounds = BG.boundingPolygon(patternLines, options["comparisonBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
 
             totalArea = queryBounds.area + patternBounds.area
             overlapPolygon = queryBounds.intersection(patternBounds)
@@ -1017,7 +1021,7 @@ def rhythmicSimilarity(query, comparison):
 
     # Open file in append mode and write with locking
     if recordRhythm:
-        with open('results.txt', 'a') as f:
+        with open('../../../OneOffs/Files/results.txt', 'a') as f:
             fcntl.flock(f.fileno(), fcntl.LOCK_EX)  # Exclusive lock
             f.write(f"{rhythmicDist}\n")
             fcntl.flock(f.fileno(), fcntl.LOCK_UN)  # Unlock
@@ -1039,7 +1043,7 @@ def isBetween(query, start, end):
 
 def calculateSimilarity(query, comparison):
     # Generate a bounding around the query
-    queryBounding = BG.boundingPolygon(query, options["comparisonBuffer"])
+    queryBounding = BG.boundingPolygon(query, options["comparisonBuffer"], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
 
     # Check if each member of the comparison has a minimum overlap with the query
     comparison = minimumOverlap(comparison, queryBounding)
@@ -1048,7 +1052,7 @@ def calculateSimilarity(query, comparison):
     comparisonMultiLine = MultiLineString(comparison)
 
     # Creates a polygon around those notes
-    comparisonBounding = BG.boundingPolygon(comparisonMultiLine, options['comparisonBuffer'])
+    comparisonBounding = BG.boundingPolygon(comparisonMultiLine, options['comparisonBuffer'], xScale=options["Scaling"]["xScale"], yScale=options["Scaling"]["yScale"])
 
     # get the area, the overlap
     totalArea = queryBounding.area + comparisonBounding.area

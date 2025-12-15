@@ -1,5 +1,6 @@
 from music21 import *
 from Utilities import ComeWhatRayUtil as CWR
+import random
 
 e = environment.Environment()
 e['directoryScratch'] = ""
@@ -7,8 +8,15 @@ e['directoryScratch'] = ""
 Options = {
     "decimalPrecision": 3,
     "includeRests": False,
-    "debugging": False
+    "debugging": False,
+    # "Noise": None
+    "Noise": {
+      "Chance": 0,
+      "XRange": (0,0),
+      "YRange": (0,0),
+    }
 }
+
 
 # Hard coded note name conversions to numbers
 noteToNumber = {
@@ -47,6 +55,8 @@ def convertMidiToPoints(work):
             tempNote = getNotePosition(n)
             if tempNote['pitch'] >= 0:
                 # Do not include notes with a negative pitch as these are likely percussion
+                if Options["Noise"]["Chance"] > 0:
+                    tempNote = addNoise(tempNote)
                 coordinates.append(tempNote)
 
         # Dismantle chords into individual notes
@@ -59,6 +69,8 @@ def convertMidiToPoints(work):
                 # (Hopefully this has been fixed with the later code increasing the octave of the notes)
                 # if returnedNote['pitch'] >= 0:
                 #     coordinates.append(returnedNote)
+                if Options["Noise"]["Chance"] > 0:
+                    returnedNote = addNoise(returnedNote)
                 coordinates.append(returnedNote)
 
         elif "Rest" in n.classSet:
@@ -69,8 +81,11 @@ def convertMidiToPoints(work):
                 "position": round(float(n.offset), Options["decimalPrecision"]),
                 "duration": round(float(n.quarterLength), Options["decimalPrecision"])
             }
+
+            if Options["Noise"]["Chance"] > 0:
+                noteRest = addNoise(noteRest)
+            noteRest["pitch"] = -1
             coordinates.append(noteRest)
-            # noteRest["position"] = round(float(n.offset), Options["decimalPrecision"])
 
 
     pointSet = sortPoints(coordinates)
@@ -206,3 +221,18 @@ def sortPoints(pointSet):
 
     return temp
 
+# Adding Noise
+def addNoise(note):
+
+    XNoise = random.uniform(0, 1) < Options["Noise"]["Chance"]
+    YNoise = random.uniform(0, 1) < Options["Noise"]["Chance"]
+
+    if XNoise:
+        note['position'] += random.uniform(Options["Noise"]["XRange"][0], Options["Noise"]["XRange"][1])
+    if YNoise:
+        note['pitch'] += random.randint(Options["Noise"]["YRange"][0], Options["Noise"]["YRange"][1])
+
+
+
+
+    return note

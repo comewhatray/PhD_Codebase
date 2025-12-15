@@ -3,6 +3,7 @@ from shapely.geometry import Polygon, box, LineString, MultiPolygon, Point
 from matplotlib.patches import Ellipse
 from Utilities import Visualisations as VIS
 from shapely.affinity import translate
+from shapely.affinity import scale
 
 
 def RectangleLineGenerator(note, dimensions):
@@ -48,22 +49,22 @@ def EllipsePointGenerator(note, dimensions):
 
 
 #Requires a line string
-def boundingPolygon(lineString, bufferSize=1):
+# xScale and yScale allow for different scales on dimensions
+def boundingPolygon(lineString, bufferSize=1, xScale=1, yScale=1):
 
-
-    # line = lineString.buffer(bufferSize)
-
+    if xScale != 1 or yScale != 1:
+        lineString = scale(lineString, xfact=1 / xScale, yfact=1 / yScale, origin=(0, 0))
 
     # Alternatives to default
                                 # Round flat Square     # round, mitre, bevel
-    line = lineString.buffer(bufferSize, cap_style='square', join_style='bevel')
+    result = lineString.buffer(bufferSize, cap_style='square', join_style='bevel')
 
-    # if line.geom_type == 'MultiPolygon':
-    #     VIS.visualiseLineString(lineString)
-    #     VIS.visualiseShape(line)
+    if xScale != 1 or yScale != 1:
+       result  = scale(result, xfact=xScale, yfact=yScale, origin=(0, 0))
 
 
-    return line
+
+    return result
 
 
 def overlappingPolygon(shape1, shape2):

@@ -13,55 +13,34 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-# fileLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/ExperimentResults.json"
-# fileLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment7Results.json"
-# fileLocation = "Papers/Paper_2/Extension/ExtensionWorkspace/Experiment8Results.json"
-# startFileLocation = "ExperimentResults/Experiment8/AllSimilarity"
-# startFileLocation = "ExperimentResults/Experiment9 (BreathingRoom)/AllSimilarity"
-# startFileLocation = "ExperimentResults/Experiment12 (membershipScale)/AllSimilarity"
-# startFileLocation = "ExperimentResults/Experiment13 (FragmentisationCheck)/AllSimilarity"
-# startFileLocation = "ExperimentResults/Experiment14 (FragAndMember)/AllSimilarity"
-startFileLocation = "ExperimentResults/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
-# startFileLocation = "ExperimentResults/Experiment16 (Kyna_Membership)/AllSimilarity"
-# startFileLocation = "ExperimentResults/Experiment17 (Default Overlap)/AllSimilarity"
+# batchLocation = "ExperimentResults/yScal4Mem5"
+batchLocation = "ExperimentResults/ScalingPolygonY4"
 
-# startFileLocation = "ExperimentResults/Experiment18 (Membership_Rhythmn)/AllSimilarity"
-startFileLocation = "ExperimentResults/Experiment19 (Membership_Rhythmn_No_Deletion)/AllSimilarity"
-# startFileLocation = "ExperimentResults/Experiment120 (Kyna_Membership_Rhythmn)/AllSimilarity"
+ExperimentNames = [
+    "Experiment15 (BreathingRoom_Membership)",
+    "Experiment17 (Default Overlap)",
+    "Experiment18 (Membership_Rhythmn)",
+    "Experiment19 (Membership_Rhythmn_No_Deletion)"
+]
 
-# Membership 0.9
-# ----------------------------------------------------------------------------------------------------------------------
-# startFileLocation = "ExperimentResults/membership_0.9/Experiment14 (FragAndMember)/AllSimilarity"
-# startFileLocation = "ExperimentResults/membership_0.9/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
-# startFileLocation = "ExperimentResults/membership_0.9/Experiment16 (Kyna_Membership)/AllSimilarity"
-# ----------------------------------------------------------------------------------------------------------------------
+experimentSubset = "AllSimilarity"
 
-# Membership 0.5
-# ----------------------------------------------------------------------------------------------------------------------
-# startFileLocation = "ExperimentResults/membership_0.5/Experiment14 (FragAndMember)/AllSimilarity"
-# startFileLocation = "ExperimentResults/membership_0.5/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
-# startFileLocation = "ExperimentResults/membership_0.5/Experiment16 (Kyna_Membership)/AllSimilarity"
-# ----------------------------------------------------------------------------------------------------------------------
-
-# startFileLocation = "ExperimentResults/PolygonBoundingChanges_0.5_0.5/Experiment13 (FragmentisationCheck)/AllSimilarity"
-# startFileLocation = "ExperimentResults/PolygonBoundingChanges_0.5_0.5/Experiment14 (FragAndMember)/AllSimilarity"
-# startFileLocation = "ExperimentResults/PolygonBoundingChanges_0.5_0.5/Experiment15 (BreathingRoom_Membership)/AllSimilarity"
-# startFileLocation = "ExperimentResults/PolygonBoundingChanges_0.5_0.5/Experiment16 (Kyna_Membership)/AllSimilarity"
-# startFileLocation = "ExperimentResults/PolygonBoundingChanges_0.5_0.5/Experiment17 (Default Overlap)/AllSimilarity"
-
-
-experimentName = startFileLocation.split("/")[1]
+# experimentName = startFileLocation.split("/")[1]
 queryLocations = "LakhDataset/ExperimentDataset/Queries"
 precissionAt = 10
 
 showInter = True
-showQuery = True
+showQuery = False
 
 def main():
-    # maxResults()
-    # topXResults(1)
-    # topXResults(4)
-    thresholdResults(0.9)
+
+    for experimentName in ExperimentNames:
+        startFileLocation = CWR.appendDirectory(batchLocation, [experimentName, experimentSubset])
+
+        # maxResults()
+        # topXResults(1)
+        # topXResults(4)
+        thresholdResults(startFileLocation, 0.9)
     return
 
 
@@ -166,7 +145,10 @@ def topXResults(topX):
     return
 
 
-def thresholdResults(threshold):
+def thresholdResults(startFileLocation, threshold):
+
+    experimentName = startFileLocation.split("/")[2]
+
     queryLabels = os.listdir(startFileLocation)
 
     resultsTracking = {}
@@ -204,8 +186,6 @@ def thresholdResults(threshold):
                 data = CWR.openFile(dataLocation, printDisplay=False)
 
                 # Gets the comparisons above a specified threshold
-
-
                 topXResult = []
                 if (
                         "fragmentedScoreList" in data and

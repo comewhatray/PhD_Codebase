@@ -30,8 +30,10 @@ def runExperiment(queryDetails, datasetDetails, aggregationDetails, systemArgs=N
                 stage["options"]["saveResultsLabel"] = f"{experimentModification['title']}/{aggregationDetails["experimentName"]}"
                 CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(stage["options"], experimentModification["aggregationModification"])
 
-
-
+    print(CWR.extraLargeSpacer)
+    print("AGGREGATION DETAILS:")
+    print(aggregationDetails)
+    print(CWR.extraLargeSpacer)
     # Query Run
     # Where to save
     querySaveLoc = CWR.appendDirectory(queryDetails["WorkspaceLocation"], "QueryLocationData.json")
@@ -50,6 +52,7 @@ def runExperiment(queryDetails, datasetDetails, aggregationDetails, systemArgs=N
 
     queryDeets = CWR.openFile(querySaveLoc)
     datasetDeets = CWR.openFile(datasetSaveLoc)
+
 
     # MultiProcess
     if multiProcess:

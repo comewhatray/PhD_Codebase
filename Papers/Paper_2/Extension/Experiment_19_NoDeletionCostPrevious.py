@@ -69,6 +69,10 @@ aggregationDetails = {
                 "inspectionBuffer": 1,
                 "comparisonBuffer": 1,
                 "visualiseProcess": visualiseProcess,
+                "Scaling": {
+                    "xScale": 1,
+                    "yScale": 1,
+                }
 
             },
         }

@@ -1,0 +1,12 @@
+{
+  "title": "yScal4Mem5",
+  "aggregationModification": {
+    "additionalParameters": {
+      "minimumOverlap": 0.5
+    },
+    "Scaling": {
+      "xScale": 1,
+      "yScale": 4
+    }
+  }
+}
