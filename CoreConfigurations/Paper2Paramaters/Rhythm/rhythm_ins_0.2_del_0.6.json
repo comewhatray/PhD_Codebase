@@ -1,0 +1,10 @@
+{
+  "title": "rhythm_ins_0.2_del_0.6",
+  "aggregationModification": {
+      "additionalParameters": {
+        "rhythmThresholdCheck": 0,
+        "deletionPenalty": 0.6,
+        "insertionPenalty": 0.2
+      }
+  }
+}

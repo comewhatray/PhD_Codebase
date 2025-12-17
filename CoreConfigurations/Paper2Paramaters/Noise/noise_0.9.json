@@ -1,0 +1,19 @@
+{
+  "title": "Noise_0.9",
+  "datasetModification": {
+    "Stages": [
+      {
+        "file": "Code_Stages/0:MIDI_Interface/MIDI_Extraction.py",
+        "options": {
+            "function": "convertMidiToPoints",
+            "saveType": ".json",
+            "Noise": {
+              "Chance": 0.9,
+              "XRange": [-1, 1],
+              "YRange": [-2, 2]
+            }
+        }
+      }
+    ]
+  }
+}

@@ -47,7 +47,6 @@ datasetDetails = {
     "Dataset_Configuration": datasetLoc,
     "Stages": stages,
     "threading": multiProcess,
-    "Noise": None
 }
 
 aggregationDetails = {
@@ -62,7 +61,9 @@ aggregationDetails = {
                 "saveResultsLabel": experimentName,
                 "additionalParameters": {
                     "minimumOverlap": 0.7,
-                    "rhythmThresholdCheck": 0
+                    "rhythmThresholdCheck": 0,
+                    "deletionPenalty": 1,
+                    "insertionPenalty": 1,
                 },
                 "debugging": False,
                 "threading": multiProcess,

@@ -1,0 +1,8 @@
+{
+  "title": "membership_0.3",
+  "aggregationModification": {
+      "additionalParameters": {
+        "minimumOverlap": 0.3
+      }
+  }
+}

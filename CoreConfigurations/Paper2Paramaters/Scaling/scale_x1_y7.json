@@ -1,0 +1,9 @@
+{
+  "title": "ScalingPolygonY4",
+  "aggregationModification": {
+    "Scaling": {
+      "xScale": 1,
+      "yScale": 7
+    }
+  }
+}

@@ -6,7 +6,6 @@ experimentsToRun = [
     "Papers/Paper_2/Extension/Experiment_17_Default_Overlap.py",
     "Papers/Paper_2/Extension/Experiment_18_Membership_Rhythmn.py",
     "Papers/Paper_2/Extension/Experiment_19_NoDeletionCostPrevious.py"
-
 ]
 
 itterations = 1

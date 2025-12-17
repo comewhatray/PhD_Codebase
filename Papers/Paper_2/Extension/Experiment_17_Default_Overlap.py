@@ -53,8 +53,6 @@ datasetDetails = {
     "Dataset_Configuration": datasetLoc,
     "Stages": stages,
     "threading": multiProcess,
-    "Noise": None
-
 }
 
 aggregationDetails = {

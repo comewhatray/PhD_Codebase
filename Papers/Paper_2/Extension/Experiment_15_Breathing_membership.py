@@ -25,6 +25,11 @@ stages = [
         "options": {
             "function": "convertMidiToPoints",
             "saveType": ".json",
+            # "Noise": {
+            #       "Chance": 1,
+            #       "XRange": [-1,1],
+            #       "YRange": [-1,1]
+            #     }
         }
     },
 ]
@@ -37,7 +42,7 @@ queryDetails = {
     "WorkspaceLocation": workspace,
     "Dataset_Configuration": queryLoc,
     "Stages": stages,
-    "threading": multiProcess
+    "threading": multiProcess,
 }
 
 datasetDetails = {
@@ -49,7 +54,6 @@ datasetDetails = {
     "Dataset_Configuration": datasetLoc,
     "Stages": stages,
     "threading": multiProcess,
-    "Noise": None
 }
 
 aggregationDetails = {

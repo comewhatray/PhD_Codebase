@@ -6,9 +6,7 @@ def runExperiment(queryDetails, datasetDetails, aggregationDetails, systemArgs=N
 
     multiProcess = queryDetails["threading"]
 
-
     if systemArgs is not None:
-
         experimentModification = CWR.openFile(systemArgs[0])
 
         # Update Identifier to create new Directories
@@ -17,23 +15,29 @@ def runExperiment(queryDetails, datasetDetails, aggregationDetails, systemArgs=N
         datasetDetails["ExperimentSignifier"] = experimentModification["title"].split('/')[0]
 
         # Update Query with modifications
-        if "queryModifications" in experimentModification:
-            CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(queryDetails, experimentModification["queryModifications"])
+        if "queryModification" in experimentModification:
+            CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(queryDetails, experimentModification["queryModification"])
 
         # Update Dataset with modifications
         if "datasetModification" in experimentModification:
-            CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(datasetDetails, experimentModification["datasetModifications"])
+            CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(datasetDetails, experimentModification["datasetModification"])
+            # print("DATSETDETAILS")
+            # print(experimentModification["datasetModification"])
+            # print(CWR.extraLargeSpacer)
+            # print(datasetDetails)
+
 
         # Update Aggregation with modifications
-        if "aggregationModification" in experimentModification:
-            for stage in aggregationDetails["Stages"]:
-                stage["options"]["saveResultsLabel"] = f"{experimentModification['title']}/{aggregationDetails["experimentName"]}"
+
+        for stage in aggregationDetails["Stages"]:
+            stage["options"]["saveResultsLabel"] = f"{experimentModification['title']}/{aggregationDetails["experimentName"]}"
+            if "aggregationModification" in experimentModification:
                 CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(stage["options"], experimentModification["aggregationModification"])
 
-    print(CWR.extraLargeSpacer)
-    print("AGGREGATION DETAILS:")
-    print(aggregationDetails)
-    print(CWR.extraLargeSpacer)
+            # print(CWR.extraLargeSpacer)
+            # print("AGGREGATION DETAILS:")
+            # print(aggregationDetails)
+            # print(CWR.extraLargeSpacer)
     # Query Run
     # Where to save
     querySaveLoc = CWR.appendDirectory(queryDetails["WorkspaceLocation"], "QueryLocationData.json")
