@@ -202,3 +202,21 @@ def updateOldDictionaryEntriesWithNewDictionaryEntries(oldDictionary, newDiction
     else:
         print("Dictionary is None")
 
+
+def combineDictionaries(directoryList):
+
+    combinedDirectory = {}
+    for dictionary in directoryList:
+        combinedDirectory = merge_dicts(combinedDirectory, dictionary)
+
+    return combinedDirectory
+
+
+def merge_dicts(d1, d2):
+    result = d1.copy()
+    for key, value in d2.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = merge_dicts(result[key], value)
+        else:
+            result[key] = value
+    return result
