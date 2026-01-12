@@ -4,16 +4,20 @@ from Utilities import ComeWhatRayUtil as CWR
 from Utilities import datasetManagment as DM
 import networkx as nx
 import sys
+import os
 import math
 import matplotlib.pyplot as plt
 
 import torch
 from torch_geometric.data import Data
-from torch_geometric.loader import DataLoader
 from torch_geometric.utils.convert import from_networkx
-from torch_geometric.datasets import Planetoid
-from torch_geometric.nn import GCNConv
-from torch_geometric.data import Batch
+
+
+import mlx.core as mx
+# from mlx_graphs.utils.convert import from_networkx
+from mlx_graphs.data.data import GraphData
+
+from parallelbar import progress_map
 
 midiTensorsLocation = "Papers/Paper_3/Datasets/ClassicalComposersDataset/MidiTensors"
 
@@ -23,8 +27,11 @@ options = {
     "trainPercentage": 0.8,
     "testing": False,
     "saveLocation": None,
+    "saveType": None,
+    "threading": False,
     # Do I want to save the gpickle in between
     "saveIntermediate": None,
+    "maxWorkers": 24,
 }
 
 hotEncodeDictionary = {
@@ -34,28 +41,35 @@ hotEncodeDictionary = {
 this_module = sys.modules[__name__]
 
 def startProcess(dataset, inputOptions):
-    print("Generating Graphs for GNN")
+    print("Generating Tensor Graphs for GNN")
+
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, inputOptions)
 
     methodInstanciated = getattr(this_module, options['function'])
 
-    return methodInstanciated(dataset)
+    classificationFormat = DM.convertDatasetToOldFormat(dataset)
+
+    # Prepopulating the hotEncoding and datapoint ID (For multiprocessing purposes)
+    dataPointNum = 0
+    for datapoint in classificationFormat:
+        hotEncoder(datapoint["Label"])
+        datapoint["ID"] = dataPointNum
+        dataPointNum += 1
+
+    CWR.saveFile("tempHotEncodings.json", hotEncodeDictionary)
+
+
+    return methodInstanciated(classificationFormat)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-# Default GNN
-def GNN(dataset):
-    print("Beginning GNN")
-
-
 def graphClassificationUsingNodeInformation(dataset):
-    classificationFormat = DM.convertDatasetToOldFormat(dataset)
+    classificationFormat = dataset
 
     dataset = []
-    idx = 0
     for nodeGraph in classificationFormat:
 
-        pyg_graph = from_networkx(CWR.openFile(nodeGraph['Location']))
+        pyg_graph = from_networkx(CWR.openFile(nodeGraph['Location'], printDisplay= not options['threading']))
 
         x = []
 
@@ -76,58 +90,38 @@ def graphClassificationUsingNodeInformation(dataset):
         )
 
         # save
-
-        saveTo = CWR.appendDirectory(options["saveLocation"], f"data_{idx}.pt")
+        saveTo = CWR.appendDirectory(options["saveLocation"], f"data_{nodeGraph["ID"]}{options["saveType"]}")
         CWR.saveFile(saveTo, cleanedTorchData)
-        idx += 1
 
 
 
     # return
+
 # Uses the edge features to classify the graph
 def graphClassificationUsingEdgeInformation(dataset):
-    print("Classify Graph using Edge Information")
 
-    classificationFormat = DM.convertDatasetToOldFormat(dataset)
+    classificationFormat = dataset
+    if not options["threading"]:
+        for nodeGraph in classificationFormat:
+            print("Classify Graph using Edge Information")
+            print(f"Datapoint: data_{nodeGraph['ID']}")
+            graphClassificationUsingEdgeInformationPointWorker(nodeGraph)
 
-    dataset = []
-    idx = 0
-    for nodeGraph in classificationFormat:
-        edgeGraph = edgeNodeSwapGraph(CWR.openFile(nodeGraph['Location']))
+    # If we are multiprocessing this
+    else:
+        print(f"MultiProcessing: Generating Tensor Graphs for GNN")
+        for datapoint in classificationFormat:
+            datapoint["OPTIONS"] = options
+        results = progress_map(graphClassificationUsingEdgeInformationPointWorker, classificationFormat, n_cpu=options["maxWorkers"], chunk_size=1)
 
-        if options["saveIntermediate"] is not None:
-            CWR.saveFile(f"{options['saveIntermediate']}/{nodeGraph['Name']}_edgeGraph.gpickle", edgeGraph)
-
-
-
-        pyg_graph = from_networkx(edgeGraph)
-
-
-        x = []
-        for i in range(pyg_graph['num_nodes']):
-            x.append([pyg_graph['pitchChange'][i], pyg_graph['onsetGap'][i], pyg_graph['endOnsetGap'][i]])
-
-        pyg_graph.x = torch.tensor(x)
-        pyg_graph.y = torch.tensor([hotEncoder(nodeGraph['Label'])])
-
-        cleanedTorchData = Data(
-            # X is a tensor of the features
-            x=pyg_graph.x,
-            # Edge index is edge index
-            edge_index=pyg_graph.edge_index,
-            # This is the class it belongs to that has been hot encoded to a number
-            y=pyg_graph.y,
-            MidiName=nodeGraph['Name']
-        )
-
-        if not options["saveLocation"] == None:
-            saveTo = CWR.appendDirectory(options["saveLocation"], f"data_{idx}.pt")
+    # dataset = []
 
 
 
         # dataset.append(pyg_graph)
 
-
+    # I believe this is old code for how I generated random distributions. I'm scared to delete it though
+    {
     #So I could create a tensor where the rows is dictated by the number of nodes and the columns are the number of features
     # In my case that would be 3 features
 
@@ -147,10 +141,65 @@ def graphClassificationUsingEdgeInformation(dataset):
 
         # nx.draw(edgeGraph, with_labels=True)
         # plt.show()
+    }
 
+# ProcessFunctions
+# ----------------------------------------------------------------------------------------------------------------------
 
+def graphClassificationUsingEdgeInformationPointWorker(dataPoint):
 
+    # This solves multiprocessing issue of defaulting to the original options, I simlpy import them when multiprocessing
+    if "OPTIONS" in dataPoint:
+        CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, dataPoint["OPTIONS"])
+        hotEncodeDictionary = CWR.openFile("tempHotEncodings.json", printDisplay=not options['threading'])
 
+    saveTo = os.path.join(options["saveLocation"], f"data_{dataPoint["ID"]}{options["saveType"]}")
+
+    if not os.path.exists(saveTo):
+
+        edgeGraph = edgeNodeSwapGraph(CWR.openFile(dataPoint['Location'], printDisplay=not options['threading']))
+
+        if options["saveIntermediate"] is not None:
+            CWR.saveFile(f"{options['saveIntermediate']}/{dataPoint['Name']}_edgeGraph.gpickle", edgeGraph)
+
+        # TODO TEMP WORKAROUND FOR LABELED NODES
+        # mapping = {}
+        # counter = 0
+        # for node in edgeGraph.nodes():
+        #     mapping[node] = counter
+        #     counter += 1
+        #
+        # edgeGraph = nx.relabel_nodes(edgeGraph, mapping)
+
+        pyg_graph = from_networkx(edgeGraph)
+
+        x = []
+        for i in range(pyg_graph['num_nodes']):
+            x.append([pyg_graph['pitchChange'][i], pyg_graph['onsetGap'][i], pyg_graph['endOnsetGap'][i]])
+
+        pyg_graph.x = torch.tensor(x)
+        pyg_graph.y = torch.tensor([hotEncoder(dataPoint['Label'])])
+
+        # pyg_graph.x = mx.array(x)
+        # pyg_graph.y = mx.array([hotEncoder(dataPoint['Label'])])
+
+        cleanedTorchData = Data(
+            # X is a tensor of the features
+            x=pyg_graph.x,
+            # Edge index is edge index
+            edge_index=pyg_graph.edge_index,
+            # This is the class it belongs to that has been hot encoded to a number
+            y=pyg_graph.y,
+            MidiName=dataPoint['Name']
+        )
+
+        if not options["saveLocation"] == None:
+            CWR.saveFile(saveTo , cleanedTorchData, printDisplay=not options['threading'])
+
+    else:
+        if not options["threading"]:
+            print(f"data_{dataPoint["ID"]}{options["saveType"]} already exists")
+            print(CWR.midSpacer)
 
 # Helper Methods
 # ----------------------------------------------------------------------------------------------------------------------

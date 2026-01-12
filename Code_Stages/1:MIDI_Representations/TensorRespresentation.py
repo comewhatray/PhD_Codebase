@@ -8,7 +8,8 @@ import sys
 options = {
     "function": "edgeToNodeTensorEncoding",
     'saveLocation': None,
-    "hotEncoderDictionary": {}
+    "hotEncoderDictionary": {},
+    "threading": False
 
 }
 
@@ -19,8 +20,8 @@ def startProcess(work, inputOptions=None):
     # Setting up python voodoo magic to let me use a sting to call a function
     this_module = sys.modules[__name__]
     methodInstanciated = getattr(this_module, options['function'])
-
-    print(f" Tensor Representations: {options['function']}")
+    if not options['threading']:
+        print(f" Tensor Representations: {options['function']}")
     proximityGraphRepresentation = methodInstanciated(work)
 
     return proximityGraphRepresentation
@@ -28,7 +29,7 @@ def startProcess(work, inputOptions=None):
 
 def edgeToNodeTensorEncoding(work):
 
-    edgeGraph = edgeNodeSwapGraph(CWR.openFile(work['Location']))
+    edgeGraph = edgeNodeSwapGraph(CWR.openFile(work['Location'], printDisplay= not options['threading']))
 
     pyg_graph = from_networkx(edgeGraph)
     x = []

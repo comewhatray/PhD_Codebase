@@ -61,7 +61,7 @@ def startProcess(work, inputOptions=None):
 # ----------------------------------------------------------------------------------------------------------------------
 
 def GraphPointRepresentation(work):
-    work = CWR.openFile(work)
+    work = CWR.openFile(work, printDisplay= not options['threading'])
     counter = 0
     updateCounter = 0
 
@@ -75,10 +75,12 @@ def GraphPointRepresentation(work):
     for note in work:
 
         # Update Counter
+
         if counter > ((len(work) / 10) * updateCounter):
-            print('Number of Points: ' + str(len(work)))
+            if not options["testing"]:
+                print('Number of Points: ' + str(len(work)))
+                print(str(counter) + '/' + str(len(work)))
             updateCounter += 1
-            print(str(counter) + '/' + str(len(work)))
 
         # Encoding each node with the notes relevant information
         tuneGraph.nodes[counter]['pitch'] = note['pitch']
@@ -115,7 +117,7 @@ def GraphLineRepresentation(work):
     counter = 0
     updateCounter = 0
 
-    work = CWR.openFile(work)
+    work = CWR.openFile(work, printDisplay= not options['threading'])
 
     # Selects the appropriate shape generator
     shapeGenerator = getattr(BG, options["polygon"]["type"]+"LineGenerator")
@@ -128,9 +130,10 @@ def GraphLineRepresentation(work):
         # Update Counter
         if counter > ((len(work) / 10) * updateCounter):
             # print(str(counter) + '/' + str(len(points)))
-            print('Number of Points: ' + str(len(work)))
+            if not options["threading"]:
+                print('Number of Points: ' + str(len(work)))
+                print(str(counter) + '/' + str(len(work)))
             updateCounter += 1
-            print(str(counter) + '/' + str(len(work)))
 
         # Encoding each node with the notes relevant information
         tuneGraph.nodes[counter]['pitch'] = note['pitch']
@@ -179,7 +182,7 @@ def SzetoGraphRepresentation(work):
     counter = 0
     updateCounter = 0
 
-    work = CWR.openFile(work)
+    work = CWR.openFile(work, printDisplay= not options['threading'])
 
     tuneGraph = nx.empty_graph(len(work))
 
@@ -195,9 +198,10 @@ def SzetoGraphRepresentation(work):
         # Update Counter
         if counter > ((len(work) / 10) * updateCounter):
             # print(str(counter) + '/' + str(len(points)))
-            print('Number of Points: ' + str(len(work)))
+            if not options["threading"]:
+                print('Number of Points: ' + str(len(work)))
+                print(str(counter) + '/' + str(len(work)))
             updateCounter += 1
-            print(str(counter) + '/' + str(len(work)))
 
         # Setup for comparison code goes here
 
@@ -282,9 +286,8 @@ def KarystinaiosRepresentation(work):
             # print(str(counter) + '/' + str(len(points)))
             if not options['threading']:
                 print('Number of Points: ' + str(len(work)))
-            updateCounter += 1
-            if not options['threading']:
                 print(str(node) + '/' + str(len(work)-1))
+            updateCounter += 1
 
 
         # compare current note to notes that occur after it

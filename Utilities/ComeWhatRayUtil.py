@@ -1,11 +1,12 @@
 import os
 
+import warnings
 import itertools
 import shutil
 import numpy as np
 # Save File Imports
 import pandas as pd
-# import torch
+import torch
 import pickle
 import json
 
@@ -51,8 +52,9 @@ def saveFile(fileLocation, file, delimiter=None, printDisplay=True):
         with open(fileLocation, "wb") as f:
             np.save(f, file)
 
-    # if ".pt" in fileLocation:
-        # torch.save(file, fileLocation)
+    if ".pt" in fileLocation:
+        # warnings.warn("YOU HAVE NOT INSTALLED TORCH")
+        torch.save(file, fileLocation)
 
     # Of note, this needs to be a pandas dataframe
     if ".csv" in fileLocation:
@@ -143,6 +145,17 @@ def appendDirectory(path, appendage):
 def deleteDirectory(directory):
     if directoryExists(directory):
         shutil.rmtree(directory)
+
+
+# Get all files from the current directory (including subdirectories)
+def exploreDirectory(directory):
+    fileLocs = []
+    for subdir, dirs, files in os.walk(directory):
+        for file in files:
+            fileLocs.append(os.path.join(subdir, file))
+
+    return fileLocs
+
 
 # String Modification Methods
 # ----------------------------------------------------------------------------------------------------------------------

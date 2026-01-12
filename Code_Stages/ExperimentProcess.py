@@ -132,11 +132,15 @@ def batchExperiment(details=None):
 
 # For Experiments that wish to compile data into new knowledge
 def aggregationExperiment(locationsDict, details=None):
-    if not options['threading']:
-        print("Aggregation Experiment")
+
+    # Get the locations of the last dictionaries before updating with the new ones
     lastLocation = locationsDict[options["Stages"][-1]['options']['function']]
 
+    # Update options dictionary with new information
     CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, details)
+
+    if not options['threading']:
+        print("Aggregation Experiment")
 
     for process in options["Stages"]:
 
@@ -212,20 +216,26 @@ def iterationStep(locationsDict, previousLocation, label, process):
         # create the locations space to store the next locations
         if label not in locationsDict[processName]:
             locationsDict[processName][label] = []
+
         # save the results and store location
         saveLocation = CWR.appendDirectory(locationsDict['directory'], [label, process['options']['function']])
         CWR.ensureDirectory(saveLocation)
+
         # Getting the name of the file
         fileName = CWR.getFileNameFromPath(location)
         if process['options']['saveType'] is not None:
             fileName += process['options']['saveType']
+
         # getting final location and saving data
         fileLocation = CWR.appendDirectory(saveLocation, fileName)
 
-        # If we don't want to multiProcess the approach
+        # If we don't want to multiProcess the approach (I am not sure why this comment is here)
+
+        # checking that the results don't already exist
         if not os.path.exists(fileLocation):
 
-            # checking that the results don't already exist
+            if not options["threading"]:
+                print(f"Processing: {fileLocation}")
             results = processTask(location, process)
 
             # Saving results
@@ -282,7 +292,7 @@ def multiProcessItterationStep(locationsDict, previousLocation, label, process):
             multiProcessArgsList.append(multiArg)
 
     # Run with multiprocessing
-    print(f"MultiProcessing: Process-> {processName}| Label-> {label} | Size-> {len(multiProcessArgsList)}")
+    print(f"MultiProcessing: Process -> {processName}| Label -> {label} | Size -> {len(multiProcessArgsList)}")
     results = progress_map(multiProcessTask, multiProcessArgsList, n_cpu=options["maxWorkers"], chunk_size=1)
 
 
