@@ -32,4 +32,23 @@ def benchmark_batch_sizes(dataset):
 
 
 # Run this with your dataset
-benchmark_batch_sizes(your_dataset)
+# benchmark_batch_sizes(your_dataset)
+
+counter = 0
+
+totalLength = 2400
+itterationSize = 4
+updateCounter = 0
+otherCounter = 0
+for i in range(0, totalLength, itterationSize):
+
+    if counter % int(totalLength*0.1) < updateCounter:
+        print(f"Completion Update: {counter}/{totalLength}")
+        print(otherCounter)
+        otherCounter += 1
+        updateCounter = 0
+    else:
+        updateCounter += itterationSize
+
+
+    counter += itterationSize

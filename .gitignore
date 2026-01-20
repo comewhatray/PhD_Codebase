@@ -3,3 +3,5 @@
 *.pt
 /LakhDataset/lmd_matched/
 /OneOffs/Files/
+results.txt
+AriaDataset/metadata.json

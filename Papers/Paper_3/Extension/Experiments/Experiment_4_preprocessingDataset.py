@@ -5,24 +5,24 @@ from Code_Stages import ExperimentProcess as EP
 from torch_geometric.nn import GCNConv, Linear, global_add_pool, SAGEConv, SumAggregation, global_mean_pool, global_max_pool, max_pool, avg_pool
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
-from tabulate import tabulate
 import os
 import time
+import sys
 
 import torch
 from torch_geometric.data import Dataset, download_url
 
-globalDevice = "mps"
+globalDevice = "cpu"
 
 # Specifications for transforming the dataset
 ExperimentDetails = {
     # Experiment Name left blank is just for experiments we don't want to store the results of
     "ExperimentName": "preprocessingDataset",
     "threading": True,
-    "ExperimentSignifier": "",
+    "ExperimentSignifier": "Szeto",
     "Description": "Ensuring that everything is still working since I have a new computer",
     "WorkspaceLocation": "Papers/Paper_3/Extension/Workspace",
-    "Dataset_Configuration": "AriaDataset/configs/periodConfigTotal.json",
+    "Dataset_Configuration": "AriaDataset/configs/BalancedAriaConfig.json",
     # "Dataset_Configuration": "Papers/Paper_3/Datasets/ClassicalComposersDataset/Configurations/All.json",
     "Stages": [
         # First Extract the midi file into points
@@ -65,11 +65,24 @@ aggregationDetails = {
 
 # Class for the dataset
 class MidiDataset(Dataset):
-    def __init__(self, root, configurationLocation, processGuide, transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, root, configurationLocation, processGuide, randomisation=None, transform=None, pre_transform=None, pre_filter=None):
+
         self.configurationLocation = configurationLocation
         self.processGuide = processGuide
         self.configuration = None
+        self.randomisations = randomisation
+
         super().__init__(root, transform, pre_transform, pre_filter)
+
+        self.data_list = []
+        num_files = len([f for f in os.listdir(self.processed_dir) if f.startswith('data_')])
+        print(f"Loading {num_files} graphs into memory...")
+        for i in range(num_files):
+            data = torch.load(os.path.join(self.processed_dir, f'data_{i}.pt'), weights_only=False)
+            self.data_list.append(data)
+        print("Done loading.")
+
+
 
     @property
     def raw_file_names(self):
@@ -109,9 +122,16 @@ class MidiDataset(Dataset):
 
     # get a specific piece of data
     def get(self, idx):
-        # data = torch.load(osp.join(self.processed_dir, processedFileName))
-        data = torch.load(os.path.join(self.processed_dir, f'data_{idx}.pt'), weights_only=False)
-        return data
+
+        # if self.randomisations is not None:
+        #     idx = self.randomisations[idx]
+        #
+        # data = torch.load(os.path.join(self.processed_dir, f'data_{idx}.pt'), weights_only=False)
+        # return data
+
+        if self.randomisations is not None:
+            idx = self.randomisations[idx]
+        return self.data_list[idx]
 
     # Method to stop constantly opening the configuration file
     def openConfig(self):
@@ -236,23 +256,27 @@ def test(loader, logging):
 
 
 # New train method
-def train_epoch(model, loader, optimizer, device=globalDevice):
+def train_epoch(model, loader, logging):
 
     print("Training...")
     model.train()
     total_loss = 0
     correct = 0
     total = 0
+    counter = 0
+    totalLength = len(loader)
+
+    num_classes = dataset.num_classes
 
     for batch in loader:
-        batch = batch.to(device)
-        optimizer.zero_grad()
+
+        optimiser.zero_grad()
 
         # IMPORTANT: Pass batch.batch for proper batching
         out = model(batch.x, batch.edge_index, batch.batch)
 
         # Use appropriate loss
-        if dataset.num_classes > 1:
+        if num_classes > 1:
             loss = F.cross_entropy(out, batch.y)
             pred = out.argmax(dim=1)
             correct += (pred == batch.y).sum().item()
@@ -260,29 +284,38 @@ def train_epoch(model, loader, optimizer, device=globalDevice):
             loss = F.mse_loss(out.squeeze(), batch.y.float())
 
         loss.backward()
-        optimizer.step()
+        optimiser.step()
 
         total_loss += loss.item() * batch.num_graphs
         total += batch.num_graphs
 
-    return total_loss / total, correct / total if dataset.num_classes > 1 else 0
+        if counter % int(totalLength/10)  == 0:
+            print(f"Batch Complete: {counter}/{totalLength}")
+        counter += 1
+
+    return total_loss / total, correct / total if num_classes > 1 else 0
+
+
 
 # New test method
 @torch.no_grad()
-def validate(model, loader, device=globalDevice):
+def validate(model, loader, logging):
     print("Validating...")
     model.eval()
     total_loss = 0
     correct = 0
     total = 0
+    counter = 0
+    totalLength = len(loader)
+    num_classes = dataset.num_classes
 
     for batch in loader:
-        batch = batch.to(device)
+        # batch = batch.to(device)
 
         # Forward pass with batch
         out = model(batch.x, batch.edge_index, batch.batch)
 
-        if dataset.num_classes > 1:
+        if num_classes > 1:
             loss = F.cross_entropy(out, batch.y)
             pred = out.argmax(dim=1)
             correct += (pred == batch.y).sum().item()
@@ -292,13 +325,18 @@ def validate(model, loader, device=globalDevice):
         total_loss += loss.item() * batch.num_graphs
         total += batch.num_graphs
 
-    return total_loss / total, correct / total if dataset.num_classes > 1 else 0
+        if counter % int(totalLength/10) == 0:
+            print(f"Batch Complete: {counter}/{totalLength}")
+        counter += 1
+
+    return total_loss / total, correct / total if num_classes > 1 else 0
 
 # Finds the optimal batch size
 def find_optimal_batch_size_graphsage(dataset, model):
     """Test different batch sizes for GraphSAGE"""
 
-    test_batch_sizes = [8, 16, 32, 64]
+    test_batch_sizes = [1,2,4,8,]
+    # test_batch_sizes = [8, 16, 32, 64]
     device = globalDevice  # or 'mps' if it works
 
     results = []
@@ -387,15 +425,34 @@ def compare_batch_sizes(train_dataset, model):
 
 
 
-
 if __name__ == '__main__':
+
+    randomisation = None
+
+    random1 = CWR.openFile("AriaDataset/configs/randomisations/randomisations.json")
+    randomisation = random1["0"]
+
+    itter = ""
+
+    if len(sys.argv) > 1:
+        print(sys.argv)
+        randomisation = CWR.openFile(sys.argv[1])
+        itter = sys.argv[2]
+        randomisation = randomisation[itter]
+        print(randomisation)
+
+
 
     # Configuration Data
     epochs = 100
     trainTestSplit = .7
     hiddenLayers = 75
-    learn = False
-    batchSize = 8
+    learn = True
+    batchSize = 4
+    output = f"Papers/Paper_3/Extension/Workspace/results/model_{itter}.pt"
+
+
+    data = CWR.openFile(ExperimentDetails["Dataset_Configuration"])
 
     torch.set_num_threads(os.cpu_count() // 2)
 
@@ -410,7 +467,7 @@ if __name__ == '__main__':
     }
 
     # Create the dataset object
-    dataset = MidiDataset(fileRoot, rawConfiguration, processLists)
+    dataset = MidiDataset(fileRoot, rawConfiguration, processLists, randomisation=randomisation)
 
     #Define the dataset split
     dataSplit = int(len(dataset) * trainTestSplit)
@@ -419,7 +476,7 @@ if __name__ == '__main__':
     print(dataset.get_summary())
 
     # Shuffle the dataset
-    dataset = dataset.shuffle()
+    # dataset = dataset.shuffle()
 
     # Create the GNN
     model = GraphSAGE(dataset.num_features, hiddenLayers ,dataset.num_classes).to(device)
@@ -428,24 +485,20 @@ if __name__ == '__main__':
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
     # Print out the model details
+    # find_optimal_batch_size_graphsage(dataset,model)
     print(model)
+
+
+
 
     # Create the train and test dataset divisions
     trainSplit = dataset[:dataSplit]
     testSplit = dataset[dataSplit:]
 
-    # print(trainSplit)
-    # print(testSplit)
-
-    # Function to find optimal batch size (it was 8)
-    # batchSize = find_optimal_batch_size_graphsage(dataset, model)
-
     # Batch sizing for improved performance
     # if batchSize is not None:
-    train_loader = DataLoader(trainSplit, batch_size=batchSize, shuffle=True, num_workers=0, drop_last=False)
-    val_loader = DataLoader(testSplit, batch_size=batchSize, shuffle=True, num_workers=0, drop_last=False)
-
-
+    train_loader = DataLoader(trainSplit, batch_size=batchSize, shuffle=False, num_workers=0, drop_last=False)
+    val_loader = DataLoader(testSplit, batch_size=batchSize, shuffle=False, num_workers=0, drop_last=False)
 
     # Summary metric storage
     analysis = {
@@ -455,6 +508,31 @@ if __name__ == '__main__':
     }
 
     # The learning Process
+
+    # print("=== Test 1: Isolated batch ===")
+    # batch = next(iter(train_loader))
+    # model.train()
+    # optimiser.zero_grad()
+    #
+    # start = time.time()
+    # out = model(batch.x, batch.edge_index, batch.batch)
+    # _ = out[0, 0].item()
+    # print(f"Forward: {(time.time() - start) * 1000:.1f}ms")
+    #
+    # start = time.time()
+    # loss = F.cross_entropy(out, batch.y)
+    # pred = out.argmax(dim=1)
+    # correct = (pred == batch.y).sum().item()
+    # print(f"Loss + pred: {(time.time() - start) * 1000:.1f}ms")
+    #
+    # print("=== Test 3: Check dataset.num_classes ===")
+    # start = time.time()
+    # nc = dataset.num_classes
+    # print(f"dataset.num_classes: {(time.time() - start) * 1000:.1f}ms, value: {nc}")
+    #
+    # print("\n=== Test 2: Your train_epoch ===")
+    # train_epoch(model, train_loader, optimiser)
+
     if learn:
 
         best_val_acc = 0
@@ -462,11 +540,27 @@ if __name__ == '__main__':
             print(CWR.largeSpacer)
             start = time.time()
 
+            trainStageLog = []
+            testStageLog = []
+
             # Train
-            train_loss, train_acc = train_epoch(model, train_loader, optimiser, globalDevice)
+            train_loss, train_acc = train_epoch(model, train_loader, trainStageLog)
+
+            analysis["TrainingStage"].append({
+                "Epoch": epoch,
+                "TrainLoss": train_loss,
+                "TrainAcc": train_acc,
+                "Predictions": trainStageLog,
+            })
 
             # Validate
-            val_loss, val_acc = validate(model, val_loader, globalDevice)
+            val_loss, val_acc = validate(model, val_loader, testStageLog)
+            analysis["TestStage"].append({
+                "Epoch": epoch,
+                "ValLoss": val_loss,
+                "ValAcc": val_acc,
+                "Predictions": testStageLog,
+            })
 
             epoch_time = time.time() - start
 
@@ -476,8 +570,103 @@ if __name__ == '__main__':
 
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-                torch.save(model.state_dict(), 'best_model.pt')
+                torch.save(model.state_dict(), f"best_model_Szeto_{itter}.pt")
 
+        CWR.saveFile(f"Experiment3Results/analysis|{ExperimentDetails["ExperimentSignifier"]}|{itter}.json", analysis)
 
+    # else:
+    #     # Test 1: Data iteration speed
+    #     print("Testing data loading...")
+    #     start = time.time()
+    #     for i, batch in enumerate(train_loader):
+    #         if i >= 50:
+    #             break
+    #     elapsed = time.time() - start
+    #     print(f"50 batches: {elapsed:.2f}s ({elapsed / 50 * 1000:.0f}ms per batch)")
+    #
+    #     # Test 2: Single batch through model
+    #     batch = next(iter(train_loader))
+    #     print(f"\nBatch: {batch.num_graphs} graphs, {batch.num_nodes} nodes, {batch.num_edges} edges")
+    #
+    #     start = time.time()
+    #     out = model(batch.x, batch.edge_index, batch.batch)
+    #     print(f"Forward: {time.time() - start:.2f}s")
+    #
+    #     start = time.time()
+    #     loss = F.cross_entropy(out, batch.y)  # replace with your actual loss
+    #     loss.backward()
+    #     print(f"Backward: {time.time() - start:.2f}s")
+    #
+    #     batch_times = []
+    #     for i, batch in enumerate(train_loader):
+    #         start = time.time()
+    #
+    #         out = model(batch.x, batch.edge_index, batch.batch)
+    #         loss = F.cross_entropy(out, batch.y)
+    #         loss.backward()
+    #         optimiser.step()
+    #         optimiser.zero_grad()
+    #
+    #         elapsed = time.time() - start
+    #         batch_times.append(elapsed)
+    #
+    #         print(f"Batch {i}: {batch.num_edges:,} edges, {elapsed:.2f}s")
+    #
+    #         if i >= 20:
+    #             break
+    #
+    #     print(
+    #         f"\nMin: {min(batch_times):.2f}s, Max: {max(batch_times):.2f}s, Mean: {sum(batch_times) / len(batch_times):.2f}s")
+    #
+    #
+    #     model.train()
+    #     batch_iter = iter(train_loader)
+    #
+    #     epoch_start = time.time()
+    #
+    #     for i, batch in enumerate(train_loader):
+    #         batch = batch.to(globalDevice)
+    #         optimiser.zero_grad()
+    #         out = model(batch.x, batch.edge_index, batch.batch)
+    #         loss = F.cross_entropy(out, batch.y)
+    #         loss.backward()
+    #         optimiser.step()
+    #
+    #         if i % 500 == 0:
+    #             print(f"Batch {i}, elapsed: {time.time() - epoch_start:.1f}s")
+    #
+    #     print(f"Epoch complete: {time.time() - epoch_start:.1f}s")
+    #
+    #     # for i in range(3):
+    #     #     print(f"\n--- Batch {i} ---")
+    #     #
+    #     #     start = time.time()
+    #     #     batch = next(batch_iter)
+    #     #     print(f"Get batch: {(time.time() - start) * 1000:.1f}ms")
+    #     #     print(f"Batch: {batch.num_graphs} graphs, {batch.num_edges:,} edges")
+    #     #
+    #     #     start = time.time()
+    #     #     batch = batch.to(globalDevice)
+    #     #     print(f"batch.to(): {(time.time() - start) * 1000:.1f}ms")
+    #     #
+    #     #     start = time.time()
+    #     #     optimiser.zero_grad()
+    #     #     print(f"zero_grad: {(time.time() - start) * 1000:.1f}ms")
+    #     #
+    #     #     start = time.time()
+    #     #     out = model(batch.x, batch.edge_index, batch.batch)
+    #     #     print(f"forward: {(time.time() - start) * 1000:.1f}ms")
+    #     #
+    #     #     start = time.time()
+    #     #     loss = F.cross_entropy(out, batch.y)
+    #     #     print(f"loss: {(time.time() - start) * 1000:.1f}ms")
+    #     #
+    #     #     start = time.time()
+    #     #     loss.backward()
+    #     #     print(f"backward: {(time.time() - start) * 1000:.1f}ms")
+    #     #
+    #     #     start = time.time()
+    #     #     optimiser.step()
+    #     #     print(f"optimizer.step: {(time.time() - start) * 1000:.1f}ms")
 
 
