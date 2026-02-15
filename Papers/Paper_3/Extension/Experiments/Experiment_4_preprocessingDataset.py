@@ -195,67 +195,68 @@ class GraphSAGE(torch.nn.Module):
 
         return x  # Return raw logits (apply loss function separately)
 
-# Old train method
-def train(train_loader, logging):
-    model.train()
+# # Old train method
+# def train(train_loader, logging):
+#     model.train()
+#
+#     totalLoss = 0
+#     dataCount = 0
+#     for data in train_loader:
+#         # if dataCount % 4 == 0:
+#         #     print(f"Sanity Check: {dataCount}")
+#
+#         data = data.to(device)
+#         optimiser.zero_grad()
+#
+#         # out = model(data)
+#         out = model(data, data.batch)
+#
+#         logging.append({
+#             "Probabilities": out.tolist(),
+#             "Answer": data.y.tolist()
+#         })
+#
+#         # desiredOutput = torch.zeros(train_loader.num_classes)
+#         # desiredOutput[data.y] = 1
+#         # loss = F.cross_entropy(out, desiredOutput)
+#         loss = F.cross_entropy(out, data.y)
+#         loss.backward()
+#         optimiser.step()
+#         # totalLoss += float(loss) * train_loader.len()
+#         dataCount += 1
+#
+#     # return float(totalLoss / len(train_loader))
 
-    totalLoss = 0
-    dataCount = 0
-    for data in train_loader:
-        # if dataCount % 4 == 0:
-        #     print(f"Sanity Check: {dataCount}")
-
-        data = data.to(device)
-        optimiser.zero_grad()
-
-        # out = model(data)
-        out = model(data, data.batch)
-
-        logging.append({
-            "Probabilities": out.tolist(),
-            "Answer": data.y.tolist()
-        })
-
-        # desiredOutput = torch.zeros(train_loader.num_classes)
-        # desiredOutput[data.y] = 1
-        # loss = F.cross_entropy(out, desiredOutput)
-        loss = F.cross_entropy(out, data.y)
-        loss.backward()
-        optimiser.step()
-        # totalLoss += float(loss) * train_loader.len()
-        dataCount += 1
-
-    # return float(totalLoss / len(train_loader))
-
-# Old test Method
-@torch.no_grad()
-def test(loader, logging):
-    model.eval()
-    # total_correct = 0
-    #
-    # for data in loader:
-    #     data = data.to(device)
-    #     out = model(data)
-    #     pred = out.argmax()
-    #
-    #     if torch.eq(pred, data.y):
-    #         total_correct += 1
-
-    # return round(total_correct / len(loader), 4)
-
-    correct = 0
-    for data in loader:  # Iterate in batches over the training/test dataset.
-        out = model(data, data.batch)
-        logging.append({
-            "Probabilities": out.tolist(),
-            "Answer": data.y.tolist()
-        })
-        pred = out.argmax(dim=1)  # Use the class with highest probability.
-        correct += int((pred == data.y).sum())  # Check against ground-truth labels.
-    return round(correct / len(loader.dataset), 4)
+# # Old test Method
+# @torch.no_grad()
+# def test(loader, logging):
+#     model.eval()
+#     # total_correct = 0
+#     #
+#     # for data in loader:
+#     #     data = data.to(device)
+#     #     out = model(data)
+#     #     pred = out.argmax()
+#     #
+#     #     if torch.eq(pred, data.y):
+#     #         total_correct += 1
+#
+#     # return round(total_correct / len(loader), 4)
+#
+#     correct = 0
+#     for data in loader:  # Iterate in batches over the training/test dataset.
+#         out = model(data, data.batch)
+#         logging.append({
+#             "Probabilities": out.tolist(),
+#             "Answer": data.y.tolist()
+#         })
+#         pred = out.argmax(dim=1)  # Use the class with highest probability.
+#         correct += int((pred == data.y).sum())  # Check against ground-truth labels.
+#     return round(correct / len(loader.dataset), 4)
 
 
 # New train method
+
 def train_epoch(model, loader, logging):
 
     print("Training...")
@@ -274,6 +275,12 @@ def train_epoch(model, loader, logging):
 
         # IMPORTANT: Pass batch.batch for proper batching
         out = model(batch.x, batch.edge_index, batch.batch)
+
+        for i in range(len(out)):
+            logging.append({
+                "Probabilities": out[i].tolist(),
+                "Answer": batch.y[i].tolist()
+            })
 
         # Use appropriate loss
         if num_classes > 1:
@@ -314,6 +321,11 @@ def validate(model, loader, logging):
 
         # Forward pass with batch
         out = model(batch.x, batch.edge_index, batch.batch)
+        for i in range(len(out)):
+            logging.append({
+                "Probabilities": out[i].tolist(),
+                "Answer": batch.y[i].tolist()
+            })
 
         if num_classes > 1:
             loss = F.cross_entropy(out, batch.y)
@@ -500,13 +512,6 @@ if __name__ == '__main__':
     train_loader = DataLoader(trainSplit, batch_size=batchSize, shuffle=False, num_workers=0, drop_last=False)
     val_loader = DataLoader(testSplit, batch_size=batchSize, shuffle=False, num_workers=0, drop_last=False)
 
-    # Summary metric storage
-    analysis = {
-        "TrainingStage": [],
-        "TrainingTest": [],
-        "TestStage": []
-    }
-
     # The learning Process
 
     # print("=== Test 1: Isolated batch ===")
@@ -540,6 +545,13 @@ if __name__ == '__main__':
             print(CWR.largeSpacer)
             start = time.time()
 
+            # Summary metric storage
+            analysis = {
+                "TrainingStage": [],
+                "TrainingTest": [],
+                "TestStage": []
+            }
+
             trainStageLog = []
             testStageLog = []
 
@@ -562,6 +574,10 @@ if __name__ == '__main__':
                 "Predictions": testStageLog,
             })
 
+            saveLoc = f"Experiment3Results/analysis/{ExperimentDetails["ExperimentSignifier"]}"
+            CWR.ensureDirectory(saveLoc)
+            CWR.saveFile(f"{saveLoc}/|Epoch{epoch}|Iteration{itter}.json",analysis)
+
             epoch_time = time.time() - start
 
             print(f"Epoch {epoch:3d}: Train Loss: {train_loss:.4f}, "
@@ -570,9 +586,9 @@ if __name__ == '__main__':
 
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-                torch.save(model.state_dict(), f"best_model_Szeto_{itter}.pt")
+                torch.save(model.state_dict(), f"Experiment3Results/models/{ExperimentDetails["ExperimentSignifier"]}/best_model_{ExperimentDetails["ExperimentSignifier"]}_{itter}.pt")
 
-        CWR.saveFile(f"Experiment3Results/analysis|{ExperimentDetails["ExperimentSignifier"]}|{itter}.json", analysis)
+
 
     # else:
     #     # Test 1: Data iteration speed

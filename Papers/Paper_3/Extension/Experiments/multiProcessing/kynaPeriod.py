@@ -16,7 +16,7 @@ if __name__ == '__main__':
     CWR.ensureDirectory(f"{workspace}/{identifier}")
 
     processes = []
-    for i in range(itters):
+    for i in range(3,6):
         cmd = ["python3", experiment, configuration, str(i)]
         log_file = open(f'{workspace}/{identifier}/log_{i}.txt', 'w')
         p = subprocess.Popen(cmd, stdout=log_file, stderr=subprocess.STDOUT)

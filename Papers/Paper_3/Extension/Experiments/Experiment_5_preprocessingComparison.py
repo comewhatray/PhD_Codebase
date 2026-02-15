@@ -62,9 +62,11 @@ aggregationDetails = {
     ]
 }
 
+
 # Class for the dataset
 class MidiDataset(Dataset):
-    def __init__(self, root, configurationLocation, processGuide, randomisation=None, transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, root, configurationLocation, processGuide, randomisation=None, transform=None,
+                 pre_transform=None, pre_filter=None):
 
         self.configurationLocation = configurationLocation
         self.processGuide = processGuide
@@ -80,8 +82,6 @@ class MidiDataset(Dataset):
             data = torch.load(os.path.join(self.processed_dir, f'data_{i}.pt'), weights_only=False)
             self.data_list.append(data)
         print("Done loading.")
-
-
 
     @property
     def raw_file_names(self):
@@ -109,7 +109,8 @@ class MidiDataset(Dataset):
         # ExperimentDetails
         print(self.raw_dir)
         print(self.raw_file_names)
-        self.processGuide["ExperimentDetails"]["Dataset_Configuration"] = CWR.appendDirectory(self.raw_dir, self.raw_file_names)
+        self.processGuide["ExperimentDetails"]["Dataset_Configuration"] = CWR.appendDirectory(self.raw_dir,
+                                                                                              self.raw_file_names)
         details = EP.batchExperiment(self.processGuide["ExperimentDetails"])
 
         self.processGuide["AggregationDetails"]["Stages"][0]["options"]["saveLocation"] = self.processed_dir
@@ -122,6 +123,12 @@ class MidiDataset(Dataset):
     # get a specific piece of data
     def get(self, idx):
 
+        # if self.randomisations is not None:
+        #     idx = self.randomisations[idx]
+        #
+        # data = torch.load(os.path.join(self.processed_dir, f'data_{idx}.pt'), weights_only=False)
+        # return data
+
         if self.randomisations is not None:
             idx = self.randomisations[idx]
         return self.data_list[idx]
@@ -130,6 +137,7 @@ class MidiDataset(Dataset):
     def openConfig(self):
         if self.configuration is None:
             self.configuration = CWR.openFile(CWR.appendDirectory(self.raw_dir, self.raw_file_names))
+
 
 # GNN construction
 class GraphSAGE(torch.nn.Module):
@@ -145,11 +153,6 @@ class GraphSAGE(torch.nn.Module):
 
         # Final classifier
         self.lin = Linear(hidden_dim, out_dim)
-
-        # self.conv1 = self.conv1.to('cpu')
-        # self.conv2 = self.conv2.to('mps')
-        # self.conv3 = self.conv3.to('mps')
-        # self.lin = self.lin.to('mps')
 
     def forward(self, x, edge_index, batch=None):
         # First conv block
@@ -188,9 +191,9 @@ class GraphSAGE(torch.nn.Module):
 
         return x  # Return raw logits (apply loss function separately)
 
-# New train method
-def train_epoch(model, loader):
 
+# New train method
+def train_epoch(model, loader, logging):
     print("Training...")
     model.train()
     total_loss = 0
@@ -208,6 +211,12 @@ def train_epoch(model, loader):
         # IMPORTANT: Pass batch.batch for proper batching
         out = model(batch.x, batch.edge_index, batch.batch)
 
+        for i in range(len(out)):
+            logging.append({
+                "Probabilities": out[i].tolist(),
+                "Answer": batch.y[i].tolist()
+            })
+
         # Use appropriate loss
         if num_classes > 1:
             loss = F.cross_entropy(out, batch.y)
@@ -222,15 +231,16 @@ def train_epoch(model, loader):
         total_loss += loss.item() * batch.num_graphs
         total += batch.num_graphs
 
-        if counter % int(totalLength/10)  == 0:
+        if counter % int(totalLength / 10) == 0:
             print(f"Batch Complete: {counter}/{totalLength}")
         counter += 1
 
     return total_loss / total, correct / total if num_classes > 1 else 0
 
+
 # New test method
 @torch.no_grad()
-def validate(model, loader):
+def validate(model, loader, logging):
     print("Validating...")
     model.eval()
     total_loss = 0
@@ -245,6 +255,11 @@ def validate(model, loader):
 
         # Forward pass with batch
         out = model(batch.x, batch.edge_index, batch.batch)
+        for i in range(len(out)):
+            logging.append({
+                "Probabilities": out[i].tolist(),
+                "Answer": batch.y[i].tolist()
+            })
 
         if num_classes > 1:
             loss = F.cross_entropy(out, batch.y)
@@ -256,17 +271,18 @@ def validate(model, loader):
         total_loss += loss.item() * batch.num_graphs
         total += batch.num_graphs
 
-        if counter % int(totalLength/10) == 0:
+        if counter % int(totalLength / 10) == 0:
             print(f"Batch Complete: {counter}/{totalLength}")
         counter += 1
 
     return total_loss / total, correct / total if num_classes > 1 else 0
 
+
 # Finds the optimal batch size
 def find_optimal_batch_size_graphsage(dataset, model):
     """Test different batch sizes for GraphSAGE"""
 
-    test_batch_sizes = [1,2,4,8,]
+    test_batch_sizes = [1, 2, 4, 8, ]
     # test_batch_sizes = [8, 16, 32, 64]
     device = globalDevice  # or 'mps' if it works
 
@@ -305,9 +321,14 @@ def find_optimal_batch_size_graphsage(dataset, model):
     print(f"\n🎯 Optimal batch size: {optimal[0]} ({optimal[1]:.1f} samples/sec)")
     return optimal[0]
 
+
 if __name__ == '__main__':
 
     randomisation = None
+
+    random1 = CWR.openFile("AriaDataset/configs/randomisations/randomisations.json")
+    randomisation = random1["0"]
+
     itter = ""
 
     if len(sys.argv) > 1:
@@ -324,7 +345,6 @@ if __name__ == '__main__':
     learn = True
     batchSize = 4
     output = f"Papers/Paper_3/Extension/Workspace/results/model_{itter}.pt"
-
 
     data = CWR.openFile(ExperimentDetails["Dataset_Configuration"])
 
@@ -343,7 +363,7 @@ if __name__ == '__main__':
     # Create the dataset object
     dataset = MidiDataset(fileRoot, rawConfiguration, processLists, randomisation=randomisation)
 
-    #Define the dataset split
+    # Define the dataset split
     dataSplit = int(len(dataset) * trainTestSplit)
 
     # Print a summary of the dataset
@@ -353,7 +373,7 @@ if __name__ == '__main__':
     # dataset = dataset.shuffle()
 
     # Create the GNN
-    model = GraphSAGE(dataset.num_features, hiddenLayers ,dataset.num_classes).to(device)
+    model = GraphSAGE(dataset.num_features, hiddenLayers, dataset.num_classes).to(device)
 
     # The optimiser does optimiser stuff
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -370,12 +390,6 @@ if __name__ == '__main__':
     train_loader = DataLoader(trainSplit, batch_size=batchSize, shuffle=False, num_workers=0, drop_last=False)
     val_loader = DataLoader(testSplit, batch_size=batchSize, shuffle=False, num_workers=0, drop_last=False)
 
-    # Summary metric storage
-    analysis = {
-        "TrainingStage": [],
-        "TrainingTest": [],
-        "TestStage": []
-    }
 
     if learn:
 
@@ -384,20 +398,38 @@ if __name__ == '__main__':
             print(CWR.largeSpacer)
             start = time.time()
 
+            # Summary metric storage
+            analysis = {
+                "TrainingStage": [],
+                "TrainingTest": [],
+                "TestStage": []
+            }
+
+            trainStageLog = []
+            testStageLog = []
+
             # Train
-            train_loss, train_acc = train_epoch(model, train_loader)
+            train_loss, train_acc = train_epoch(model, train_loader, trainStageLog)
+
             analysis["TrainingStage"].append({
                 "Epoch": epoch,
                 "TrainLoss": train_loss,
                 "TrainAcc": train_acc,
+                "Predictions": trainStageLog,
             })
+
             # Validate
-            val_loss, val_acc = validate(model, val_loader)
+            val_loss, val_acc = validate(model, val_loader, testStageLog)
             analysis["TestStage"].append({
                 "Epoch": epoch,
                 "ValLoss": val_loss,
                 "ValAcc": val_acc,
+                "Predictions": testStageLog,
             })
+
+            saveLoc = f"Experiment3Results/analysis/{ExperimentDetails["ExperimentSignifier"]}"
+            CWR.ensureDirectory(saveLoc)
+            CWR.saveFile(f"{saveLoc}/|Epoch{epoch}|Iteration{itter}.json", analysis)
 
             epoch_time = time.time() - start
 
@@ -407,7 +439,4 @@ if __name__ == '__main__':
 
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-                torch.save(model.state_dict(), f"best_model_Szeto_{itter}.pt")
-
-        CWR.saveFile(f"Experiment3Results/analysis|{ExperimentDetails["ExperimentSignifier"]}|{itter}.json", analysis)
-
+                torch.save(model.state_dict(), f"Experiment3Results/models/{ExperimentDetails["ExperimentSignifier"]}/best_model_{ExperimentDetails["ExperimentSignifier"]}_{itter}.pt")

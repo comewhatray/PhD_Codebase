@@ -64,36 +64,48 @@ def startProcess(dataset, inputOptions):
 # ----------------------------------------------------------------------------------------------------------------------
 
 def graphClassificationUsingNodeInformation(dataset):
+    # classificationFormat = dataset
+    #
+    # dataset = []
+    # for nodeGraph in classificationFormat:
+    #
+    #     pyg_graph = from_networkx(CWR.openFile(nodeGraph['Location'], printDisplay= not options['threading']))
+    #
+    #     x = []
+    #
+    #     for i in range(pyg_graph.num_nodes):
+    #         x.append([pyg_graph['pitch'][i], pyg_graph['position'][i], pyg_graph['duration'][i]])
+    #
+    #     pyg_graph.x = torch.tensor(x)
+    #     pyg_graph.y = torch.tensor([hotEncoder(nodeGraph['Label'])])
+    #
+    #     cleanedTorchData = Data(
+    #         # X is a tensor of the features
+    #         x=pyg_graph.x,
+    #         # Edge index is edge index
+    #         edge_index=pyg_graph.edge_index,
+    #         # This is the class it belongs to that has been hot encoded to a number
+    #         y=pyg_graph.y,
+    #         MidiName=nodeGraph['Name']
+    #     )
+    #
+    #     # save
+    #     saveTo = CWR.appendDirectory(options["saveLocation"], f"data_{nodeGraph["ID"]}{options["saveType"]}")
+    #     CWR.saveFile(saveTo, cleanedTorchData)
+
     classificationFormat = dataset
+    if not options["threading"]:
+        for nodeGraph in classificationFormat:
+            print("Classify Graph using Edge Information")
+            print(f"Datapoint: data_{nodeGraph['ID']}")
+            graphClassificationUsingNodeInformationPointWorker(nodeGraph)
 
-    dataset = []
-    for nodeGraph in classificationFormat:
-
-        pyg_graph = from_networkx(CWR.openFile(nodeGraph['Location'], printDisplay= not options['threading']))
-
-        x = []
-
-        for i in range(pyg_graph.num_nodes):
-            x.append([pyg_graph['pitch'][i], pyg_graph['position'][i], pyg_graph['duration'][i]])
-
-        pyg_graph.x = torch.tensor(x)
-        pyg_graph.y = torch.tensor([hotEncoder(nodeGraph['Label'])])
-
-        cleanedTorchData = Data(
-            # X is a tensor of the features
-            x=pyg_graph.x,
-            # Edge index is edge index
-            edge_index=pyg_graph.edge_index,
-            # This is the class it belongs to that has been hot encoded to a number
-            y=pyg_graph.y,
-            MidiName=nodeGraph['Name']
-        )
-
-        # save
-        saveTo = CWR.appendDirectory(options["saveLocation"], f"data_{nodeGraph["ID"]}{options["saveType"]}")
-        CWR.saveFile(saveTo, cleanedTorchData)
-
-
+    # If we are multiprocessing this
+    else:
+        print(f"MultiProcessing: Generating Tensor Graphs for GNN (Node Information)")
+        for datapoint in classificationFormat:
+            datapoint["OPTIONS"] = options
+        results = progress_map(graphClassificationUsingNodeInformationPointWorker, classificationFormat, n_cpu=options["maxWorkers"], chunk_size=1)
 
     # return
 
@@ -109,7 +121,7 @@ def graphClassificationUsingEdgeInformation(dataset):
 
     # If we are multiprocessing this
     else:
-        print(f"MultiProcessing: Generating Tensor Graphs for GNN")
+        print(f"MultiProcessing: Generating Tensor Graphs for GNN (Graph Information)")
         for datapoint in classificationFormat:
             datapoint["OPTIONS"] = options
         results = progress_map(graphClassificationUsingEdgeInformationPointWorker, classificationFormat, n_cpu=options["maxWorkers"], chunk_size=1)
@@ -182,6 +194,47 @@ def graphClassificationUsingEdgeInformationPointWorker(dataPoint):
 
         # pyg_graph.x = mx.array(x)
         # pyg_graph.y = mx.array([hotEncoder(dataPoint['Label'])])
+
+        cleanedTorchData = Data(
+            # X is a tensor of the features
+            x=pyg_graph.x,
+            # Edge index is edge index
+            edge_index=pyg_graph.edge_index,
+            # This is the class it belongs to that has been hot encoded to a number
+            y=pyg_graph.y,
+            MidiName=dataPoint['Name']
+        )
+
+        if not options["saveLocation"] == None:
+            CWR.saveFile(saveTo , cleanedTorchData, printDisplay=not options['threading'])
+
+    else:
+        if not options["threading"]:
+            print(f"data_{dataPoint["ID"]}{options["saveType"]} already exists")
+            print(CWR.midSpacer)
+
+
+def graphClassificationUsingNodeInformationPointWorker(dataPoint):
+
+    # This solves multiprocessing issue of defaulting to the original options, I simlpy import them when multiprocessing
+    if "OPTIONS" in dataPoint:
+        CWR.updateOldDictionaryEntriesWithNewDictionaryEntries(options, dataPoint["OPTIONS"])
+        hotEncodeDictionary = CWR.openFile("tempHotEncodings.json", printDisplay=not options['threading'])
+
+    saveTo = os.path.join(options["saveLocation"], f"data_{dataPoint["ID"]}{options["saveType"]}")
+
+    if not os.path.exists(saveTo):
+
+        nodeGraph = CWR.openFile(dataPoint['Location'], printDisplay=not options['threading'])
+
+        pyg_graph = from_networkx(nodeGraph)
+
+        x = []
+        for i in range(pyg_graph.num_nodes):
+            x.append([pyg_graph['pitchChange'][i], pyg_graph['onsetGap'][i], pyg_graph['endOnsetGap'][i]])
+
+        pyg_graph.x = torch.tensor(x)
+        pyg_graph.y = torch.tensor([hotEncoder(dataPoint['Label'])])
 
         cleanedTorchData = Data(
             # X is a tensor of the features
