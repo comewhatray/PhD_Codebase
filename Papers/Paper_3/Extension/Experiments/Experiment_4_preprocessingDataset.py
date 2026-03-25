@@ -13,6 +13,7 @@ import torch
 from torch_geometric.data import Dataset, download_url
 
 globalDevice = "cpu"
+tempLearning = False
 
 # Specifications for transforming the dataset
 ExperimentDetails = {
@@ -31,13 +32,14 @@ ExperimentDetails = {
             "options": {
                 "function": "convertMidiToPoints",
                 "saveType": ".json",
+                # "includeRests": True
             }
         },
         # Then transform it into a more usable representation
         {
             "file": "Code_Stages/1:MIDI_Representations/ProximityGraphRepresentation.py",
             "options": {
-                "function": "SzetoGraphRepresentation",
+                "function": "karystinaiosModification",
                 "saveType": ".gpickle",
                 "edgeAttributes": True
             }
@@ -459,7 +461,7 @@ if __name__ == '__main__':
     epochs = 100
     trainTestSplit = .7
     hiddenLayers = 75
-    learn = True
+    learn = tempLearning
     batchSize = 4
     output = f"Papers/Paper_3/Extension/Workspace/results/model_{itter}.pt"
 
@@ -585,9 +587,9 @@ if __name__ == '__main__':
                   f"Val Acc: {val_acc:.3f}, Time: {epoch_time:.2f}s")
 
             if val_acc > best_val_acc:
-                best_val_acc = val_acc
-                torch.save(model.state_dict(), f"Experiment3Results/models/{ExperimentDetails["ExperimentSignifier"]}/best_model_{ExperimentDetails["ExperimentSignifier"]}_{itter}.pt")
-
+                saveLoc = f"Experiment3Results/models/{ExperimentDetails["ExperimentSignifier"]}/"
+                CWR.ensureDirectory(saveLoc)
+                torch.save(model.state_dict(),f"{saveLoc}/best_model_{ExperimentDetails["ExperimentSignifier"]}_{itter}.pt")
 
 
     # else:

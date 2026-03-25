@@ -11,6 +11,7 @@
       <excludeFolder url="file://$MODULE_DIR$/AriaDataset/dataMonolith" />
       <excludeFolder url="file://$MODULE_DIR$/Papers/Paper_3/Extension/Workspace" />
       <excludeFolder url="file://$MODULE_DIR$/Experiment3Results" />
+      <excludeFolder url="file://$MODULE_DIR$/Experiment3ResultsBackups" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 virtualenv at ~/PycharmProjects/PhD_Codebase/.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

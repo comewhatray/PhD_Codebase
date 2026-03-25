@@ -1,0 +1,7 @@
+{
+    "Title": "BachSizeExample",
+    "Directory": "GiantMidiDataset/subsets/5ComposerTest",
+    "Labels": {
+      "Bach": ["Bach_28.mid"]
+    }
+}

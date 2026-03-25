@@ -83,8 +83,8 @@ def openFile(fileLocation, delimiter=None, printDisplay=True):
         with open(fileLocation, "rb") as f:
             return np.load(f)
 
-    # if ".pt" in fileLocation:
-        # return torch.load(fileLocation)
+    if ".pt" in fileLocation:
+        return torch.load(fileLocation, weights_only=False)
 
     if ".csv" in fileLocation:
         if delimiter is not None:

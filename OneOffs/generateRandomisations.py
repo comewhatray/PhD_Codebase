@@ -1,9 +1,9 @@
 from Utilities import ComeWhatRayUtil as CWR
 import random
 
-outputLocation = "AriaDataset/configs/randomisations/randomisations.json"
+outputLocation = "unbalancedRandomisations.json"
 # config = "AriaDataset/configs/periodConfigTotal.json"
-config = "AriaDataset/configs/BalancedAriaConfig.json"
+config = "GiantMidiDataset/subsets/configurations/5ComposersComparison.json"
 itterations = 10
 
 output = {}
@@ -23,4 +23,4 @@ for i in range(itterations):
     random.shuffle(order)
     output[i] = order[:]
 
-# CWR.saveFile(outputLocation, output)
+CWR.saveFile(outputLocation, output)

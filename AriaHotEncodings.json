@@ -1,0 +1,8 @@
+{
+        "classical": 0,
+        "modern": 1,
+        "baroque": 2,
+        "contemporary": 3,
+        "romantic": 4,
+        "impressionist": 5
+}

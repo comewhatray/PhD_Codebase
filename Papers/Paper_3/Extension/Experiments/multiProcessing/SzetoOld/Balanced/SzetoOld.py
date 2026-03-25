@@ -6,18 +6,18 @@ import time
 
 configuration = "GiantMidiDataset/randomisations/balancedRandomisations.json"
 
-experiment = "Papers/Paper_3/Extension/Experiments/Experiment_9_oldData_kyna.py"
+experiment = "Papers/Paper_3/Extension/Experiments/Experiment_13_SzetoOld.py"
 
 
 if __name__ == '__main__':
 
     itters = len(CWR.openFile(configuration))
-    identifier = "kynaLogs"
+    identifier = "SzetoOldLogs"
     workspace = "Papers/Paper_3/Extension/Workspace"
     CWR.ensureDirectory(f"{workspace}/{identifier}")
 
     processes = []
-    for i in range(3):
+    for i in range(3,6):
         cmd = ["python3", experiment, configuration, str(i)]
         log_file = open(f'{workspace}/{identifier}/log_{i}.txt', 'w')
         p = subprocess.Popen(cmd, stdout=log_file, stderr=subprocess.STDOUT)

@@ -2,34 +2,62 @@ from Utilities import ComeWhatRayUtil as CWR
 import os
 import numpy as np
 from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
 
 directory = "Experiment3Results/analysis"
+startItteration = 0
 numIterations = 3
 epoch = 99
+hotEncodingsLocation = "AriaHotEncodings.json"
+# hotEncodingsLocation = "GiantMidiHotEncodings.json"
+
+
+# experimentNames = [
+#     # "Kyna",
+#     # "KynaDefault",
+#     # "Szeto",
+#     "SzetoDefault",
+# ]
+#
+# classes = [
+#     "baroque",
+#     "classical",
+#     "romantic",
+#     "impressionist",
+#     "contemporary",
+#     "modern"
+# ]
 
 experimentNames = [
-    "Kyna",
-    "KynaDefault",
-    "Szeto",
-    "SzetoDefault",
+    # "KynaOld",
+    # "KynaDefaultOld",
+    # "SzetoOld",
+    # "SzetoDefaultOld",
+    "KynaOldUnbalanced",
+    "KynaDefaultOldUnbalanced",
+    # "SzetoOldUnbalanced",
+    # "SzetoDefaultOldUnbalanced",
+    # "KynaDefaultOldUnbalancedMoreTime",
+    # "SzetoDefaultOldUnbalancedMoreTime"
 ]
 
 classes = [
-    "baroque",
-    "classical",
-    "romantic",
-    "impressionist",
-    "contemporary",
-    "modern"
+    "Chopin",
+    "Liszt",
+    "Schubert",
+    "Scarlatti",
+    "Bach"
 ]
 
 def main():
     averageConfusionMatrix()
-    averageCloseCall()
-
+    # averageCloseCall()
+    # accuracyList()
+    # outLiars("Experiment3Results/analysis/SzetoDefault/|Epoch99|Iteration4.json")
+#
 
 def averageConfusionMatrix():
-    encodings = CWR.openFile("tempHotEncodings.json")
+    encodings = CWR.openFile(hotEncodingsLocation, printDisplay=False)
     titleString = "|"
     for encode in encodings.keys():
         titleString = titleString + encode + "|"
@@ -57,6 +85,13 @@ def averageConfusionMatrix():
         print(titleString)
         average_confusion = np.mean(matrixStorage, axis=0)
         print(average_confusion)
+
+        averageCorrectness = 0
+        for i in range(len(average_confusion)):
+            averageCorrectness = averageCorrectness + average_confusion[i][i]
+
+        print(averageCorrectness/len(average_confusion))
+
         # print(confusionMatrixTest(data, percentage=True))
 
 
@@ -66,7 +101,7 @@ def averageConfusionMatrix():
 
 
 def averageCloseCall():
-    encodings = CWR.openFile("tempHotEncodings.json")
+    encodings = CWR.openFile(hotEncodingsLocation, printDisplay=False)
 
     titleString = "|"
     for encode in encodings.keys():
@@ -77,7 +112,7 @@ def averageCloseCall():
 
         dataCollection = []
 
-        for i in range(numIterations):
+        for i in range(startItteration, numIterations):
             identifier = generateIdentifier(epoch, i)
 
             experimentLocation = os.path.join(directory, experiment)
@@ -96,7 +131,92 @@ def averageCloseCall():
         for data in dataCollection:
             dataTransformation["TestStage"][0]["Predictions"].extend(data["TestStage"][0]["Predictions"])
 
-        closeCallTest(dataTransformation, printIncorect=False)
+        closeCallTest(dataTransformation, printIncorect=True)
+
+
+def accuracyList():
+    encodings = CWR.openFile(hotEncodingsLocation, printDisplay=False)
+
+    titleString = "|"
+    for encode in encodings.keys():
+        titleString = titleString + encode + "|"
+
+    for experiment in experimentNames:
+        for iteration in range(numIterations):
+            correctnessStorage = []
+
+            print(f"ITTERATION {iteration}-----------------------------------------")
+            for eopch in range(epoch):
+                identifier = generateIdentifier(eopch, iteration)
+
+                experimentLocation = os.path.join(directory, experiment)
+                dataLocation = os.path.join(experimentLocation, identifier)
+
+                data = CWR.openFile(dataLocation, printDisplay=False)
+                results = confusionMatrixTest(data, percentage=True)
+
+                average_confusion = results
+
+                averageCorrectness = 0
+                for i in range(len(average_confusion)):
+                    averageCorrectness = averageCorrectness + average_confusion[i][i]
+
+                correctnessStorage.append(averageCorrectness/len(average_confusion))
+
+            accuracies = correctnessStorage
+
+            # Create epochs array (0 to len(accuracies)-1)
+            epochs = list(range(len(accuracies)))
+
+            # Create the plot
+            plt.figure(figsize=(10, 6))
+            plt.scatter(epochs, accuracies, s=30, color='#378ADD', alpha=0.8, edgecolors='darkblue', linewidth=1)
+
+            # Customize the plot
+            plt.xlabel('Epoch', fontsize=12, fontweight='500')
+            plt.ylabel('Accuracy (%)', fontsize=12, fontweight='500')
+            plt.title(f'{experiment}: Average Accuracy', fontsize=14, fontweight='bold', pad=15)
+
+            # Add grid for better readability
+            plt.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
+
+            # Set y-axis to start from 0
+            plt.ylim([0, max(accuracies) + 5])
+
+            # Show every 5th tick (change 5 to whatever interval you want)
+            plt.xticks(range(0, len(epochs), 25), fontsize=10)
+            plt.yticks(fontsize=10)
+
+            # Add some styling
+            plt.tight_layout()
+
+            # Save and show
+            plt.savefig('accuracy_dot_plot.png', dpi=300, bbox_inches='tight')
+            plt.show()
+
+
+def outLiars(testFile):
+
+    tempEncodings = CWR.openFile(hotEncodingsLocation)
+    hotEncodings = {}
+    for key, value in tempEncodings.items():
+        hotEncodings[value] = key
+
+    results = CWR.openFile(testFile)
+    predictions = results["TestStage"][0]["Predictions"]
+
+    probsWrong = []
+
+    for prediction in predictions:
+        probs = prediction["Probabilities"]
+        predict = np.argmax(probs)
+        if predict != prediction["Answer"]:
+            prob = probs[np.argmax(probs)]
+            probsWrong.append((prob, hotEncodings[predict], hotEncodings[prediction["Answer"]]))
+
+    probsWrong.sort(reverse=True)
+    # print(hotEncodings)
+    print(probsWrong)
 
 
 
@@ -143,11 +263,22 @@ def closeCallTest(experimentData, printIncorect=True):
 
     averageMatrix = np.zeros((numClass, numClass))
 
+    tempResultsStore = []
     for result in results:
         if printIncorect:
             print(result)
         # averageMatrix[result['actual']][result['prediction']] += (result['probAct'] - result['probPred'])
-        averageMatrix[result['prediction']][result['actual']] += (result['probPred'] - result['probAct'])
+        difference = result['probPred'] - result['probAct']
+        percentDiff = difference * 100 / abs(result['probAct'])
+        averageMatrix[result['prediction']][result['actual']] += percentDiff
+
+        if percentDiff > 100000:
+            print("pause")
+
+        tempResultsStore.append((percentDiff, result['prediction'], result['actual']))
+
+    tempResultsStore.sort(reverse=True)
+    print(tempResultsStore)
 
 
     for x in range(numClass):

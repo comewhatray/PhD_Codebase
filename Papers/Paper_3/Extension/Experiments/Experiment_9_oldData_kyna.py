@@ -31,6 +31,7 @@ ExperimentDetails = {
             "options": {
                 "function": "convertMidiToPoints",
                 "saveType": ".json",
+                "includeRests": True,
             }
         },
         # Then transform it into a more usable representation
@@ -440,4 +441,6 @@ if __name__ == '__main__':
 
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-                torch.save(model.state_dict(), f"Experiment3Results/models/{ExperimentDetails["ExperimentSignifier"]}/best_model_{ExperimentDetails["ExperimentSignifier"]}_{itter}.pt")
+                saveLoc = f"Experiment3Results/models/{ExperimentDetails["ExperimentSignifier"]}/"
+                CWR.ensureDirectory(saveLoc)
+                torch.save(model.state_dict(),f"{saveLoc}/best_model_{ExperimentDetails["ExperimentSignifier"]}_{itter}.pt")

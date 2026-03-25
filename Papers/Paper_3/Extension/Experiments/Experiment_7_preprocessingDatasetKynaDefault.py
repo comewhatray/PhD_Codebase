@@ -13,6 +13,7 @@ import torch
 from torch_geometric.data import Dataset, download_url
 
 globalDevice = "cpu"
+learning = True
 
 # Specifications for transforming the dataset
 ExperimentDetails = {
@@ -30,6 +31,7 @@ ExperimentDetails = {
             "options": {
                 "function": "convertMidiToPoints",
                 "saveType": ".json",
+                "includeRests": True,
             }
         },
         # Then transform it into a more usable representation
@@ -450,7 +452,7 @@ if __name__ == '__main__':
     epochs = 100
     trainTestSplit = .7
     hiddenLayers = 75
-    learn = True
+    learn = learning
     batchSize = 4
     output = f"Papers/Paper_3/Extension/Workspace/results/model_{itter}.pt"
 
@@ -577,7 +579,10 @@ if __name__ == '__main__':
 
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-                torch.save(model.state_dict(), f"best_model_{ExperimentDetails["ExperimentSignifier"]}_{itter}.pt")
+                saveLoc = f"Experiment3Results/models/{ExperimentDetails["ExperimentSignifier"]}/"
+                CWR.ensureDirectory(saveLoc)
+                torch.save(model.state_dict(),
+                           f"{saveLoc}/best_model_{ExperimentDetails["ExperimentSignifier"]}_{itter}.pt")
 
 
 
