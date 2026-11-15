@@ -60,6 +60,7 @@ def runExperiment(queryDetails, datasetDetails, aggregationDetails, systemArgs=N
 
     # MultiProcess
     if multiProcess:
+        # print(f"multiprocess: {multiProcess}")
         PM.threadedAnalysis(queryDeets, datasetDeets, aggregationDetails)
     else:
         # SingleProcess

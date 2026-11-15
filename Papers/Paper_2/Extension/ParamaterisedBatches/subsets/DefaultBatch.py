@@ -3,6 +3,17 @@ import os
 
 defaultExperiment = "Papers/Paper_2/Extension/Experiment_17_Default_Overlap.py"
 
+
+# def subsetConfigurations(Location, topX=30):
+#     listings = CWR.openFile(Location")
+#
+#     listings = listings[:topX]
+#     configNames = []
+#     for listing in listings:
+#         configNames.append(listing[0])
+#
+#     return configNames
+
 if __name__ == '__main__':
 
     additionalConfig = None

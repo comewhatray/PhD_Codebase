@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 directory = "Experiment3Results/analysis"
 startItteration = 0
 numIterations = 3
-epoch = 99
-hotEncodingsLocation = "AriaHotEncodings.json"
-# hotEncodingsLocation = "GiantMidiHotEncodings.json"
+epoch = 2999
+# hotEncodingsLocation = "AriaHotEncodings.json"
+hotEncodingsLocation = "GiantMidiHotEncodings.json"
 
 
 # experimentNames = [
@@ -33,11 +33,11 @@ experimentNames = [
     # "KynaDefaultOld",
     # "SzetoOld",
     # "SzetoDefaultOld",
-    "KynaOldUnbalanced",
-    "KynaDefaultOldUnbalanced",
+    # "KynaOldUnbalanced",
+    # "KynaDefaultOldUnbalanced",
     # "SzetoOldUnbalanced",
     # "SzetoDefaultOldUnbalanced",
-    # "KynaDefaultOldUnbalancedMoreTime",
+    "KynaDefaultOldUnbalancedMoreTime",
     # "SzetoDefaultOldUnbalancedMoreTime"
 ]
 

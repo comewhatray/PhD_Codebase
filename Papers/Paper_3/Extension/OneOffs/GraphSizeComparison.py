@@ -1,5 +1,6 @@
 from Utilities import ComeWhatRayUtil as CWR
 from Code_Stages import ExperimentProcess as EP
+import networkx as nx
 import torch
 from torch_geometric.data import Data
 from torch_geometric.utils import to_networkx
@@ -73,6 +74,15 @@ def main():
 
     print(f"Number of nodes: {num_nodes}")
     print(f"Number of edges: {num_edges/2}")
+
+
+
+    G = nx.Graph(kynaRep)  # undirected, no duplicate edges
+    predicted = sum(d * (d - 1) // 2 for _, d in G.degree())
+
+    print(type(kynaRep))
+    print(f"Base graph: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges")
+    print(f"Formula predicts: {G.number_of_edges()} nodes, {predicted} edges")
 
     return
 

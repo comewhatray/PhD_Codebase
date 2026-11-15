@@ -5,6 +5,8 @@ experimentName = "Experiment18 (Membership_Rhythmn)"
 workspace = "Papers/Paper_2/Extension/ExtensionWorkspace"
 
 queryLoc = "LakhDataset/Configs/Lakh20Experiment(Queries).json"
+
+# queryLoc = "LakhDataset/Configs/Lakh20Experiment(Queries)(Modified).json"
 datasetLoc = "LakhDataset/Configs/Lakh20Experiment(Dataset).json"
 
 ## Label2

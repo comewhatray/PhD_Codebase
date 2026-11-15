@@ -339,6 +339,7 @@ if __name__ == '__main__':
         randomisation = randomisation[itter]
         print(randomisation)
 
+
     # Configuration Data
     epochs = 100
     trainTestSplit = .7

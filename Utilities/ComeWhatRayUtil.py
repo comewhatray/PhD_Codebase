@@ -42,6 +42,11 @@ def saveFile(fileLocation, file, delimiter=None, printDisplay=True):
         with open(fileLocation, "w+") as f:
             json.dump(file, f)
 
+
+    if ".pkl" in fileLocation:
+        with open(fileLocation, 'wb') as f:
+            pickle.dump(file, f)
+
     # Pickle Files
     if ".gpickle" in fileLocation:
         with open(fileLocation, "wb") as f:
@@ -73,6 +78,10 @@ def openFile(fileLocation, delimiter=None, printDisplay=True):
     if ".json" in fileLocation:
         with open(fileLocation, "r") as f:
             return json.load(f)
+
+    if ".pkl" in fileLocation:
+        with open(fileLocation, 'rb') as f:
+            return pickle.load(f)
 
     # Pickle Files
     if ".gpickle" in fileLocation:
@@ -125,12 +134,14 @@ def createParameterisedDirectory(initDirectory, parameters):
 # If you have a directory return the file name at the end of it
 def getFileNameFromPath(directory, includeExtension=False):
     fileName = os.path.basename(os.path.normpath(directory))
+    # print(fileName)
 
     if includeExtension:
         return fileName
 
     else:
-        return fileName.split('.')[0]
+        endLoc = fileName.rfind(".")
+        return fileName[:endLoc]
 
 # Appends a directory to a File Path
 def appendDirectory(path, appendage):

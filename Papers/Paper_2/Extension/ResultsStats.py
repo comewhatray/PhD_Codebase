@@ -9,13 +9,31 @@ import pandas as pd
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+
+from scipy import stats
 
 import seaborn as sns
 
 
-# batchLocation = "ExperimentResults/yScal4Mem5"
-batchLocation = "ExperimentResults/ScalingPolygonY4"
+# batchLocation = "yScal4Mem5"
+# batchName = "scale_x1_y5-membership_0.7" # Top at 0.7
+# batchName = "scale_x1_y5_BestResults_0.7-membership_0.9-rhythm_ins_0.8_del_0.2" # 2nd at 0.7
+# batchName = "scale_x1_y5_BestResults_0.7-membership_0.9-rhythm_ins_1_del_0.2"
+# batchName = "scale_x1_y6-membership_0.7"
+# batchName = "scale_x1_y5_BestResults_0.7-membership_0.9-rhythm_ins_0.4_del_0.2"
 
+batchName = "-membership_0.9-rhythm_ins_0.4_del_0.4"
+# batchName = "-membership_0.9-rhythm_ins_0.4_del_0.4_TEST"
+# batchName = "-membership_0.9-rhythm_ins_0.8_del_0.4"
+
+# batchName = "scale_x1_y6-membership_0.9" # Top at 0.8
+# batchName = "scale_x1_y7-membership_0.9" # Top at 0.9
+
+
+# batchName = "test"
+
+batchLocation = f"ExperimentResults/{batchName}"
 ExperimentNames = [
     "Experiment15 (BreathingRoom_Membership)",
     "Experiment17 (Default Overlap)",
@@ -27,25 +45,42 @@ experimentSubset = "AllSimilarity"
 
 # experimentName = startFileLocation.split("/")[1]
 queryLocations = "LakhDataset/ExperimentDataset/Queries"
-precissionAt = 10
+precissionAt = 20
+# Percentages for threshold values
+minThreshold = 50
+thresholdInterval = 2
 
-showInter = True
+showInter = False
 showQuery = False
+showMain = False
 
 def main():
 
     for experimentName in ExperimentNames:
         startFileLocation = CWR.appendDirectory(batchLocation, [experimentName, experimentSubset])
 
-        # maxResults()
-        # topXResults(1)
-        # topXResults(4)
-        thresholdResults(startFileLocation, 0.9)
+        if os.path.exists(startFileLocation):
+
+            print(f"{startFileLocation} exists")
+
+            # stats = thresholdResults(startFileLocation, 0.85)
+            # plotPrecisionRecallGraph(startFileLocation)
+
+            queryStatsPerformance(startFileLocation, 0.8)
+
+            # combinedStatsPerformance(startFileLocation, 0.85)
+
+        else:
+            print(f"{experimentName} does not exist")
+
+
+
+
     return
 
 
 # Deprecated
-def maxResults():
+def maxResults(fileLocation):
     results = CWR.openFile(fileLocation)
 
     highestResults = {}
@@ -83,8 +118,8 @@ def maxResults():
     print(f"True Count: {trueCount}")
     print(f"False Count: {falseCount}")
 
-
-def topXResults(topX):
+# Deprecated
+def topXResults(topX, startFileLocation):
 
     queryLabels = os.listdir(startFileLocation)
 
@@ -152,6 +187,8 @@ def thresholdResults(startFileLocation, threshold):
     queryLabels = os.listdir(startFileLocation)
 
     resultsTracking = {}
+
+    recallStats = []
 
     # Go through each query
     for queryLabel in queryLabels:
@@ -271,6 +308,8 @@ def thresholdResults(startFileLocation, threshold):
             plt.show()
             print(dataFrameData)
 
+        # recallStats.append((nameMapping[query], len(dataFrameData[nameMapping[query]]) / resultsTracking[query][query]['total']))
+
 
 
     orderingDictionary = {
@@ -360,12 +399,17 @@ def thresholdResults(startFileLocation, threshold):
 
         match = False
         precissionMatches = 0
+        recallMatches = 0
 
+        # This gets whichever is lowest, the number of returned results or the precision value
         finalPrecisionLength = min(len(orderingDictionary[query]), precissionAt)
 
         for i in range(finalPrecisionLength):
             if orderingDictionary[query][i][0] == query:
                 precissionMatches += 1
+                recallMatches += 1
+
+        recallStats.append((nameMapping[query], recallMatches/ resultsTracking[query][query]['total']))
 
 
         lowestAverage = None
@@ -399,6 +443,7 @@ def thresholdResults(startFileLocation, threshold):
         print(f"Precision of {query} @ {precissionAt}: {precissionMatches}/{finalPrecisionLength}")
         precisionDict[query] = (precissionMatches, finalPrecisionLength)
 
+
     print(f"True Count: {matchCount}/{len(resultsTracking)}")
 
 
@@ -408,18 +453,200 @@ def thresholdResults(startFileLocation, threshold):
 
     df = pd.DataFrame(precisionTransform, columns=["Label", "Precision"])
 
-    plt.suptitle(experimentName)
-    plt.title(f"Precision at {precissionAt}")
-    sns.barplot(x="Label", y="Precision", data=df)
-    plt.xticks(rotation=90)
+    if showMain:
+        plt.suptitle(experimentName)
+        plt.title(f"Precision at {precissionAt}")
+        sns.barplot(x="Label", y="Precision", data=df)
+        plt.xticks(rotation=90)
 
+        plt.show()
+
+    # print(nameMapping)
+
+
+
+    precisionStats = []
+
+
+    for query in precisionTransform:
+        precisionStats.append((query[0], query[1]/precissionAt))
+
+    return (precisionStats, recallStats)
+
+
+def plot_precision_recall_vs_threshold(data: dict):
+    """
+    Plot precision and recall vs threshold for each entry in the dictionary.
+
+    Args:
+        data: dict where each key is an entry ID and each value contains:
+              'Precision': list of (threshold, precision) tuples
+              'Recall':    list of (threshold, recall) tuples
+    """
+    n = len(data)
+    ncols = 3
+    nrows = (n + ncols - 1) // ncols
+
+    fig, axes = plt.subplots(nrows, ncols, figsize=(ncols * 4.5, nrows * 3.2))
+    axes = axes.flatten()
+    fig.suptitle(f"Precision and Recall vs Threshold: {batchName}")
+    colors = cm.tab10(np.linspace(0, 1, 10))
+
+    for idx, (entry_id, metrics) in enumerate(data.items()):
+        ax = axes[idx]
+
+        p_thresholds, p_values = zip(*metrics['Precision'])
+        r_thresholds, r_values = zip(*metrics['Recall'])
+
+        ax.plot(p_thresholds, p_values, marker='o', markersize=4,
+                label='Precision', color='#378ADD', linewidth=1.8)
+        ax.plot(r_thresholds, r_values, marker='s', markersize=4,
+                label='Recall', color='#D85A30', linewidth=1.8, linestyle='--')
+
+        ax.set_title(f'Query {entry_id}', fontsize=11, fontweight='medium')
+        ax.set_xlabel('Threshold', fontsize=9)
+        ax.set_ylabel('Score', fontsize=9)
+        ax.set_ylim(-0.05, 1.1)
+        ax.set_xlim(-0.02, max(max(p_thresholds), max(r_thresholds)) + 0.05)
+        ax.grid(True, linestyle='--', alpha=0.4)
+        ax.tick_params(labelsize=8)
+        ax.legend(fontsize=8, loc='center right')
+        ax.spines[['top', 'right']].set_visible(False)
+
+    # Hide unused subplots
+    for idx in range(n, len(axes)):
+        axes[idx].set_visible(False)
+
+    fig.suptitle('Precision & Recall vs Threshold', fontsize=14,
+                 fontweight='medium', y=1.01)
+    plt.tight_layout()
+    plt.savefig(f'Papers/Paper_2/Visualisations/Extension/Figures/{batchName}-precision_recall_plot.png', dpi=150, bbox_inches='tight')
     plt.show()
-
-    print(nameMapping)
-
+    print("Plot saved to precision_recall_plot.png")
 
 
-    return
+def plotPrecisionRecallGraph(startFileLocation):
+    individualStorage = {}
+    for i in range(minThreshold, 101, thresholdInterval):
+        theshold = i / 100
+
+        results = thresholdResults(startFileLocation, theshold)
+
+        for query in range(len(results[0])):
+            if query not in individualStorage:
+                individualStorage[query] = {
+                    "Precision": [(theshold, results[0][query][1])],
+                    "Recall": [(theshold, results[1][query][1])]
+                }
+            else:
+                individualStorage[query]["Precision"].append((theshold, results[0][query][1]))
+                individualStorage[query]["Recall"].append((theshold, results[1][query][1]))
+
+    plot_precision_recall_vs_threshold(individualStorage)
+
+def queryStatsPerformance(startFileLocation, threshold):
+
+    importantStats = ["numNotes", "noteDensity", "xRange", "yRange", "standardDeviationPitch"]
+
+    statsDictionary = CWR.openFile("Papers/Paper_2/Extension/OnceOffStorage/QueryCharacteristics.json")
+    nameMapping = CWR.openFile("Papers/Paper_2/Datasets/NamingConvention.json")
+    reverseMapping  = {v: k for k, v in nameMapping.items()}
+
+    metricName = "Average Precision/Recall"
+    # metricName = "Precision"
+    # metricName = "Recall"
+
+    tempResults = []
+    for stat in importantStats:
+
+        statResults = []
+        results = thresholdResults(startFileLocation, threshold)
+
+
+        for i in range(len(results[0])):
+
+            # Average of precision and recall)
+            metric = (results[0][i][1] + results[1][i][1])/ 2
+
+            # Precision
+            # metric = results[0][i][1]
+
+            # Recall
+            # metric = results[1][i][1]
+
+            queryStatValue = statsDictionary[reverseMapping[f"{i}"]][stat]
+            statResults.append((queryStatValue, metric))
+
+
+        x, y = zip(*statResults)
+        plt.title(f"{metricName} @ {precissionAt} vs {stat} @ threshold: {threshold}")
+        plt.xlabel(f"{stat}")
+        plt.ylabel(f"{metricName}")
+        plt.scatter(x, y)
+        plt.show()
+
+        rho, p = stats.spearmanr(x, y)
+        tempResults.append((stat, rho, p))
+        # print(f"Stat {stat}")
+        # print(f"P: {p}")
+        # print(f"rho: {rho}")
+    for results in tempResults:
+        print(results)
+
+
+def combinedStatsPerformance(startFileLocation, threshold):
+
+    importantStats = ["numNotes", "noteDensity", "xRange", "yRange", "standardDeviationPitch"]
+
+    statsDictionary = CWR.openFile("Papers/Paper_2/Extension/OnceOffStorage/QueryCharacteristics.json")
+    nameMapping = CWR.openFile("Papers/Paper_2/Datasets/NamingConvention.json")
+    reverseMapping = {v: k for k, v in nameMapping.items()}
+
+    # stat1 = "numNotes"
+    # stat2 = "noteDensity"
+    metricName = "Average Precision/Recall"
+
+
+    results = thresholdResults(startFileLocation, threshold)
+
+
+    for k in range(len(importantStats)):
+        stat1 = importantStats[k]
+        for j in range(k+1, len(importantStats)):
+            stat2 = importantStats[j]
+
+            statResults = []
+
+            for i in range(len(results[0])):
+                # Average of precision and recall)
+                metric = (results[0][i][1] + results[1][i][1]) / 2
+
+                # Precision
+                # metric = results[0][i][1]
+
+                # Recall
+                # metric = results[1][i][1]
+
+                queryStatValue1 = statsDictionary[reverseMapping[f"{i}"]][stat1]
+                queryStatValue2 = statsDictionary[reverseMapping[f"{i}"]][stat2]
+                statResults.append((queryStatValue1, queryStatValue2, metric))
+
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+
+            # points = [(1, 2, 3), (4, 5, 6), (7, 8, 9)]
+
+            x, y, z = zip(*statResults)
+            ax.scatter(x, y, z)
+
+            ax.set_title(f"{stat1} + {stat2} | {metricName} @ {precissionAt} vs {threshold}")
+            ax.set_xlabel(f"{stat1}")
+            ax.set_ylabel(f"{stat2}")
+            ax.set_zlabel(f"{metricName}")
+
+            plt.show()
+
 
 
 main()

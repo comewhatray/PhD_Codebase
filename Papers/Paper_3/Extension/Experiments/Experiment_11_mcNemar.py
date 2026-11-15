@@ -4,17 +4,20 @@ from Utilities import ComeWhatRayUtil as CWR
 from statsmodels.stats.contingency_tables import mcnemar
 
 # Kyna Comparisons
-filesLocationNew = "Experiment3Results/analysis/Kyna"
-filesLocationOld = "Experiment3Results/analysis/KynaDefault"
+# filesLocationNew = "Experiment3Results/analysis/Kyna"
+# filesLocationOld = "Experiment3Results/analysis/KynaDefault"
+
+filesLocationNew = "Experiment3Results/analysis/KynaOld"
+filesLocationOld = "Experiment3Results/analysis/KynaDefaultOld"
 
 #Szeto Comparisons
 
-filesLocationOld = "Experiment3ResultsBackups/analysis/Szeto"
+# filesLocationOld = "Experiment3ResultsBackups/analysis/Szeto"
 
 # NoteDiff Comparisons
 
-filesLocationNew = "Experiment3Results/analysis/KynaOldUnbalanced"
-filesLocationOld = "Experiment3Results/analysis/KynaDefaultOldUnbalanced"
+# filesLocationNew = "Experiment3Results/analysis/KynaOldUnbalanced"
+# filesLocationOld = "Experiment3Results/analysis/KynaDefaultOldUnbalanced"
 
 # Szeto Old Comparison on blanced data
 # filesLocationOld = "Experiment3Results/analysis/SzetoOld"
@@ -23,7 +26,7 @@ filesLocationOld = "Experiment3Results/analysis/KynaDefaultOldUnbalanced"
 # filesLocationOld = "Experiment3Results/analysis/SzetoOldUnbalanced"
 # filesLocationNew = "Experiment3Results/analysis/SzetoDefaultOldUnbalanced"
 
-numIterations = 3
+numIterations = 6
 epoch = 99
 
 def main():

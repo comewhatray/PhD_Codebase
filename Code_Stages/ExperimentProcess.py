@@ -293,9 +293,11 @@ def multiProcessItterationStep(locationsDict, previousLocation, label, process):
 
     # Run with multiprocessing
     print(f"MultiProcessing: Process -> {processName}| Label -> {label} | Size -> {len(multiProcessArgsList)}")
-    results = progress_map(multiProcessTask, multiProcessArgsList, n_cpu=options["maxWorkers"], chunk_size=1)
+    results = []
+    if len(multiProcessArgsList) > 0:
+        results = progress_map(multiProcessTask, multiProcessArgsList, n_cpu=options["maxWorkers"], chunk_size=1)
 
-
+    # print(f"Results Length: {len(results)}")
     for i in range(len(results)):
         CWR.saveFile(multiProcessArgsList[i][2], results[i], printDisplay=False)
         locationsDict[processName][label].append(multiProcessArgsList[i][2])

@@ -38,10 +38,15 @@ def run_python_files_sequentially(file_list):
 
 # Your list of Python files to run
 python_files = [
+    # "Papers/Paper_3/Extension/Experiments/multiProcessing/CurrentKyna/kynaDefaultPeriod.py",
+    # "Papers/Paper_3/Extension/Experiments/multiProcessing/CurrentKyna/kynaPeriod.py"
+
+
     # "Papers/Paper_3/Extension/Experiments/multiProcessing/KynaOld/Balanced/KynaDefaultOld.py",
     # "Papers/Paper_3/Extension/Experiments/multiProcessing/KynaOld/Balanced/kynaOld.py",
+
     # "Papers/Paper_3/Extension/Experiments/multiProcessing/KynaOld/Unbalanced/KynaDefaultOldUnbalanced.py",
-    "Papers/Paper_3/Extension/Experiments/multiProcessing/KynaOld/Unbalanced/KynaUnbalancedOld.py",
+    # "Papers/Paper_3/Extension/Experiments/multiProcessing/KynaOld/Unbalanced/KynaUnbalancedOld.py",
     # "Papers/Paper_3/Extension/Experiments/multiProcessing/SzetoOld/Balanced/SzetoDefaultOld.py",
     # "Papers/Paper_3/Extension/Experiments/multiProcessing/SzetoOld/Balanced/SzetoOld.py",
     # "Papers/Paper_3/Extension/Experiments/multiProcessing/SzetoOld/Unbalanced/DefaultUnbalanced.py",

@@ -13,7 +13,7 @@ import torch
 from torch_geometric.data import Dataset, download_url
 
 globalDevice = "cpu"
-tempLearning = False
+tempLearning = True
 
 # Specifications for transforming the dataset
 ExperimentDetails = {
@@ -39,7 +39,7 @@ ExperimentDetails = {
         {
             "file": "Code_Stages/1:MIDI_Representations/ProximityGraphRepresentation.py",
             "options": {
-                "function": "karystinaiosModification",
+                "function": "SzetoGraphRepresentation",
                 "saveType": ".gpickle",
                 "edgeAttributes": True
             }
